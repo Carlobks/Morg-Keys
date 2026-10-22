@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Apps e arranque</title>
+    <style>
+      /* Painel "Apps e arranque" (Alt+Esc, C). Mesmo kit visual do guia (Alt+K)
+         e do painel do sistema: Catppuccin Mocha, secções --mantle com título
+         colorido, ícones Nerd Font em caixinha, teclas kbd escuras com contorno.
+         Só fontes instaladas no Windows e o cliente do Zebar em ../vendor/. */
+      :root {
+        --mauve: #cba6f7;
+        --red: #f38ba8;
+        --peach: #fab387;
+        --green: #a6e3a1;
+        --blue: #89b4fa;
+        --teal: #94e2d5;
+        --yellow: #f9e2af;
+        --pink: #f5c2e7;
+        --lavender: #b4befe;
+        --sky: #89dceb;
+        --text: #cdd6f4;
+        --subtext0: #a6adc8;
+        --overlay0: #6c7086;
+        --surface0: #313244;
+        --surface1: #45475a;
+        --base: #1e1e2e;
+        --mantle: #181825;
+        --crust: #11111b;
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body {
+        margin: 0;
+        height: 100%;
+        background: transparent;
+        font-family: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+        color: var(--text);
+        overflow: hidden;
+        user-select: none;
+      }
+
+      /* Aberto no navegador (fora do Zebar): fundo, centrado e com dados de exemplo. */
+      body.standalone { background: var(--crust); display: grid; place-items: center; }
+      body.busy, body.busy * { cursor: progress !important; }
+
+      .card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        background: var(--base);
+        border: 1px solid var(--surface1);
+        border-radius: 14px;
+        overflow: hidden;
+        will-change: transform, opacity, filter;
+        /* Fechado = recolhido na chávena da barra (como o guia). */
+        transform-origin: var(--ox, 0) var(--oy, 0);
+        transform: scale(0.03);
+        opacity: 0;
+        filter: blur(3px);
+        transition:
+          transform 260ms cubic-bezier(0.5, 0, 0.75, 0),
+          opacity 120ms ease-in 140ms,
+          filter 260ms ease-in;
+      }
+
+      body.open .card {
+        transform: none;
+        opacity: 1;
+        filter: none;
+        transition:
+          transform 480ms cubic-bezier(0.34, 1.15, 0.5, 1),
+          opacity 90ms linear,
+          filter 380ms ease-out;
+      }
+
+      body.standalone .card { width: min(1240px, 96vw); height: min(820px, 94vh); transform: none; opacity: 1; filter: none; }
+
+      header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 18px 22px 14px;
+        background: var(--mantle);
+        border-bottom: 1px solid var(--surface0);
+      }
+
+      header h1 { margin: 0; font-size: 17px; font-weight: 600; color: var(--mauve); letter-spacing: 0.2px; }
+      header .hint { font-size: 12px; color: var(--subtext0); }
+      header .spacer { margin-left: auto; }
+
+      .btn {
+        --k: var(--subtext0);
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        height: 30px;
+        padding: 0 11px;
+        border-radius: 8px;
+        border: 1.5px solid color-mix(in srgb, var(--k) 45%, transparent);
+        background: var(--crust);
+        color: var(--k);
+        font: inherit;
+        font-size: 12.5px;
+        font-weight: 600;
+        box-shadow: 0 2px 0 color-mix(in srgb, var(--k) 25%, transparent);
+        cursor: pointer;
+      }
+      .btn:hover:not(:disabled) { --k: var(--text); }
+      .btn:disabled { opacity: 0.35; cursor: default; }
+      .btn .ico { width: 18px; height: 18px; font-size: 13px; border-radius: 5px; background: none; }
+
+      .close {
+        width: 30px; height: 30px; border: 0; border-radius: 8px;
+        background: transparent; color: var(--subtext0); font-size: 14px; cursor: pointer;
+      }
+      .close:hover { background: var(--surface0); color: var(--text); }
+      body.standalone .close { display: none; }
+
+      main {
+        flex: 1;
+        min-height: 0;
+        display: grid;
+        grid-template-columns: minmax(250px, 300px) 1fr;
+        gap: 14px;
+        padding: 16px 22px 18px;
+      }
+
+      section {
+        --c: var(--accent, var(--lavender));
+        padding: 10px 10px 8px;
+        background: var(--mantle);
+        border-radius: 12px;
+        min-height: 0;
+      }
+
+      section h2 {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 8px 2px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--c);
+      }
+      section h2 small { margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--overlay0); font-size: 11px; }
+
+      .ico {
+        width: 24px; height: 24px; flex: none; border-radius: 7px;
+        display: grid; place-items: center;
+        font-family: 'JetBrainsMono NF', monospace; font-size: 13px;
+        color: var(--ic, var(--c));
+        background: color-mix(in srgb, var(--ic, var(--c)) 16%, transparent);
+      }
+
+      kbd {
+        --k: var(--c, var(--subtext0));
+        font-family: 'JetBrainsMono NF', 'Cascadia Mono', Consolas, monospace;
+        font-size: 11.5px; font-weight: 700; line-height: 1;
+        display: inline-grid; place-items: center;
+        min-width: 22px; height: 22px; padding: 0 6px; border-radius: 6px;
+        color: var(--k); background: var(--crust);
+        border: 1.5px solid color-mix(in srgb, var(--k) 55%, transparent);
+        box-shadow: 0 2px 0 color-mix(in srgb, var(--k) 30%, transparent);
+        white-space: nowrap;
+      }
+      header kbd { --k: var(--subtext0); height: 20px; font-size: 11px; }
+
+      /* --- Coluna das apps --- */
+      #apps { --accent: var(--green); display: flex; flex-direction: column; }
+      #apps input {
+        width: 100%; padding: 7px 11px; margin-bottom: 8px;
+        border-radius: 8px; border: 1px solid var(--surface1);
+        background: var(--surface0); color: var(--text);
+        font: inherit; font-size: 13px; outline: none;
+      }
+      #apps input:focus { border-color: var(--green); }
+      #apps input::placeholder { color: var(--overlay0); }
+      #list { flex: 1; min-height: 0; overflow-y: auto; margin: 0 -4px; padding: 0 4px; border-radius: 8px; }
+      #list::-webkit-scrollbar, .right::-webkit-scrollbar { width: 8px; }
+      #list::-webkit-scrollbar-thumb, .right::-webkit-scrollbar-thumb { background: var(--surface1); border-radius: 4px; }
+      #list .group { margin: 8px 4px 4px; font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--overlay0); }
+      #list .group:first-child { margin-top: 0; }
+      #list.drop-remove { outline: 2px dashed color-mix(in srgb, var(--red) 70%, transparent); outline-offset: -2px; background: color-mix(in srgb, var(--red) 8%, transparent); }
+      .app {
+        display: flex; align-items: center; gap: 10px;
+        padding: 4px 6px; border-radius: 7px; font-size: 13px;
+        cursor: grab;
+      }
+      .app:hover { background: var(--surface0); }
+      .app .ico { width: 22px; height: 22px; font-size: 12px; border-radius: 6px; }
+      .app .lb { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .app .used { font-size: 10.5px; color: var(--overlay0); }
+      .empty { padding: 10px 6px; font-size: 12px; color: var(--overlay0); }
+      #site { display: flex; gap: 6px; margin-top: 8px; }
+      #site input { margin: 0; flex: 1; }
+      #site .btn { --k: var(--green); height: 32px; }
+
+      /* --- Coluna da direita --- */
+      .right { display: flex; flex-direction: column; gap: 14px; min-height: 0; overflow-y: auto; overflow-x: hidden; }
+      .right > section { flex: none; }  /* não encolhem: a coluna desliza se faltar altura */
+
+      #keys { --accent: var(--blue); }
+      .kb { display: flex; flex-direction: column; gap: 6px; }
+      /* Teclas proporcionais à largura (10 por linha, como um teclado), para
+         caber também num portátil; a 2.ª e a 3.ª linha desviam meia/uma tecla. */
+      .kb .krow { display: flex; gap: 6px; --kw: calc((100% - 54px) / 10); }
+      .kb .krow:nth-child(2) .key:first-child { margin-left: calc((100% - 54px) / 20); }
+      .kb .krow:nth-child(3) .key:first-child { margin-left: calc((100% - 54px) / 10); }
+      .kb .krow.special { margin-top: 4px; }
+      .key {
+        --k: var(--blue);
+        position: relative;
+        width: var(--kw); max-width: 96px; height: 66px; flex: none;
+        padding: 6px 6px 5px;
+        border-radius: 9px;
+        background: var(--crust);
+        border: 1.5px solid color-mix(in srgb, var(--k) 30%, transparent);
+        box-shadow: 0 2px 0 color-mix(in srgb, var(--k) 20%, transparent);
+        display: flex; flex-direction: column; gap: 3px;
+      }
+      .key.wide { width: calc(var(--kw) * 2 + 6px); min-width: 130px; max-width: 198px; }
+      .key .cap { font-family: 'JetBrainsMono NF', Consolas, monospace; font-size: 11.5px; font-weight: 700; color: var(--k);
+                  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .key .what { display: flex; align-items: center; gap: 5px; min-width: 0; font-size: 11px; }
+      .key .what .ico { width: 18px; height: 18px; font-size: 11px; border-radius: 5px; }
+      .key .what span:last-child { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .key.free .what { color: var(--overlay0); }
+      .key.has { border-color: color-mix(in srgb, var(--k) 60%, transparent); cursor: grab; }
+      .key.fixed { --k: var(--overlay0); opacity: 0.45; }
+      .key.fixed .what { color: var(--overlay0); }
+      .key.over { --k: var(--green); background: color-mix(in srgb, var(--green) 12%, var(--crust)); }
+
+      .x {
+        position: absolute; top: 3px; right: 3px;
+        width: 18px; height: 18px; border: 0; border-radius: 5px;
+        display: none; place-items: center;
+        background: var(--surface0); color: var(--subtext0);
+        font-size: 10px; cursor: pointer;
+      }
+      .x:hover { background: var(--red); color: var(--crust); }
+      .key.has:hover .x, .chip:hover .x { display: grid; }
+
+      #ws { --accent: var(--mauve); }
+      /* 5 por linha num ecrã grande (1–5 e 6–10); menos colunas se faltar espaço. */
+      .wsgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(max(150px, calc((100% - 32px) / 5)), 1fr)); gap: 8px; }
+      .box {
+        --k: var(--mauve);
+        min-height: 92px;
+        padding: 7px;
+        border-radius: 10px;
+        background: var(--crust);
+        border: 1.5px dashed color-mix(in srgb, var(--k) 30%, transparent);
+        display: flex; flex-direction: column; gap: 4px;
+      }
+      .box.has { border-style: solid; }
+      .box.over { --k: var(--green); background: color-mix(in srgb, var(--green) 10%, var(--crust)); }
+      .box .head { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--overlay0); margin-bottom: 2px; }
+      .box .head kbd { --k: var(--mauve); }
+      .box .hint { font-size: 11px; color: var(--overlay0); padding: 4px 2px; }
+      .chip {
+        position: relative;
+        display: flex; align-items: center; gap: 6px;
+        padding: 3px 24px 3px 4px; border-radius: 7px;
+        background: var(--mantle); font-size: 12px; cursor: grab;
+      }
+      .chip .ico { width: 18px; height: 18px; font-size: 11px; border-radius: 5px; }
+      .chip span:nth-child(2) { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .chip .x { top: 3px; right: 3px; }
+
+      .dragging { opacity: 0.4; }
+
+      footer {
+        display: flex; align-items: center; gap: 10px;
+        padding: 9px 22px; font-size: 11.5px; color: var(--overlay0);
+        background: var(--mantle); border-top: 1px solid var(--surface0);
+      }
+      footer b { color: var(--subtext0); font-weight: 600; }
+      #status { margin-left: auto; text-align: right; }
+      #status.ok { color: var(--green); }
+      #status.err { color: var(--red); }
+      .hidden { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <header>
+        <h1>Apps e arranque</h1>
+        <span class="hint">Arraste uma app para uma tecla ou para um workspace · <kbd>Esc</kbd> fecha</span>
+        <span class="spacer"></span>
+        <button id="undo" class="btn" title="Desfazer a última mudança (Ctrl+Z)" disabled><span class="ico" data-icon="984396"></span>Desfazer</button>
+        <button id="close" class="close" title="Fechar (Esc)">✕</button>
+      </header>
+
+      <main>
+        <section id="apps">
+          <h2><span class="ico" data-icon="983099"></span>Apps<small id="count"></small></h2>
+          <input id="filter" type="search" placeholder="Procurar uma app…" autocomplete="off" />
+          <div id="list"><div class="empty">A carregar as apps do menu Iniciar…</div></div>
+          <form id="site">
+            <input id="url" placeholder="+ site (ex.: youtube.com)" autocomplete="off" />
+            <button class="btn" type="submit">Adicionar</button>
+          </form>
+        </section>
+
+        <div class="right">
+          <section id="keys">
+            <h2><span class="ico" data-icon="983820"></span>Atalhos<small><kbd>Alt</kbd> <kbd>Shift</kbd> + tecla · cinzentas = do sistema</small></h2>
+            <div class="kb" id="kb"></div>
+          </section>
+          <section id="ws">
+            <h2><span class="ico" data-icon="984163"></span>Arranque — abre no workspace<small>ao ligar o PC · <kbd>Alt+Esc</kbd> <kbd>G</kbd> grava o arranjo atual por cima</small></h2>
+            <div class="wsgrid" id="wsgrid"></div>
+          </section>
+        </div>
+      </main>
+
+      <footer>
+        <span><b>Arrastar</b> para uma tecla ou workspace · <b>arrastar de volta</b> para a lista tira · cada mudança vale logo</span>
+        <span id="status"></span>
+      </footer>
+    </div>
+
+    <script type="module">
+      const $ = id => document.getElementById(id);
+      const esc = s => String(s).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
+
+      // --- Nomes e ícones (Nerd Font nf-md; confirmados na fonte JetBrainsMono NF) ---
+      const SPECIAL = {
+        terminal: 'Terminal',
+        'claude-code': 'Claude Code no terminal',
+        explorador: 'Explorador de ficheiros',
+        explorer: 'Explorador de ficheiros',
+      };
+      function appLabel(value) {
+        const v = String(value).trim();
+        if (SPECIAL[v.toLowerCase()]) return SPECIAL[v.toLowerCase()];
+        if (/^web:/i.test(v)) {
+          try { return new URL(v.slice(4).trim()).hostname.replace(/^www\./, ''); } catch { return v; }
+        }
+        return v.split(/[\\/]/).pop().replace(/\.exe$/i, '');
+      }
+      // [palavra no nome, ícone, cor]
+      const ICONS = [
+        ['claude-code', 0xf489, 'var(--peach)'], ['terminal', 0xf489, 'var(--text)'], ['powershell', 0xf489, 'var(--blue)'],
+        ['claude', 0xf06c4, 'var(--peach)'], ['chrome', 0xf02af, 'var(--yellow)'], ['edge', 0xf01e9, 'var(--teal)'],
+        ['firefox', 0xf0239, 'var(--peach)'], ['arc', 0xf059f, 'var(--pink)'], ['explor', 0xf024b, 'var(--yellow)'],
+        ['visual studio code', 0xf0a1e, 'var(--blue)'], ['vs code', 0xf0a1e, 'var(--blue)'], ['code', 0xf0a1e, 'var(--blue)'],
+        ['spotify', 0xf04c7, 'var(--green)'], ['steam', 0xf04d3, 'var(--sky)'], ['discord', 0xf066f, 'var(--lavender)'],
+        ['whatsapp', 0xf05a3, 'var(--green)'], ['youtube', 0xf05c3, 'var(--red)'], ['word', 0xf022c, 'var(--blue)'],
+        ['excel', 0xf021b, 'var(--green)'], ['powerpoint', 0xf0227, 'var(--peach)'], ['outlook', 0xf0d22, 'var(--sky)'],
+        ['teams', 0xf02bb, 'var(--lavender)'], ['calcul', 0xf00ec, 'var(--teal)'], ['defini', 0xf0493, 'var(--subtext0)'],
+        ['settings', 0xf0493, 'var(--subtext0)'], ['notepad', 0xf0219, 'var(--green)'], ['bloco de notas', 0xf0219, 'var(--green)'],
+        ['obsidian', 0xf0ebf, 'var(--mauve)'], ['github', 0xf02a4, 'var(--text)'], ['git', 0xf02a2, 'var(--peach)'],
+        ['gmail', 0xf02ab, 'var(--red)'], ['mail', 0xf01ee, 'var(--sky)'], ['calend', 0xf00ed, 'var(--sky)'],
+        ['slack', 0xf04b1, 'var(--pink)'], ['docker', 0xf0868, 'var(--blue)'], ['python', 0xf0320, 'var(--yellow)'],
+        ['node', 0xf0399, 'var(--green)'], ['store', 0xf0110, 'var(--blue)'], ['loja', 0xf0110, 'var(--blue)'],
+        ['câmara', 0xf0100, 'var(--subtext0)'], ['camera', 0xf0100, 'var(--subtext0)'], ['foto', 0xf02e9, 'var(--pink)'],
+        ['photo', 0xf02e9, 'var(--pink)'], ['music', 0xf075a, 'var(--pink)'], ['música', 0xf075a, 'var(--pink)'],
+        ['vídeo', 0xf0567, 'var(--red)'], ['video', 0xf0567, 'var(--red)'], ['pdf', 0xf0226, 'var(--red)'],
+        ['acrobat', 0xf0226, 'var(--red)'], ['game', 0xf0297, 'var(--mauve)'], ['xbox', 0xf0297, 'var(--green)'],
+        ['riot', 0xf0297, 'var(--red)'], ['segur', 0xf0483, 'var(--teal)'], ['onedrive', 0xf015f, 'var(--sky)'],
+        ['impress', 0xf042a, 'var(--subtext0)'], ['print', 0xf042a, 'var(--subtext0)'], ['sql', 0xf01bc, 'var(--yellow)'],
+        ['monitor', 0xf0379, 'var(--teal)'], ['raycast', 0xf0349, 'var(--red)'], ['windows', 0xf05b3, 'var(--blue)'],
+      ];
+      function iconFor(value) {
+        const v = String(value).toLowerCase();
+        if (v.startsWith('web:')) {
+          const host = appLabel(value).toLowerCase();
+          const hit = ICONS.find(([w]) => host.includes(w));
+          return hit ? [hit[1], hit[2]] : [0xf059f, 'var(--sky)'];
+        }
+        const name = (SPECIAL[v] ?? v).toLowerCase();
+        const hit = ICONS.find(([w]) => (v === w) || name.includes(w));
+        return hit ? [hit[1], hit[2]] : [0xf003b, 'var(--lavender)'];
+      }
+      const ico = value => {
+        const [code, color] = iconFor(value);
+        return `<span class="ico" data-icon="${code}" style="--ic:${color}"></span>`;
+      };
+
+      // Ícones centrados a sério (igual ao guia): mede-se o desenho real e pinta-se num canvas.
+      async function drawIcons(root = document) {
+        try { await document.fonts.load('16px "JetBrainsMono NF"'); } catch {}
+        const dpr = window.devicePixelRatio || 1;
+        for (const el of root.querySelectorAll('.ico[data-icon]')) {
+          const size = el.offsetWidth || 22;
+          const css = getComputedStyle(el);
+          const cv = document.createElement('canvas');
+          cv.width = cv.height = Math.round(size * dpr);
+          cv.style.width = cv.style.height = `${size}px`;
+          const ctx = cv.getContext('2d');
+          ctx.scale(dpr, dpr);
+          ctx.font = `${css.fontSize} "JetBrainsMono NF"`;
+          ctx.fillStyle = css.color;
+          const ch = String.fromCodePoint(Number(el.dataset.icon));
+          const m = ctx.measureText(ch);
+          ctx.fillText(ch, size / 2 - (m.actualBoundingBoxRight - m.actualBoundingBoxLeft) / 2,
+                       size / 2 - (m.actualBoundingBoxDescent - m.actualBoundingBoxAscent) / 2);
+          el.replaceChildren(cv);
+          el.removeAttribute('data-icon');
+        }
+      }
+
+      // --- Estado ---
+      let state = { keys: [], fixed: [], workspaces: [], undo: 0 };
+      let startApps = [];          // [{name, value}] do menu Iniciar
+      let extraSites = [];         // sites acrescentados nesta sessão (ainda sem tecla nem workspace)
+      let call = null;             // (args) => Promise<objeto JSON> — Zebar ou exemplo
+      let dragging = false;
+
+      const KEY_ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
+      const SPECIAL_KEYS = [['alt+enter', 'Alt Enter'], ['alt+shift+enter', 'Alt Shift Enter']];
+      const keyId = l => `alt+shift+${l.toLowerCase()}`;
+      // "alt+shift+b" -> "Alt+Shift+B" (como no apps.txt e no guia).
+      const keyLong = id => id.split('+').map(p => ({ alt: 'Alt', shift: 'Shift', enter: 'Enter', space: 'Space' })[p] ?? p.toUpperCase()).join('+');
+
+      function setStatus(text, kind = '') {
+        const el = $('status');
+        el.textContent = text;
+        el.className = kind;
+        clearTimeout(setStatus.t);
+        if (kind === 'ok') setStatus.t = setTimeout(() => (el.textContent = ''), 2500);
+      }
+
+      // --- Desenho ---
+      function renderList() {
+        const q = $('filter').value.trim().toLowerCase();
+        const used = new Map();
+        for (const k of state.keys) used.set(k.value.toLowerCase(), k.key);
+        const hits = it => !q || it.label.toLowerCase().includes(q) || it.value.toLowerCase().includes(q);
+        const sites = [...new Set([...state.keys.map(k => k.value), ...state.workspaces.map(w => w.value || ''), ...extraSites]
+          .filter(v => /^web:/i.test(v)))].map(v => ({ value: v, label: appLabel(v) }));
+        const groups = [
+          ['Especiais', ['terminal', 'claude-code', 'explorador'].map(v => ({ value: v, label: appLabel(v) }))],
+          ['Sites', sites],
+          ['Menu Iniciar', startApps.map(a => ({ value: a.value, label: a.name }))],
+        ];
+        let n = 0;
+        const html = groups.map(([title, items]) => {
+          const shown = items.filter(hits);
+          n += shown.length;
+          if (!shown.length) return '';
+          return `<div class="group">${esc(title)}</div>` + shown.map(it => {
+            const k = used.get(it.value.toLowerCase());
+            return `<div class="app" draggable="true" data-kind="app" data-value="${esc(it.value)}" data-label="${esc(it.label)}">` +
+              `${ico(it.value)}<span class="lb">${esc(it.label)}</span>` +
+              `${k ? `<span class="used">${esc(keyLong(k))}</span>` : ''}</div>`;
+          }).join('');
+        }).join('');
+        $('list').innerHTML = html || `<div class="empty">${startApps.length ? 'Nenhuma app com esse nome.' : 'A carregar as apps do menu Iniciar…'}</div>`;
+        $('count').textContent = startApps.length ? `${startApps.length} no menu Iniciar` : '';
+        drawIcons($('list'));
+      }
+
+      function keyHtml(id, cap, wide = false) {
+        const fixed = state.fixed.includes(id);
+        const has = state.keys.find(k => k.key === id);
+        const cls = ['key', wide && 'wide', fixed ? 'fixed' : has ? 'has' : 'free'].filter(Boolean).join(' ');
+        const what = fixed ? '<span class="ico" data-icon="983870" style="--ic:var(--overlay0)"></span><span>sistema</span>'
+          : has ? `${ico(has.value)}<span>${esc(appLabel(has.value))}</span>` : '';
+        const drag = has && !fixed ? ` draggable="true" data-kind="key" data-value="${esc(has.value)}" data-label="${esc(appLabel(has.value))}"` : '';
+        return `<div class="${cls}" data-key="${id}"${drag} title="${esc(has ? `${cap}: ${appLabel(has.value)}` : fixed ? `${cap}: usado pelo sistema` : `${cap}: livre`)}">` +
+          `<span class="cap">${esc(cap)}</span><span class="what">${what}</span>` +
+          `${has && !fixed ? '<button class="x" data-unkey="' + id + '" title="Tirar o atalho">✕</button>' : ''}</div>`;
+      }
+
+      function renderKeys() {
+        $('kb').innerHTML =
+          KEY_ROWS.map(r => `<div class="krow">${[...r].map(l => keyHtml(keyId(l), l)).join('')}</div>`).join('') +
+          `<div class="krow special">${SPECIAL_KEYS.map(([id, cap]) => keyHtml(id, cap, true)).join('')}</div>`;
+        drawIcons($('kb'));
+      }
+
+      function renderWorkspaces() {
+        const boxes = [];
+        for (let n = 1; n <= 10; n++) {
+          const ws = String(n);
+          const items = state.workspaces.filter(w => w.workspace === ws);
+          boxes.push(`<div class="box${items.length ? ' has' : ''}" data-ws="${ws}">` +
+            `<div class="head"><kbd>${ws}</kbd><span>${items.length ? `${items.length} ${items.length === 1 ? 'app' : 'apps'}` : ''}</span></div>` +
+            (items.length ? items.map(w => {
+              const value = w.value || w.process || w.label;
+              return `<div class="chip" draggable="true" data-kind="ws" data-index="${w.index}" data-value="${esc(w.value || '')}" data-label="${esc(w.label)}" title="${esc(w.label)}">` +
+                `${ico(value)}<span>${esc(w.label)}</span><button class="x" data-wsdel="${w.index}" title="Não abrir no arranque">✕</button></div>`;
+            }).join('') : '<div class="hint">largue aqui</div>') +
+            '</div>');
+        }
+        $('wsgrid').innerHTML = boxes.join('');
+        drawIcons($('wsgrid'));
+      }
+
+      function render() {
+        renderList();
+        renderKeys();
+        renderWorkspaces();
+        $('undo').disabled = !state.undo;
+      }
+
+      // --- Pedidos ao bar_helper.py (um de cada vez, pela ordem) ---
+      let queue = Promise.resolve();
+      function request(args, okText) {
+        queue = queue.then(async () => {
+          document.body.classList.add('busy');
+          try {
+            const res = await call(args);
+            if (res.state) state = res.state;
+            if (res.ok) setStatus(okText ?? '✓ Guardado', 'ok');
+            else setStatus(res.error || 'Erro desconhecido.', 'err');
+          } catch (err) {
+            setStatus(`Erro: ${err?.message ?? err}`, 'err');
+          } finally {
+            document.body.classList.remove('busy');
+            render();
+          }
+        });
+        return queue;
+      }
+      const b64 = s => btoa(String.fromCharCode(...new TextEncoder().encode(s)))
+        .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      const op = (o, okText) => request(['do', b64(JSON.stringify(o))], okText);
+
+      async function loadAll() {
+        await request(['state'], '');
+        try {
+          const res = await call(['apps']);
+          if (res.ok) { startApps = res.apps; renderList(); }
+        } catch (err) {
+          setStatus(`Não consegui ler o menu Iniciar: ${err?.message ?? err}`, 'err');
+        }
+      }
+
+      // --- Arrastar e largar ---
+      let dragData = null;
+      document.addEventListener('dragstart', e => {
+        const el = e.target.closest?.('[draggable="true"]');
+        if (!el) return;
+        dragging = true;
+        dragData = { kind: el.dataset.kind, value: el.dataset.value, label: el.dataset.label,
+                     key: el.dataset.key, index: el.dataset.index !== undefined ? Number(el.dataset.index) : undefined };
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', dragData.label || '');
+        el.classList.add('dragging');
+      });
+      document.addEventListener('dragend', e => {
+        e.target.closest?.('[draggable="true"]')?.classList.remove('dragging');
+        document.querySelectorAll('.over, .drop-remove').forEach(x => x.classList.remove('over', 'drop-remove'));
+        dragging = false;
+        dragData = null;
+      });
+
+      // Onde se pode largar o quê.
+      function targetOf(el) {
+        const key = el.closest?.('.key');
+        if (key && !key.classList.contains('fixed')) return { el: key, type: 'key' };
+        const box = el.closest?.('.box');
+        if (box) return { el: box, type: 'ws' };
+        const list = el.closest?.('#list');
+        if (list && dragData && dragData.kind !== 'app') return { el: list, type: 'remove' };
+        return null;
+      }
+      document.addEventListener('dragover', e => {
+        if (!dragData) return;
+        const t = targetOf(e.target);
+        document.querySelectorAll('.over, .drop-remove').forEach(x => x !== t?.el && x.classList.remove('over', 'drop-remove'));
+        if (!t) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        t.el.classList.add(t.type === 'remove' ? 'drop-remove' : 'over');
+      });
+      document.addEventListener('drop', e => {
+        const d = dragData;
+        const t = d && targetOf(e.target);
+        if (!t) return;
+        e.preventDefault();
+        t.el.classList.remove('over', 'drop-remove');
+        if (t.type === 'key') {
+          const key = t.el.dataset.key;
+          if (d.kind === 'key' && d.key === key) return;
+          if (!d.value) return setStatus('Esta app não tem um nome do menu Iniciar: arraste-a da lista.', 'err');
+          const o = { op: 'key', key, value: d.value };
+          if (d.kind === 'key') o.from = d.key;
+          op(o, `✓ ${appLabel(d.value)} em ${keyLong(key)}`);
+        } else if (t.type === 'ws') {
+          const ws = t.el.dataset.ws;
+          if (d.kind === 'ws') return op({ op: 'ws-move', index: d.index, ws }, `✓ Agora abre no workspace ${ws}`);
+          if (!d.value) return;
+          op({ op: 'ws-add', ws, value: d.value, label: d.label || appLabel(d.value) }, `✓ ${d.label || appLabel(d.value)} abre no workspace ${ws}`);
+        } else if (t.type === 'remove') {
+          if (d.kind === 'key') op({ op: 'unkey', key: d.key }, '✓ Atalho tirado');
+          if (d.kind === 'ws') op({ op: 'ws-del', index: d.index }, '✓ Já não abre no arranque');
+        }
+      });
+
+      // Botões ✕ e Desfazer.
+      document.addEventListener('click', e => {
+        const un = e.target.closest?.('[data-unkey]');
+        if (un) return op({ op: 'unkey', key: un.dataset.unkey }, '✓ Atalho tirado');
+        const del = e.target.closest?.('[data-wsdel]');
+        if (del) return op({ op: 'ws-del', index: Number(del.dataset.wsdel) }, '✓ Já não abre no arranque');
+      });
+      $('undo').addEventListener('click', () => request(['undo'], '✓ Desfeito'));
+
+      // + site: o endereço vira um "app" web: que se arrasta como os outros.
+      $('site').addEventListener('submit', e => {
+        e.preventDefault();
+        let url = $('url').value.trim();
+        if (!url) return;
+        if (!/^https?:\/\//i.test(url)) url = `https://${url}`;
+        try { new URL(url); } catch { return setStatus('Endereço inválido.', 'err'); }
+        const value = `web: ${url}`;
+        if (!extraSites.includes(value)) extraSites.push(value);
+        $('url').value = '';
+        $('filter').value = '';
+        renderList();
+        setStatus(`${appLabel(value)} está na lista (em "Sites"): arraste-o.`, 'ok');
+      });
+      $('filter').addEventListener('input', renderList);
+
+      // --- Zebar ou navegador ---
+      let close = () => window.close();
+      if (location.protocol === 'file:' || new URLSearchParams(location.search).has('preview')) {
+        // Pré-visualização no navegador (ficheiro ou ?preview): dados de exemplo, sem gravar nada.
+        document.body.classList.add('standalone', 'open');
+        const sample = {
+          keys: [{ key: 'alt+enter', value: 'terminal' }, { key: 'alt+shift+enter', value: 'claude-code' },
+                 { key: 'alt+shift+b', value: 'Google Chrome' }, { key: 'alt+shift+c', value: 'Claude' },
+                 { key: 'alt+shift+n', value: 'Notepad++' }, { key: 'alt+shift+y', value: 'web: https://www.youtube.com' }],
+          fixed: ['alt+shift+h', 'alt+shift+j', 'alt+shift+k', 'alt+shift+l', 'alt+shift+q', 'alt+shift+m', 'alt+shift+p',
+                  'alt+shift+r', 'alt+shift+s', 'alt+shift+w', 'alt+shift+e'],
+          workspaces: [{ index: 0, workspace: '1', label: 'Terminal', value: 'terminal' },
+                       { index: 1, workspace: '2', label: 'Google Chrome', value: 'Google Chrome' },
+                       { index: 2, workspace: '2', label: 'web.whatsapp.com', value: 'web: https://web.whatsapp.com' },
+                       { index: 3, workspace: '3', label: 'Spotify', value: 'Spotify' }],
+          undo: 0,
+        };
+        const apps = ['Arc', 'Calculadora', 'Claude', 'Discord', 'Excel', 'Google Chrome', 'Microsoft Edge', 'Notepad++',
+                      'Obsidian', 'Outlook', 'PowerPoint', 'Spotify', 'Steam', 'Visual Studio Code', 'Word']
+          .map(n => ({ name: n, value: n }));
+        call = async args => {
+          await new Promise(r => setTimeout(r, 150));
+          if (args[0] === 'apps') return { ok: true, apps };
+          if (args[0] === 'state') return { ok: true, state: sample };
+          if (args[0] === 'do') {
+            const o = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(args[1].replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0))));
+            const s = sample;
+            if (o.op === 'key' || o.op === 'unkey') {
+              s.keys = s.keys.filter(k => k.key !== o.key && k.key !== o.from);
+              if (o.op === 'key') s.keys.push({ key: o.key, value: o.value });
+            } else if (o.op === 'ws-add') {
+              s.workspaces.push({ index: s.workspaces.length, workspace: o.ws, label: o.label, value: o.value });
+            } else if (o.op === 'ws-del') {
+              s.workspaces = s.workspaces.filter(w => w.index !== o.index).map((w, i) => ({ ...w, index: i }));
+            } else if (o.op === 'ws-move') {
+              s.workspaces.find(w => w.index === o.index).workspace = o.ws;
+            }
+            s.undo++;
+            return { ok: true, state: s };
+          }
+          return { ok: false, error: 'Na pré-visualização não há desfazer.', state: sample };
+        };
+        loadAll();
+      } else {
+        const CUP = { x: Math.round(screen.width / 2) - 72, y: 14 };
+        const OPEN_MS = 480;
+        const CLOSE_MS = 260;
+        let win = null;
+        let shown = 'hidden'; // hidden | open | closing
+        let watch = null;
+        let closeTimer = null;
+        let hideWindow = () => {};
+        try {
+          const zebar = await import('../vendor/zebar-3.3.1.mjs');
+          win = zebar.currentWidget().tauriWindow;
+          // py.exe (com saída) para os pedidos; pyw.exe para esconder. Os argumentos
+          // têm de bater com o argsRegex do widget "apps" no zpack.json (A8).
+          const PY = 'C:\\Windows\\py.exe';
+          const PYW = 'C:\\Windows\\pyw.exe';
+          const HELPER = '{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py';
+          call = async args => JSON.parse((await zebar.shellExec(PY, ['-I', HELPER, 'panel', ...args])).stdout);
+          // Esconder passa sempre pelo bar_helper.py (um só dono da visibilidade, A9).
+          hideWindow = () => zebar.shellExec(PYW, ['-I', HELPER, 'panel-hide']).catch(console.error);
+
+          const pos = await win.outerPosition();
+          const scale = (await win.scaleFactor()) || 1;
+          document.documentElement.style.setProperty('--ox', `${CUP.x - pos.x / scale}px`);
+          document.documentElement.style.setProperty('--oy', `${CUP.y - pos.y / scale}px`);
+          await win.hide(); // pré-carregado: o Alt+Esc, C (bar_helper.py panel) mostra-o
+        } catch (err) {
+          console.error('Zebar API indisponível:', err);
+          setStatus(`Erro Zebar: ${err?.message ?? err}`, 'err');
+        }
+
+        close = () => {
+          if (shown !== 'open') return;
+          shown = 'closing';
+          clearInterval(watch);
+          document.body.classList.remove('open');
+          closeTimer = setTimeout(() => { closeTimer = null; hideWindow(); shown = 'hidden'; }, CLOSE_MS);
+        };
+
+        window.addEventListener('focus', () => {
+          if (shown === 'open') return;
+          clearTimeout(closeTimer);
+          closeTimer = null;
+          shown = 'open';
+          $('filter').value = '';
+          setStatus('');
+          loadAll(); // apps.txt e layout.json podem ter mudado (Alt+Esc, G; outra app)
+          $('filter').focus();
+          document.body.classList.remove('open');
+          void document.body.offsetWidth;
+          requestAnimationFrame(() => document.body.classList.add('open'));
+
+          // Clicar fora fecha (o WebView2 não dá "blur" fiável: pergunta-se à janela).
+          // Enquanto se arrasta ou um pedido está a correr, não fecha.
+          clearInterval(watch);
+          const since = performance.now();
+          watch = setInterval(async () => {
+            if (!win || dragging || document.body.classList.contains('busy') || performance.now() - since < OPEN_MS) return;
+            if (!(await win.isFocused())) close();
+          }, 150);
+        });
+      }
+
+      $('close').addEventListener('click', () => close());
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          if (document.activeElement === $('url') && $('url').value) { $('url').value = ''; return; }
+          if ($('filter').value) { $('filter').value = ''; renderList(); return; }
+          close();
+        } else if ((e.ctrlKey && e.key.toLowerCase() === 'z') && !$('undo').disabled) {
+          e.preventDefault();
+          request(['undo'], '✓ Desfeito');
+        } else if (e.key.length === 1 && !e.ctrlKey && !e.altKey && document.activeElement !== $('filter') && document.activeElement !== $('url')) {
+          $('filter').focus(); // escrever em qualquer lado começa a procurar
+        }
+      });
+      render();
+      drawIcons();
+    </script>
+  </body>
+</html>

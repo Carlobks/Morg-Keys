@@ -116,6 +116,44 @@
       ]
     },
     {
+      "name": "apps",
+      "htmlPath": "./painel/apps.html",
+      "zOrder": "top_most",
+      "shownInTaskbar": false,
+      "focused": false,
+      "resizable": false,
+      "transparent": true,
+      "includeFiles": ["painel/*.html", "vendor/*.mjs"],
+      "caching": {
+        "defaultDuration": 604800,
+        "rules": []
+      },
+      "privileges": {
+        "shellCommands": [
+          {
+            "program": "C:\\Windows\\py.exe",
+            "argsRegex": "^-I {{HOME_RE}}/\\.glzr/zebar/omarchy-catppuccin/bar_helper\\.py panel (state|apps|undo|do [A-Za-z0-9_-]+)$"
+          },
+          {
+            "program": "C:\\Windows\\pyw.exe",
+            "argsRegex": "^-I {{HOME_RE}}/\\.glzr/zebar/omarchy-catppuccin/bar_helper\\.py panel-hide$"
+          }
+        ]
+      },
+      "presets": [
+        {
+          "name": "default",
+          "anchor": "center",
+          "offsetX": "0px",
+          "offsetY": "0px",
+          "width": "72%",
+          "height": "74%",
+          "monitorSelection": { "type": "primary" },
+          "dockToEdge": { "enabled": false, "edge": null, "windowMargin": "0px" }
+        }
+      ]
+    },
+    {
       "name": "splash",
       "htmlPath": "./arranque/splash.html",
       "zOrder": "top_most",

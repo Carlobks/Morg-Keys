@@ -246,7 +246,7 @@
   <tr><td>Ligações</td><td><kbd>W</kbd> Wi-Fi · <kbd>B</kbd> Bluetooth · <kbd>A</kbd> Som</td></tr>
   <tr><td>Ecrã</td><td><kbd>D</kbd> Ecrã · <kbd>N</kbd> Luz noturna · <kbd>I</kbd> Não suspender (o café na barra)</td></tr>
   <tr><td>Sistema</td><td><kbd>T</kbd> Gestor de Tarefas · <kbd>P</kbd> Energia e suspensão · <kbd>L</kbd> Bloquear o PC</td></tr>
-  <tr><td>Personalizar</td><td><kbd>C</kbd> Atalhos das apps · <kbd>G</kbd> Gravar a disposição das janelas · <kbd>E</kbd> Animação do arranque (<b>tocar</b> troca, <b>segurar</b> mostra; ver <a href="#arranque">Ecrã de arranque</a>)</td></tr>
+  <tr><td>Personalizar</td><td><kbd>C</kbd> Apps e arranque (o <a href="#apps">painel de arrastar</a>) · <kbd>G</kbd> Gravar a disposição das janelas · <kbd>E</kbd> Animação do arranque (<b>tocar</b> troca, <b>segurar</b> mostra; ver <a href="#arranque">Ecrã de arranque</a>)</td></tr>
   <tr><td>Sessão</td><td><kbd>Q</kbd> Sair do GlazeWM · <kbd>R</kbd> Reiniciar · <kbd>O</kbd> Desligar (estes dois pedem confirmação)</td></tr>
 </table>
 <h2 id="barra">A barra</h2>
@@ -268,9 +268,19 @@
   <tr><td>Wi-Fi</td><td>Lista de redes</td><td></td></tr>
 </table>
 
-<h2 id="apps">Mudar os atalhos das apps</h2>
+<h2 id="apps">Mudar os atalhos e as apps do arranque (painel)</h2>
+<p><kbd>Alt</kbd>+<kbd>Esc</kbd> e depois <kbd>C</kbd> abre o painel <b>Apps e arranque</b>. Não é preciso abrir ficheiros nem escrever comandos: tudo se faz a arrastar, e cada mudança vale logo.</p>
+<ul>
+  <li><b>À esquerda</b>, a lista das apps: as especiais (Terminal, Claude Code, Explorador), os sites e todas as apps do menu Iniciar. Escreva para procurar. Para um site, escreva o endereço em <i>+ site</i> e carregue em <i>Adicionar</i>: ele aparece na lista, em “Sites”.</li>
+  <li><b>Atalhos</b>: arraste uma app para uma tecla do teclado desenhado. Essa tecla com <kbd>Alt</kbd>+<kbd>Shift</kbd> passa a abrir a app (também há <kbd>Alt</kbd>+<kbd>Enter</kbd> e <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd>). As teclas cinzentas com cadeado são do sistema e não aceitam apps.</li>
+  <li><b>Arranque</b>: arraste uma app para a caixa de um workspace. Ao ligar o PC, ela abre nesse workspace.</li>
+  <li><b>Mudar ou tirar</b>: arraste uma tecla ou uma app de um workspace para outro sítio, ou de volta para a lista (tira). O <b>✕</b> que aparece ao passar o rato também tira.</li>
+  <li><b>Desfazer</b> (botão no topo ou <kbd>Ctrl</kbd>+<kbd>Z</kbd>) volta atrás, passo a passo. <kbd>Esc</kbd> ou um clique fora fecham o painel.</li>
+</ul>
+<p>Se uma mudança não puder ser feita (por exemplo, a app já não existe), o painel diz porquê no rodapé e nada é alterado.</p>
+<h3>Para quem prefere o ficheiro de texto</h3>
+<p>O painel grava no mesmo ficheiro de sempre, <code>Documentos\Guia de Atalhos\apps.txt</code>, que continua a poder ser editado à mão:</p>
 <ol class="steps">
-  <li><kbd>Alt</kbd>+<kbd>Esc</kbd> e depois <kbd>C</kbd>: abre o <code>apps.txt</code>. Também está em <code>Documentos\Guia de Atalhos\apps.txt</code>.</li>
   <li>Uma linha por atalho: <code>TECLAS = APP</code>. Exemplos:
 <pre><code>Alt+Shift+B  = Google Chrome
 Alt+Shift+O  = Obsidian
@@ -316,7 +326,11 @@ bat = C:\Scripts\copias.bat</code></pre>
 <p>O <code>.bat</code> corre na sua própria pasta. Se ele usar Node.js (<code>npm run dev</code>, por exemplo), o Node.js e as dependências do projeto têm de estar instalados: não fazem parte deste pacote.</p>
 
 <h3>Que apps abrem e onde</h3>
-<p>Arrume as janelas como quer (que app em que workspace) e carregue <kbd>Alt</kbd>+<kbd>Esc</kbd>, <kbd>G</kbd>. Fica guardado em <code>%USERPROFILE%\.glzr\layout.json</code>.</p>
+<p>Duas formas, que gravam no mesmo sítio (<code>%USERPROFILE%\.glzr\layout.json</code>):</p>
+<ul>
+  <li><b>Painel</b> (<kbd>Alt</kbd>+<kbd>Esc</kbd>, <kbd>C</kbd>): arraste cada app para a caixa do seu workspace. Uma app do menu Iniciar que o sistema ainda não conhece é reconhecida no primeiro arranque: abre-a, fica com a janela nova que aparecer e lembra-se dela para as vezes seguintes.</li>
+  <li><b>Gravar o que está aberto</b>: arrume as janelas como quer e carregue <kbd>Alt</kbd>+<kbd>Esc</kbd>, <kbd>G</kbd>. Isto <b>substitui</b> o que estava no painel pelo arranjo atual (as apps que o painel já sabia abrir continuam a saber).</li>
+</ul>
 
 <h3>O que acontece ao ligar o PC</h3>
 <p>Por baixo da animação aparece a lista do que está a arrancar. Cada linha tem o seu ícone e, à direita, o estado: a rodar enquanto carrega, <b>✓</b> quando está pronto, <b>!</b> se falhou (por exemplo, um <code>.bat</code> que já não existe).</p>
@@ -341,7 +355,7 @@ bat = C:\Scripts\copias.bat</code></pre>
   <tr><td>Reiniciei e não arrancou nada</td><td>Abra o Agendador de Tarefas e procure “GlazeWM (arranque)”: deve estar <i>Pronta</i>, com “Ao iniciar sessão”. Para arrancar à mão, abra o PowerShell e escreva <code>Start-ScheduledTask "GlazeWM (arranque)"</code>.</td></tr>
   <tr><td>Uma janela “desapareceu”</td><td>Pode estar noutro workspace (veja a barra) ou minimizada (chips na barra, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd>). Se sair do GlazeWM (<kbd>Alt</kbd>+<kbd>Esc</kbd>, <kbd>Q</kbd>), todas as janelas escondidas voltam a aparecer.</td></tr>
   <tr><td>Os ícones da barra são quadrados</td><td>A fonte ainda não foi carregada. Termine a sessão e volte a entrar.</td></tr>
-  <tr><td>Um atalho de app não faz nada</td><td>Confirme a linha no <code>apps.txt</code> e carregue <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>. Uma app instalada agora pode precisar de terminar a sessão para aparecer no menu Iniciar.</td></tr>
+  <tr><td>Um atalho de app não faz nada</td><td>Abra o painel (<kbd>Alt</kbd>+<kbd>Esc</kbd>, <kbd>C</kbd>) e veja se a app está na tecla certa; arraste-a de novo. Uma app instalada agora pode precisar de terminar a sessão para aparecer no menu Iniciar.</td></tr>
   <tr><td>Preciso do Windows “normal” por momentos</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> pausa o GlazeWM; repita para retomar.</td></tr>
   <tr><td>Uma janela de administrador não obedece</td><td>Normal no Windows: janelas elevadas não aceitam ordens de programas sem elevação. Use o rato nessa janela.</td></tr>
   <tr><td>O instalador fecha logo com erro de política</td><td>A política de grupo da organização bloqueia scripts. O TI tem de correr <code>scripts\instalar.ps1</code> com a política adequada.</td></tr>

@@ -199,7 +199,9 @@ binding_modes:
         bindings: ['l']
       - commands: ['shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layout-save', 'wm-disable-binding-mode --name sistema', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layer-hide']
         bindings: ['g']
-      - commands: ['shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" apps-edit', 'wm-disable-binding-mode --name sistema', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layer-hide']
+      # Painel "Apps e arranque" (arrastar apps para teclas e workspaces). Sai da
+      # camada primeiro: o painel tem de ficar com o foco (para Esc e pesquisa).
+      - commands: ['wm-disable-binding-mode --name sistema', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layer-hide', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" panel']
         bindings: ['c']
       # Animação do arranque: tocar E troca (o painel fica aberto e mostra qual);
       # segurar E mostra-a ao largar (o bar_helper.py sai da camada nessa altura).

@@ -2,7 +2,7 @@
 #
 # Uma linha por atalho:   TECLAS = APP
 # Depois de gravar, carregue  Alt+Shift+R  para aplicar.
-# (Para abrir este ficheiro: Alt+Esc e depois C.)
+# (Mais fácil: o painel Alt+Esc e depois C muda isto arrastando apps.)
 #
 # TECLAS  Alt+Shift+letra (recomendado) ou Alt+Shift+Enter.
 #         Não use Ctrl+Alt (no teclado é o AltGr: @ # € ...).

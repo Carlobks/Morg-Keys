@@ -15,6 +15,11 @@
       "pack": "omarchy-catppuccin",
       "widget": "sistema",
       "preset": "default"
+    },
+    {
+      "pack": "omarchy-catppuccin",
+      "widget": "apps",
+      "preset": "default"
     }
   ]
 }

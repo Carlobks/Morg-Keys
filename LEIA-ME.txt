@@ -22,10 +22,11 @@ DEPOIS
   Alt+K      guia com todos os atalhos
   Alt+Esc    painel do sistema (Wi-Fi, som, bloquear, desligar...)
   Alt+Enter  terminal
+  Alt+Esc, C painel "Apps e arranque": arraste apps para teclas (atalhos)
+             e para workspaces (abrem lá ao ligar o PC)
   Alt+Esc, E animação do arranque: segurar mostra-a
 
-Mudar depois: Documentos\Guia de Atalhos\arranque.txt (animação e .bat)
-e Documentos\Guia de Atalhos\apps.txt (atalhos das apps).
+Programas .bat ao iniciar: Documentos\Guia de Atalhos\arranque.txt.
 
 Tutorial completo: Tutorial.html (abre no navegador).
 Para o TI ou outro agente de IA manter/refazer: COMO-FOI-FEITO.md

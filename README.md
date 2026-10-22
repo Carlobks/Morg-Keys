@@ -32,10 +32,11 @@ Sem internet: ponha os instaladores em `1-instaladores\` antes de correr (nomes 
 |---|---|
 | `Alt+K` | Guia com todos os atalhos |
 | `Alt+Esc` | Painel do sistema (Wi-Fi, som, bloquear, desligar…) |
+| `Alt+Esc`, `C` | Painel **Apps e arranque**: arraste apps para teclas (atalhos) e para workspaces (abrem lá ao ligar o PC) |
 | `Alt+Enter` | Terminal |
 | `Alt+1`…`Alt+0` | Workspaces |
 
-Os atalhos das apps e os programas ao iniciar mudam-se em `Documentos\Guia de Atalhos\` (`apps.txt` e `arranque.txt`).
+Sem editar ficheiros: os atalhos e as apps do arranque mudam-se no painel `Alt+Esc`, `C`. Os programas `.bat` ao iniciar ficam em `Documentos\Guia de Atalhos\arranque.txt`.
 
 - **Guia completo:** [Tutorial.html](Tutorial.html)
 - **Como funciona por dentro** (para quem mantém, ou para um agente de IA): [COMO-FOI-FEITO.md](COMO-FOI-FEITO.md)
