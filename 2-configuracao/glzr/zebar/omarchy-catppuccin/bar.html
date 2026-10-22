@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" href="./icons.css" />
+    <link rel="stylesheet" type="text/css" href="./styles.css" />
+  </head>
+  <body>
+    <div id="root">
+      <div class="app">
+        <!-- Esquerda: menu (como o logótipo do Omarchy), workspaces, minimizadas, modos -->
+        <div class="left">
+          <span class="ico menu clickable" id="menu" style="--c: var(--mauve)"
+                title="Clique: Raycast · Botão direito: Terminal"></span>
+          <div id="workspaces" class="left" title="Roda do rato: workspace seguinte/anterior"></div>
+          <div id="minimized" class="left"></div>
+          <div id="modes" class="left"></div>
+        </div>
+
+        <!-- Centro: indicadores (chávena) e relógio, como na barra do Omarchy 4 -->
+        <div class="center">
+          <span class="ico indicator clickable off" id="awake" style="--c: var(--peach)"
+                title="Suspensão permitida — clique para manter o PC acordado"></span>
+          <span class="clickable" id="clock"
+                title="Clique: notificações e calendário · Botão direito: formato longo"></span>
+        </div>
+
+        <!-- Direita: Claude, sistema, som, rede -->
+        <div class="right">
+          <div class="stat claude clickable" id="claude" style="--c: var(--peach)" title="Uso do Claude">
+            <span class="ico txt">✻</span><span id="claude-text" class="muted">…</span>
+          </div>
+          <div class="stat" id="cpu" style="--c: var(--blue)"></div>
+          <div class="stat" id="memory" style="--c: var(--teal)"></div>
+          <div class="stat clickable" id="audio" style="--c: var(--peach)"
+               title="Clique: definições rápidas · Roda: volume · Botão direito: silenciar"></div>
+          <div class="stat clickable" id="network" style="--c: var(--green)" title="Escolher rede Wi-Fi"></div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      // Cliente do Zebar guardado no pack (vendor/): funciona sem internet.
+      // Gerado com esbuild a partir do pacote npm zebar@3.3.1 (= versão instalada).
+      import * as zebar from './vendor/zebar-3.3.1.mjs';
+
+      // Scripts Python locais (permitidos no zpack.json). py.exe = lançador
+      // oficial do Python: o caminho não muda quando o Python é atualizado.
+      const PY = 'C:\\Windows\\py.exe';
+      const PACK = '{{HOME}}/.glzr/zebar/omarchy-catppuccin';
+      const helper = (...args) => zebar.shellExec(PY, ['-I', `${PACK}/bar_helper.py`, ...args]);
+      const USAGE_EVERY_MS = 30_000; // só lê um ficheiro pequeno
+      const AWAKE_EVERY_MS = 5_000;
+
+      // Ícones Nerd Font (família nf-md / nf-oct da fonte JetBrainsMono NF).
+      const ICON = {
+        menu: 0xf003b, cpu: 0xf4bc, memory: 0xe266,
+        volOff: 0xf0581, volLow: 0xf057f, volMed: 0xf0580, volHigh: 0xf057e,
+        ethernet: 0xf0200, wifi: 0xf05a9, wifiOff: 0xf05aa, vpn: 0xf0ccc,
+        coffee: 0xf0176, coffeeOutline: 0xf06ca, app: 0xf0614,
+      };
+
+      const providers = zebar.createProviderGroup({
+        glazewm: { type: 'glazewm' },
+        cpu: { type: 'cpu', refreshInterval: 5000 },
+        memory: { type: 'memory', refreshInterval: 5000 },
+        network: { type: 'network', refreshInterval: 10000 },
+        date: { type: 'date', refreshInterval: 1000 },
+        audio: { type: 'audio' },
+      });
+
+      // Abre painéis do Windows através do GlazeWM: lançados pelo Zebar
+      // (janela sem foco), o Windows não deixa os painéis aparecerem.
+      const glazeRun = cmd => providers.outputMap.glazewm?.runCommand(cmd);
+      const openWin = uri => glazeRun(`shell-exec explorer ${uri}`);
+
+      const $ = id => document.getElementById(id);
+      const esc = s => String(s ?? '').replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
+      const ico = code => `<span class="ico" data-icon="${code}"></span>`;
+
+      // Ícones centrados a sério (como no guia e no painel): na fonte
+      // "JetBrainsMono NF" cada ícone é mais largo do que a célula e fica
+      // desviado, por isso mede-se o desenho real e pinta-se num canvas.
+      const fontReady = document.fonts.load('16px "JetBrainsMono NF"').catch(() => {});
+      async function paintIcon(el, code) {
+        await fontReady;
+        if (el.dataset.drawn === String(code)) return;
+        const size = el.offsetWidth || 20;
+        const css = getComputedStyle(el);
+        const dpr = window.devicePixelRatio || 1;
+        const cv = document.createElement('canvas');
+        cv.width = cv.height = Math.round(size * dpr);
+        cv.style.width = cv.style.height = `${size}px`;
+        const ctx = cv.getContext('2d');
+        ctx.scale(dpr, dpr);
+        ctx.font = `${css.fontSize} "JetBrainsMono NF"`;
+        ctx.fillStyle = css.color;
+        const ch = String.fromCodePoint(Number(code));
+        const m = ctx.measureText(ch);
+        ctx.fillText(ch, size / 2 - (m.actualBoundingBoxRight - m.actualBoundingBoxLeft) / 2,
+                     size / 2 - (m.actualBoundingBoxDescent - m.actualBoundingBoxAscent) / 2);
+        el.replaceChildren(cv);
+        el.dataset.drawn = String(code);
+      }
+      const paintIcons = root => root.querySelectorAll('.ico[data-icon]').forEach(el => paintIcon(el, el.dataset.icon));
+
+      // Só reescreve o HTML se mudou: um clique a meio de uma atualização (a
+      // cada 5 s por causa da CPU) não se perde e o hover não pisca.
+      function setHTML(el, html) {
+        if (el.dataset.html !== html) {
+          el.innerHTML = html;
+          el.dataset.html = html;
+          paintIcons(el);
+        }
+      }
+
+      // Nome curto e ícone por processo, para as etiquetas das minimizadas.
+      const APPS = {
+        claude: { icon: 0xf06c4, name: 'Claude' },
+        chrome: { icon: 0xf02af, name: 'Chrome' },
+        Arc: { icon: 0xf059f, name: 'Arc' },
+        msedge: { icon: 0xf01e9, name: 'Edge' },
+        Obsidian: { icon: 0xf0ebf, name: 'Obsidian' },
+        explorer: { icon: 0xf0256, name: 'Explorador' },
+        WindowsTerminal: { icon: 0xf489, name: 'Terminal' },
+      };
+      const SCRATCH = 'S'; // workspace "scratchpad" (Alt+º)
+
+      function renderWorkspaces(glazewm) {
+        setHTML($('workspaces'), glazewm.currentWorkspaces
+          // O scratchpad só aparece quando está aberto.
+          .filter(ws => ws.name !== SCRATCH || ws.isDisplayed)
+          .map(ws => {
+            const cls = [
+              'workspace',
+              ws.hasFocus ? 'focused' : '',
+              ws.children.length === 0 ? 'empty' : '',
+              ws.name === SCRATCH ? 'scratch' : '',
+            ].join(' ');
+            return `<button class="${cls}" data-ws="${esc(ws.name)}">${esc(ws.displayName ?? ws.name)}</button>`;
+          })
+          .join(''));
+
+        // Janelas minimizadas do workspace visível: uma etiqueta clicável cada.
+        const minimized = [];
+        const walk = c => {
+          if (c.type === 'window' && c.state?.type === 'minimized') minimized.push(c);
+          (c.children ?? []).forEach(walk);
+        };
+        if (glazewm.displayedWorkspace) walk(glazewm.displayedWorkspace);
+        setHTML($('minimized'), minimized
+          .map(w => {
+            const app = APPS[w.processName] ?? { icon: ICON.app, name: w.processName };
+            return `<button class="min-chip" data-restore="${esc(w.id)}" title="${esc(w.title)}\nClique para restaurar">` +
+              `${ico(app.icon)}${esc(app.name)}</button>`;
+          })
+          .join(''));
+
+        const modes = glazewm.bindingModes.map(
+          m => `<button class="pill" data-mode="${esc(m.name)}">${esc(m.displayName ?? m.name)}</button>`,
+        );
+        if (glazewm.isPaused) {
+          modes.unshift('<button class="pill paused" data-pause="1">PAUSADO</button>');
+        }
+        setHTML($('modes'), modes.join(''));
+      }
+
+      function networkIcon(net) {
+        const type = net?.defaultInterface?.type;
+        if (type === 'ethernet') return ICON.ethernet;
+        if (type === 'wifi') return ICON.wifi;
+        if (type === 'proprietary_virtual') return ICON.vpn;
+        return ICON.wifiOff;
+      }
+
+      // --- Relógio: curto ou longo (botão direito), em pt-PT ---
+      let longClock = false;
+      // Peças separadas: o formato curto de pt-PT junta dia/mês em números
+      // ("20/10"); assim fica "ter. 20 out.".
+      const fmtWeekday = new Intl.DateTimeFormat('pt-PT', { weekday: 'short' });
+      const fmtMonth = new Intl.DateTimeFormat('pt-PT', { month: 'short' });
+      const fmtTime = new Intl.DateTimeFormat('pt-PT', { hour: '2-digit', minute: '2-digit' });
+      const fmtLong = new Intl.DateTimeFormat('pt-PT', { weekday: 'long', day: 'numeric', month: 'long' });
+
+      function isoWeek(d) {
+        const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        const day = t.getUTCDay() || 7;
+        t.setUTCDate(t.getUTCDate() + 4 - day);
+        const yearStart = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+        return Math.ceil(((t - yearStart) / 86400000 + 1) / 7);
+      }
+
+      function clockText(now) {
+        return longClock
+          ? `${fmtLong.format(now)} · semana ${isoWeek(now)} · ${fmtTime.format(now)}`
+          : `${fmtWeekday.format(now)} ${now.getDate()} ${fmtMonth.format(now)}  ${fmtTime.format(now)}`;
+      }
+
+      // --- Volume: a roda acumula os passos (3 toques rápidos = +15) ---
+      let pendingVolume = null;
+      let pendingTimer = null;
+
+      function render() {
+        const out = providers.outputMap;
+        if (out.glazewm) renderWorkspaces(out.glazewm);
+        $('clock').textContent = clockText(new Date());
+        if (out.cpu) {
+          const v = Math.round(out.cpu.usage);
+          setHTML($('cpu'), `${ico(ICON.cpu)}<span class="${v > 85 ? 'high' : ''}">${v}%</span>`);
+        }
+        if (out.memory) {
+          setHTML($('memory'), `${ico(ICON.memory)}${Math.round(out.memory.usage)}%`);
+        }
+        if (out.network) {
+          const ssid = out.network.defaultGateway?.ssid;
+          setHTML($('network'), `${ico(networkIcon(out.network))}${esc(ssid ?? '')}`);
+        }
+        const dev = out.audio?.defaultPlaybackDevice;
+        if (dev) {
+          const vol = Math.round(pendingVolume ?? dev.volume);
+          const icon = dev.isMuted || vol === 0 ? ICON.volOff
+            : vol < 34 ? ICON.volLow : vol < 67 ? ICON.volMed : ICON.volHigh;
+          setHTML($('audio'), `${ico(icon)}<span class="${dev.isMuted ? 'muted' : ''}">${vol}%</span>`);
+          $('audio').title = `${dev.name}\nClique: definições rápidas · Roda: volume · Botão direito: silenciar`;
+        }
+      }
+
+      // --- Cliques ---
+      paintIcon($('menu'), ICON.menu);
+      $('menu').addEventListener('click', () => openWin('raycast://'));
+      $('menu').addEventListener('contextmenu', e => {
+        e.preventDefault();
+        glazeRun('shell-exec %LOCALAPPDATA%/Microsoft/WindowsApps/wt.exe');
+      });
+
+      $('workspaces').addEventListener('wheel', e => {
+        glazeRun(e.deltaY > 0 ? 'focus --next-active-workspace' : 'focus --prev-active-workspace');
+      }, { passive: true });
+
+      $('clock').addEventListener('click', () => openWin('ms-actioncenter:'));
+      $('clock').addEventListener('contextmenu', e => {
+        e.preventDefault();
+        longClock = !longClock;
+        render();
+      });
+
+      $('network').addEventListener('click', () => openWin('ms-availablenetworks:'));
+      // Definições Rápidas (= Win+A): não abrem por URI neste Windows, por isso
+      // o bar_helper.py carrega Win+A.
+      $('audio').addEventListener('click', () => helper('quick').catch(console.error));
+      $('audio').addEventListener('contextmenu', e => {
+        e.preventDefault();
+        const audio = providers.outputMap.audio;
+        const dev = audio?.defaultPlaybackDevice;
+        if (dev) audio.setMute(!dev.isMuted);
+      });
+      $('audio').addEventListener('wheel', e => {
+        const audio = providers.outputMap.audio;
+        const dev = audio?.defaultPlaybackDevice;
+        if (!dev) return;
+        const base = pendingVolume ?? Math.round(dev.volume);
+        pendingVolume = Math.min(100, Math.max(0, base + (e.deltaY < 0 ? 5 : -5)));
+        audio.setVolume(pendingVolume);
+        render();
+        clearTimeout(pendingTimer); // depois de 1 s parado, volta a confiar no valor real
+        pendingTimer = setTimeout(() => { pendingVolume = null; render(); }, 1000);
+      }, { passive: true });
+
+      // --- Chávena: não suspender. Como no Omarchy 4, só aparece quando está
+      // ligada; desligada, aparece esbatida ao passar o rato pela barra. ---
+      function renderAwake(state) {
+        const on = state.trim() === 'on';
+        const el = $('awake');
+        paintIcon(el, on ? ICON.coffee : ICON.coffeeOutline);
+        el.classList.toggle('on', on);
+        el.classList.toggle('off', !on);
+        el.title = on
+          ? 'PC mantido acordado — clique para voltar a permitir a suspensão (Alt+Esc, I)'
+          : 'Suspensão permitida — clique para manter o PC acordado (Alt+Esc, I)';
+      }
+      const refreshAwake = () => helper('awake', 'status').then(r => renderAwake(r.stdout)).catch(console.error);
+      $('awake').addEventListener('click', () =>
+        helper('awake', 'toggle').then(r => renderAwake(r.stdout)).catch(console.error));
+      renderAwake('off');
+      refreshAwake();
+      setInterval(refreshAwake, AWAKE_EVERY_MS);
+
+      providers.onOutput(render);
+      render();
+
+      // Cliques nos botões gerados: workspaces, modos, pausa, minimizadas.
+      document.addEventListener('click', e => {
+        const glazewm = providers.outputMap.glazewm;
+        const el = e.target.closest('button');
+        if (!glazewm || !el) return;
+        if (el.dataset.ws) glazewm.runCommand(`focus --workspace ${el.dataset.ws}`);
+        if (el.dataset.mode) glazewm.runCommand(`wm-disable-binding-mode --name ${el.dataset.mode}`);
+        if (el.dataset.pause) glazewm.runCommand('wm-toggle-pause');
+        if (el.dataset.restore) {
+          // Sai de minimizada (volta ao estado anterior) e recebe o foco.
+          glazewm
+            .runCommand('toggle-minimized', el.dataset.restore)
+            .then(() => glazewm.runCommand(`focus --container-id ${el.dataset.restore}`))
+            .catch(console.error);
+        }
+      });
+
+      // --- Claude: % do plano (5h e semanal) e tempo até a janela de 5h repor ---
+      const USAGE_URL = 'https://claude.ai/settings/usage';
+      const STALE_AFTER_S = 15 * 60; // a partir daqui os valores ficam esbatidos
+
+      function fmtUntil(epoch, now) {
+        const mins = Math.max(0, Math.round((epoch - now) / 60));
+        const h = Math.floor(mins / 60);
+        if (h >= 24) return `${Math.floor(h / 24)}d${h % 24}h`;
+        return h ? `${h}h${String(mins % 60).padStart(2, '0')}` : `${mins}m`;
+      }
+
+      const level = pct => (pct >= 80 ? 'high' : pct >= 50 ? 'warn' : 'ok');
+
+      function renderClaude(u) {
+        const five = u.five_hour;
+        const week = u.seven_day;
+        const parts = [];
+        const tips = [];
+
+        parts.push(five
+          ? `<span class="${level(five.pct)}">5h ${Math.round(five.pct)}%</span>`
+          : '<span class="muted">5h —</span>');
+        parts.push(week
+          ? `<span class="${level(week.pct)}">sem ${Math.round(week.pct)}%</span>`
+          : '<span class="muted">sem —</span>');
+        if (five) parts.push(`<span class="muted">↺ ${fmtUntil(five.resets_at, u.now)}</span>`);
+
+        if (five) tips.push(`Sessão (5h): ${five.pct}% — repõe em ${fmtUntil(five.resets_at, u.now)}`);
+        if (week) tips.push(`Semanal: ${week.pct}% — repõe em ${fmtUntil(week.resets_at, u.now)}`);
+
+        const age = u.captured_at ? u.now - u.captured_at : null;
+        const stale = age === null || age > STALE_AFTER_S;
+        if (age === null) {
+          tips.push('Ainda sem valores: aparecem depois de usar o Claude Code no terminal.');
+        } else {
+          tips.push(`Valores de há ${fmtUntil(u.now + age, u.now)} (última sessão no terminal).`);
+        }
+        tips.push('Clique: abre a página de uso com os números exatos.');
+
+        setHTML($('claude-text'), parts.join(' <span class="sep">·</span> '));
+        $('claude-text').classList.toggle('stale', stale);
+        $('claude').title = tips.join('\n');
+      }
+
+      async function refreshClaude() {
+        try {
+          const res = await zebar.shellExec(PY, ['-I', `${PACK}/claude_usage.py`]);
+          renderClaude(JSON.parse(res.stdout));
+        } catch (err) {
+          setHTML($('claude-text'), '<span class="high">erro</span>');
+          $('claude').title = String(err);
+        }
+      }
+
+      $('claude').addEventListener('click', () => openWin(USAGE_URL));
+      refreshClaude();
+      setInterval(refreshClaude, USAGE_EVERY_MS);
+    </script>
+  </body>
+</html>

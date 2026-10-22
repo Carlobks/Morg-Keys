@@ -1,0 +1,236 @@
+/* Catppuccin Mocha — https://catppuccin.com/palette
+   Sem nada da internet: fonte JetBrainsMono NF instalada no Windows e ícones
+   em icons.css. */
+
+:root {
+  --rosewater: #f5e0dc;
+  --mauve: #cba6f7;
+  --red: #f38ba8;
+  --peach: #fab387;
+  --yellow: #f9e2af;
+  --green: #a6e3a1;
+  --teal: #94e2d5;
+  --blue: #89b4fa;
+  --lavender: #b4befe;
+  --text: #cdd6f4;
+  --subtext0: #a6adc8;
+  --overlay0: #6c7086;
+  --surface0: #313244;
+  --surface1: #45475a;
+  --base: #1e1e2e;
+  --crust: #11111b;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: 'JetBrainsMono NF', 'JetBrainsMono Nerd Font', 'Cascadia Mono', ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--text);
+  overflow: hidden;
+  user-select: none;
+  cursor: default;
+}
+
+#root {
+  background: rgb(30 30 46 / 96%); /* base */
+  border-bottom: 1px solid var(--surface0);
+  box-sizing: border-box;
+}
+
+.app {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  height: 100%;
+  padding: 0 10px;
+}
+
+.left,
+.center,
+.right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.right {
+  justify-self: end;
+  gap: 14px;
+}
+
+/* Mesmo estilo do guia (Alt+K) e do painel (Alt+Esc): ícones em caixinhas
+   com a cor do módulo e workspaces como teclas escuras com contorno. */
+
+/* Caixinha de ícone. O ícone é desenhado num canvas pelo bar.html (centrado
+   pelo desenho real); --c = cor do módulo. */
+.ico {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  color: var(--c, var(--lavender));
+  background: color-mix(in srgb, var(--c, var(--lavender)) 16%, transparent);
+}
+
+.ico canvas { display: block; }
+.ico.txt { font-size: 13px; line-height: 1; }
+
+/* Botão de menu (como o logótipo do Omarchy): Raycast / Terminal. */
+.menu {
+  margin-right: 4px;
+  padding: 0;
+}
+
+/* Indicadores do centro, como no Omarchy 4: a chávena só se vê quando está
+   ligada; desligada, aparece esbatida ao passar o rato pela barra. */
+.indicator {
+  padding: 0;
+  transition: opacity 150ms;
+}
+
+.indicator.off {
+  --c: var(--overlay0);
+  opacity: 0;
+}
+
+#root:hover .indicator.off {
+  opacity: 1;
+}
+
+button {
+  font: inherit;
+  border: 0;
+  cursor: pointer;
+}
+
+/* Workspaces: teclas escuras; a ativa com contorno e letra mauve. */
+.workspace {
+  min-width: 22px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: var(--crust);
+  border: 1px solid var(--surface0);
+  color: var(--subtext0);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.workspace.empty {
+  background: transparent;
+  border-color: transparent;
+  color: var(--overlay0);
+}
+
+.workspace:hover {
+  border-color: var(--surface1);
+  color: var(--text);
+}
+
+.workspace.focused {
+  --k: var(--mauve);
+  color: var(--k);
+  background: var(--crust);
+  border: 1.5px solid color-mix(in srgb, var(--k) 60%, transparent);
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--k) 35%, transparent);
+}
+
+/* Scratchpad (Alt+º): só aparece quando aberto, com outra cor. */
+.workspace.scratch.focused {
+  --k: var(--peach);
+}
+
+/* Janelas minimizadas: etiquetas com o ícone da app. */
+.min-chip {
+  --c: var(--lavender);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 8px 0 1px;
+  border-radius: 7px;
+  background: transparent;
+  border: 1px dashed var(--surface1);
+  color: var(--subtext0);
+  font-size: 11px;
+}
+
+.min-chip .ico { width: 18px; height: 18px; font-size: 11px; border-radius: 5px; }
+
+.min-chip:hover {
+  background: var(--surface0);
+  border-style: solid;
+  color: var(--text);
+}
+
+#minimized:not(:empty) {
+  margin-left: 6px;
+  padding-left: 8px;
+  border-left: 1px solid var(--surface0);
+}
+
+.pill {
+  --k: var(--peach);
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: var(--crust);
+  border: 1.5px solid color-mix(in srgb, var(--k) 60%, transparent);
+  color: var(--k);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.pill.paused {
+  --k: var(--red);
+}
+
+.center {
+  color: var(--lavender);
+  font-weight: 600;
+  gap: 6px;
+}
+
+/* Módulos da direita: caixinha do ícone + valor. */
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Tudo o que tem ação mostra a mão e um fundo ao passar o rato. */
+.clickable {
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 7px;
+}
+
+.stat.clickable { padding: 2px 7px 2px 2px; }
+.ico.clickable { padding: 0; }
+
+.clickable:hover {
+  background: var(--surface0);
+}
+
+.claude .sep {
+  color: var(--overlay0);
+}
+
+/* Valores com mais de 15 min: esbatidos (podem já não ser os atuais). */
+#claude-text.stale {
+  opacity: 0.55;
+}
+
+.ok { color: var(--green); }
+.warn { color: var(--yellow); }
+.high { color: var(--red); }
+.muted { color: var(--subtext0); }

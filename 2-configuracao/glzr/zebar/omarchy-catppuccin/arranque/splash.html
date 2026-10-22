@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Morg Keys</title>
+    <style>
+      /* Ecrã de arranque: preto com a animação escolhida em arranque.txt
+         ("animacao = cafe"; Alt+Esc, E troca, se houver mais). Nasce transparente (sem
+         clarão branco do WebView2) por cima da cortina preta nativa do
+         orquestrador, que já mostra o 1.º quadro da animação (cafe.bmp,
+         mesmo tamanho e sítio); quando está desenhado avisa, e a
+         cortina sai — sem corte. Sai quando tudo assentou (progress.json). */
+      html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; cursor: none; }
+      body { opacity: 0; transition: opacity 150ms linear; font-family: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif; }
+      body.shown { opacity: 1; }
+      body.out { opacity: 0; transition: opacity 600ms cubic-bezier(0.33, 0, 0.2, 1); }
+
+      #bg { position: fixed; inset: 0; background: #000; }
+
+      #content {
+        position: fixed; inset: 0;
+        transition: opacity 350ms ease-out, transform 350ms ease-out;
+      }
+      body.leaving #content { opacity: 0; transform: scale(0.96); }
+
+      /* Cada animação é um bloco .anim com data-anim; só a escolhida aparece. */
+      .anim { display: none; position: fixed; overflow: visible; }
+      body.a-cafe #cafe { display: block; }
+
+      /* --- Café: igual ao cafe.bmp (280×280, centro a 38 % da altura) --- */
+      #cafe { width: 280px; height: 280px; left: calc(50% - 140px); top: calc(38% - 140px); }
+      #cafe .st { opacity: 0; stroke-dasharray: 100; stroke-dashoffset: 100; }
+      body.run #cafe .st { animation: steam 2.7s ease-in-out infinite; }
+      body.run #cafe .st:nth-child(2) { animation-delay: 0.9s; }
+      body.run #cafe .st:nth-child(3) { animation-delay: 1.8s; }
+      @keyframes steam {
+        0%   { stroke-dashoffset: 100;  opacity: 0;   transform: translateY(10px); }
+        25%  { opacity: 0.9; }
+        60%  { stroke-dashoffset: 0;    opacity: 0.8; }
+        100% { stroke-dashoffset: -100; opacity: 0;   transform: translateY(-18px); }
+      }
+      #cshine { opacity: 0; }
+
+      /* Lista de etapas no estilo do guia (Alt+K) e do painel (Alt+Esc):
+         cartão escuro, ícone em caixinha com a cor da animação e, à direita,
+         o estado numa "tecla" escura (a rodar enquanto carrega, ✓ no fim). */
+      body { --c: #fab387; }                 /* Café: peach do Catppuccin (cor por omissão) */
+      #list { position: fixed; top: calc(38% + 150px); left: 50%; transform: translateX(-50%);
+              width: 380px; font-size: 14px; color: #a6adc8;
+              background: #181825; border-radius: 14px; padding: 8px;
+              transition: opacity 300ms; }
+      #list:empty { opacity: 0; }
+      body.a-cafe #list { top: calc(38% + 165px); }
+      .it { display: flex; align-items: center; gap: 12px; padding: 4px 6px; border-radius: 8px;
+            opacity: 0; transform: translateY(5px); transition: opacity 300ms, transform 300ms, color 300ms; }
+      .it.on { opacity: 1; transform: none; }
+      .it.done { color: #cdd6f4; }
+      .it.fail { color: #6c7086; }
+      .ico { width: 26px; height: 26px; flex: none; border-radius: 8px; display: grid; place-items: center;
+             font-family: 'JetBrainsMono NF', monospace; font-size: 14px; color: var(--c);
+             background: color-mix(in srgb, var(--c) 16%, transparent); }
+      .ico canvas { display: block; }
+      .lb { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .st { width: 26px; height: 24px; flex: none; position: relative; border-radius: 7px; background: #11111b;
+            border: 1.5px solid color-mix(in srgb, var(--c) 55%, transparent);
+            box-shadow: 0 2px 0 color-mix(in srgb, var(--c) 30%, transparent); }
+      .st::after { content: ''; position: absolute; box-sizing: border-box; }
+      .it:not(.done) .st::after { left: 6px; top: 5px; width: 11px; height: 11px; border-radius: 50%;
+                                  border: 2px solid color-mix(in srgb, var(--c) 25%, transparent);
+                                  border-top-color: var(--c); animation: spin 0.8s linear infinite; }
+      .it.done .st::after { left: 8px; top: 3px; width: 6px; height: 11px;
+                            border: solid var(--c); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+      .it.fail .st { --c: #6c7086; }
+      .it.fail .st::after { content: '!'; left: 0; right: 0; top: 2px; text-align: center; transform: none;
+                            border: 0; font: 700 13px 'JetBrainsMono NF', monospace; color: #6c7086; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+  </head>
+  <body>
+    <div id="bg"></div>
+    <div id="content">
+      <!-- Animação "cafe": chávena (cores Catppuccin) com vapor a subir.
+           A geometria é a MESMA do scripts\gerar-cafe-bmp.ps1 (que desenha o
+           cafe.bmp sem vapor): se mudar uma, mude a outra. -->
+      <svg id="cafe" class="anim" data-anim="cafe" viewBox="0 0 400 400" role="img" aria-label="Café">
+        <defs>
+          <clipPath id="cupclip">
+            <path d="M92 150 L308 150 L298 240 C292 295 252 318 200 318 C148 318 108 295 102 240 Z"/>
+          </clipPath>
+        </defs>
+        <g fill="none" stroke="#a6adc8" stroke-width="10" stroke-linecap="round">
+          <path class="st" pathLength="100" d="M160 118 C140 94 180 78 160 48"/>
+          <path class="st" pathLength="100" d="M200 112 C180 88 220 72 200 38"/>
+          <path class="st" pathLength="100" d="M240 118 C220 94 260 78 240 48"/>
+        </g>
+        <ellipse cx="200" cy="322" rx="150" ry="20" fill="#45475a"/>
+        <ellipse cx="305" cy="212" rx="42" ry="38" fill="none" stroke="#f5e0dc" stroke-width="16"/>
+        <path d="M92 150 L308 150 L298 240 C292 295 252 318 200 318 C148 318 108 295 102 240 Z" fill="#f5e0dc"/>
+        <ellipse cx="200" cy="150" rx="108" ry="16" fill="#6f4e37" stroke="#f5e0dc" stroke-width="6"/>
+        <g clip-path="url(#cupclip)">
+          <polygon id="cshine" fill="#ffffff" fill-opacity="0.45" points="60,140 90,140 40,330 10,330"/>
+        </g>
+      </svg>
+
+      <div id="list"></div>
+    </div>
+
+    <script type="module">
+      // O progresso vem de progress.json, escrito pelo orquestrador
+      // (bar_helper.py boot, ou "animacao preview"):
+      // {boot_id, started, animacao, preview, steps:[{id,label,state}], fim}.
+      const MAX_MS = 70000;       // rede de segurança (o orquestrador sai aos 60 s no máximo)
+      const MIN_ITEM_MS = 250;    // cada linha fica visível pelo menos isto
+      const CYCLE_MS = 4500;      // período dos ciclos das animações
+      const $ = id => document.getElementById(id);
+      const q = s => [...document.querySelectorAll(s)];
+      let widget = null;
+      let leaving = false;
+
+      async function readProgress() {
+        try {
+          const res = await fetch(`./progress.json?t=${Date.now()}`, { cache: 'no-store' });
+          return res.ok ? await res.json() : null;
+        } catch { return null; }
+      }
+
+      async function closeSelf() {
+        try { await widget?.close(); } catch { window.close(); }
+      }
+
+      function sweep(el, dx, ms) {  // brilho que atravessa o desenho
+        el.style.transition = 'none'; el.style.transform = 'none'; el.style.opacity = 0;
+        void el.getBoundingClientRect();
+        el.style.transition = `transform ${ms}ms ease-in-out, opacity .2s`;
+        el.style.opacity = 1; el.style.transform = `translateX(${dx}px)`;
+        setTimeout(() => (el.style.opacity = 0), ms - 100);
+      }
+
+      // --- Animação "cafe" ---------------------------------------------------------
+      // Começa igual ao cafe.bmp (chávena sem vapor); o vapor sobe em ciclo (CSS)
+      // e um brilho passa pela chávena a cada CYCLE_MS.
+
+      // Registo das animações: nome (= arranque.txt / ANIMACOES no bar_helper.py)
+      // -> como mostrar o 1.º quadro e como correr o ciclo.
+      const ANIMS = {
+        cafe: {
+          first() {},
+          start() {
+            document.body.classList.add('run');
+            setTimeout(() => sweep($('cshine'), 360, 1200), 600);
+            return setInterval(() => !leaving && sweep($('cshine'), 360, 1200), CYCLE_MS);
+          },
+        },
+      };
+
+      // --- Lista de etapas (progresso real) ---
+      // Ícone de cada etapa (Nerd Font nf-md / nf-oct, fonte JetBrainsMono NF),
+      // pelo id que o bar_helper.py lhe dá: barra, glazewm, app:<processo>, bat:<n>, fim.
+      const APP_ICONS = {
+        claude: 0xf06c4, chrome: 0xf02af, Arc: 0xf059f, msedge: 0xf01e9,
+        Obsidian: 0xf0ebf, explorer: 0xf0256, WindowsTerminal: 0xf489,
+      };
+      function iconFor(id) {
+        if (id === 'barra') return 0xf035c;               // menu
+        if (id === 'glazewm') return 0xf0574;             // mosaico
+        if (id === 'fim') return 0xf012c;                 // visto
+        if (id === 'anim') return 0xf03d8;                // paleta (pré-visualização)
+        if (id === 'apps') return 0xf003b;
+        if (id.startsWith('bat:')) return 0xf489;         // terminal
+        if (id.startsWith('app:')) return APP_ICONS[id.slice(4)] ?? 0xf0614;
+        return 0xf0614;                                   // janela genérica
+      }
+
+      // Ícones centrados a sério (como no guia, no painel e na barra): na fonte
+      // "JetBrainsMono NF" cada ícone é mais largo do que a célula e fica
+      // desviado, por isso mede-se o desenho real e pinta-se num canvas.
+      const fontReady = document.fonts.load('16px "JetBrainsMono NF"').catch(() => {});
+      async function paintIcon(el, code) {
+        await fontReady;
+        const size = el.offsetWidth || 26;
+        const css = getComputedStyle(el);
+        const dpr = window.devicePixelRatio || 1;
+        const cv = document.createElement('canvas');
+        cv.width = cv.height = Math.round(size * dpr);
+        cv.style.width = cv.style.height = `${size}px`;
+        const ctx = cv.getContext('2d');
+        ctx.scale(dpr, dpr);
+        ctx.font = `${css.fontSize} "JetBrainsMono NF"`;
+        ctx.fillStyle = css.color;
+        const ch = String.fromCodePoint(code);
+        const m = ctx.measureText(ch);
+        ctx.fillText(ch, size / 2 - (m.actualBoundingBoxRight - m.actualBoundingBoxLeft) / 2,
+                     size / 2 - (m.actualBoundingBoxDescent - m.actualBoundingBoxAscent) / 2);
+        el.replaceChildren(cv);
+      }
+
+      const shownAt = new Map(); // id -> instante em que apareceu
+      function renderSteps(steps) {
+        const list = $('list');
+        for (const s of steps) {
+          let el = list.querySelector(`[data-id="${CSS.escape(s.id)}"]`);
+          if (!el) {
+            el = document.createElement('div');
+            el.className = 'it';
+            el.dataset.id = s.id;
+            el.innerHTML = '<span class="ico"></span><span class="lb"></span><span class="st"></span>';
+            el.querySelector('.lb').textContent = s.label;
+            list.appendChild(el);
+            paintIcon(el.querySelector('.ico'), iconFor(s.id));
+            shownAt.set(s.id, performance.now());
+            requestAnimationFrame(() => el.classList.add('on'));
+          }
+          const old = performance.now() - shownAt.get(s.id) >= MIN_ITEM_MS;
+          if (s.state === 'feito' && old) el.classList.add('done');
+          if (s.state === 'falhou' && old) el.classList.add('done', 'fail');
+        }
+      }
+      const allShownDone = () => q('.it').every(el => el.classList.contains('done'));
+
+      // --- Saída: desenho desvanece primeiro, o fundo a seguir; depois fecha ---
+      let loop = null;
+      function leave() {
+        if (leaving) return;
+        leaving = true;
+        clearInterval(loop);
+        document.body.classList.add('leaving');
+        setTimeout(() => document.body.classList.add('out'), 300);
+        setTimeout(closeSelf, 950);
+      }
+
+      let zebar = null;
+      // Avisa o orquestrador (bar_helper.py boot) que o ecrã já tapa tudo: só
+      // então a cortina nativa sai.
+      const signalReady = () => zebar?.shellExec('C:\\Windows\\pyw.exe',
+        ['-I', '{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py', 'splash-ready'])
+        .catch(console.error);
+
+      async function main() {
+        if (location.protocol !== 'file:') {
+          zebar = await import('../vendor/zebar-3.3.1.mjs');
+          widget = zebar.currentWidget();
+        }
+        // Guarda: só mostra se houver um arranque (ou pré-visualização) em curso
+        // (evita reaparecer, p.ex. se o Zebar relançar widgets ao mudar de monitor).
+        const first = await readProgress();
+        if (!first || first.fim || Date.now() / 1000 - first.started > 60) {
+          await closeSelf();
+          return;
+        }
+        const name = ANIMS[first.animacao] ? first.animacao : 'cafe';
+        const anim = ANIMS[name];
+        document.body.classList.add(`a-${name}`);
+        anim.first();                            // = imagem da cortina, mesmo sítio
+        document.body.classList.add('shown');    // preto + desenho por cima da cortina
+        setTimeout(signalReady, 200);            // já desenhado: a cortina pode sair
+        setTimeout(() => { loop = anim.start(); }, 250);
+
+        const t0 = performance.now();
+        setTimeout(leave, MAX_MS);
+        let fimSince = null;
+        const tick = async () => {
+          if (leaving) return;
+          const p = await readProgress();
+          if (p && p.boot_id === first.boot_id) {
+            renderSteps(p.steps || []);
+            if (p.fim && allShownDone()) {
+              fimSince ??= performance.now();
+              if (performance.now() - fimSince >= 300 && performance.now() - t0 > 1800) return leave();
+            }
+          }
+          setTimeout(tick, 250);
+        };
+        tick();
+      }
+      main();
+    </script>
+  </body>
+</html>

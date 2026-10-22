@@ -1,0 +1,2 @@
+# Guardar os ficheiros exatamente como estão (CRLF nos .cmd/.ps1, LF no resto).
+* -text

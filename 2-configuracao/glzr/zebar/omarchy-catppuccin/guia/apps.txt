@@ -1,0 +1,29 @@
+# ATALHOS DAS APPS
+#
+# Uma linha por atalho:   TECLAS = APP
+# Depois de gravar, carregue  Alt+Shift+R  para aplicar.
+# (Para abrir este ficheiro: Alt+Esc e depois C.)
+#
+# TECLAS  Alt+Shift+letra (recomendado) ou Alt+Shift+Enter.
+#         Não use Ctrl+Alt (no teclado é o AltGr: @ # € ...).
+# APP     - o nome como aparece no menu Iniciar   ex.: Google Chrome
+#         - web: endereço  → abre o site numa janela própria do Chrome
+#         - o caminho completo de um programa     ex.: C:\Programas\app.exe
+#         - terminal    → Windows Terminal
+#         - claude-code → Claude Code num terminal novo
+#         - explorador  → Explorador de ficheiros
+#
+# Linhas começadas por # são ignoradas. Para tirar um atalho, apague a linha
+# ou ponha # no início.
+
+Alt+Enter        = terminal
+Alt+Shift+Enter  = claude-code
+Alt+Shift+C      = Claude
+Alt+Shift+B      = Google Chrome
+Alt+Shift+A      = Arc
+Alt+Shift+I      = Microsoft Edge
+Alt+Shift+O      = Obsidian
+Alt+Shift+F      = explorador
+Alt+Shift+N      = Notepad++
+Alt+Shift+Y      = web: https://www.youtube.com
+Alt+Shift+G      = web: https://web.whatsapp.com

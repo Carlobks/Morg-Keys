@@ -1,0 +1,365 @@
+# GlazeWM 3.10 — config estilo Omarchy, com Alt no lugar de Super.
+# Recarregar após editar: Alt+Shift+R. Pausar tudo: Alt+Shift+P.
+
+general:
+  # Zebar não está no PATH. Sem aspas: o parser do GlazeWM 3.10 falha com
+  # caminhos entre aspas sem argumentos, mas resolve espaços sozinho.
+  # Python sempre pelo lançador oficial (C:/Windows/pyw.exe): o caminho não
+  # muda quando o Python é atualizado.
+  # 1.º: "startup" abre barra/guia/painel mesmo que o Zebar já esteja a correr
+  #      (no arranque do PC o orquestrador lança-o primeiro só com o ecrã de arranque).
+  #      Widgets já abertos não se duplicam.
+  # 2.º: repõe o arranjo dos workspaces (~/.glzr/layout.json, Alt+Esc e depois G).
+  #      No arranque do PC quem o faz é o orquestrador (bar_helper.py boot, com o
+  #      ecrã de arranque) e este cede-lhe a vez; serve para reinícios manuais do GlazeWM.
+  # 3.º: rede de segurança — se o guia (Alt+K) não se esconder sozinho ao
+  #      carregar, esconde-o.
+  startup_commands:
+    - 'shell-exec %ProgramFiles%/glzr.io/Zebar/zebar.exe startup'
+    - 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layout-restore'
+    - 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" guide-ensure-hidden'
+  # Ao sair: fecha o Zebar e lança "on-exit". Os processos lançados aqui
+  # morrem quando o GlazeWM termina (estão no mesmo job do Windows), por isso
+  # o on-exit só arranca um processo independente que, depois de o GlazeWM
+  # sair, desliga o "não suspender" (sem barra ninguém o vê) e volta a mostrar
+  # as janelas que fiquem escondidas (defeito da 3.10.1; ver uncloak.ps1).
+  shutdown_commands:
+    - 'shell-exec taskkill /IM zebar.exe /F'
+    - 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" on-exit'
+  config_reload_commands: []
+  focus_follows_cursor: false
+  # Carregar de novo no workspace atual volta ao anterior. É o que faz o
+  # scratchpad (Alt+º) abrir e fechar. Efeito secundário conhecido (issue
+  # glzr-io/glazewm#1397): Alt+Shift+N numa janela que JÁ está no workspace N
+  # manda-a para o anterior.
+  toggle_workspace_on_refocus: true
+  cursor_jump:
+    enabled: true
+    trigger: 'monitor_focus'
+  hide_method: 'cloak'
+  # false = a barra de tarefas só mostra as janelas do workspace visível.
+  show_all_in_taskbar: false
+
+gaps:
+  scale_with_dpi: true
+  inner_gap: '10px'
+  outer_gap:
+    top: '40px'    # barra do Zebar (30px) + 10px
+    right: '10px'
+    bottom: '10px'
+    left: '10px'
+
+window_effects:
+  focused_window:
+    border:
+      enabled: true
+      color: '#cba6f7'   # Catppuccin Mocha: mauve
+    hide_title_bar:
+      enabled: false
+    corner_style:
+      enabled: true
+      style: 'small_rounded'
+    transparency:
+      enabled: false
+      opacity: '95%'
+  other_windows:
+    border:
+      enabled: true
+      color: '#45475a'   # Catppuccin Mocha: surface1
+    hide_title_bar:
+      enabled: false
+    corner_style:
+      enabled: true
+      style: 'small_rounded'
+    transparency:
+      enabled: false
+      opacity: '0%'
+
+window_behavior:
+  initial_state: 'tiling'
+  state_defaults:
+    floating:
+      centered: true
+      shown_on_top: false
+    fullscreen:
+      maximized: false
+      shown_on_top: false
+
+# 1–5 ficam sempre visíveis na barra (como no Omarchy); 6–10 só quando usados.
+# "S" é o scratchpad (Alt+º): só aparece na barra quando está aberto.
+workspaces:
+# keep_alive só é aplicado com bind_to_monitor (0 = o monitor mais à esquerda;
+# com um só ecrã é esse).
+  - name: '1'
+    bind_to_monitor: 0
+    keep_alive: true
+  - name: '2'
+    bind_to_monitor: 0
+    keep_alive: true
+  - name: '3'
+    bind_to_monitor: 0
+    keep_alive: true
+  - name: '4'
+    bind_to_monitor: 0
+    keep_alive: true
+  - name: '5'
+    bind_to_monitor: 0
+    keep_alive: true
+  - name: '6'
+  - name: '7'
+  - name: '8'
+  - name: '9'
+  - name: '10'
+  - name: 'S'
+
+window_rules:
+  - commands: ['ignore']
+    match:
+      - window_process: { equals: 'zebar' }
+      # Picture-in-picture do Chrome/Edge/Arc.
+      - window_title: { regex: '[Pp]icture.in.[Pp]icture' }
+        window_class: { regex: 'Chrome_WidgetWin_1|MozillaDialogClass' }
+      # PowerToys (Command Palette = Win+Alt+Espaço).
+      - window_process: { equals: 'PowerToys' }
+        window_class: { regex: 'HwndWrapper\[PowerToys\.PowerAccent.*?\]' }
+      - window_title: { equals: 'Command Palette' }
+        window_class: { equals: 'WinUIDesktopWin32WindowClass' }
+      - window_process: { equals: 'PowerToys' }
+        window_title: { regex: '.*? - Peek' }
+      # Office: só a janela principal entra no tiling.
+      - window_process: { equals: 'EXCEL' }
+        window_class: { not_regex: 'XLMAIN' }
+      - window_process: { equals: 'WINWORD' }
+        window_class: { not_regex: 'OpusApp' }
+      - window_process: { equals: 'POWERPNT' }
+        window_class: { not_regex: 'PPTFrameClass' }
+      # Cortina preta do arranque (bar_helper.py boot).
+      - window_title: { equals: 'Morg Keys arranque' }
+      # Raycast e as suas janelas auxiliares invisíveis.
+      - window_process: { regex: '^Raycast' }
+      - window_title: { equals: 'RaycastNodeGracefulShutdownWindow' }
+      # Outras janelas de sistema/utilitários que não devem entrar no mosaico.
+      - window_process: { equals: 'PowerToys.QuickAccess' }
+      - window_process: { equals: 'TextInputHost' }
+
+  - commands: ['set-floating --centered']
+    match:
+      # Diálogos clássicos do Windows (Abrir/Guardar, propriedades, avisos).
+      - window_class: { equals: '#32770' }
+      # Janela de progresso de cópia do Explorador de Ficheiros.
+      - window_class: { equals: 'OperationStatusWindow' }
+      # Painéis pequenos que ficam melhor a flutuar.
+      - window_process: { equals: 'HPAudioCenter' }
+      - window_title: { equals: 'HP Audio Center' }
+      - window_process: { equals: 'SystemSettings' }
+
+  # Sem regras "app X vai sempre para o workspace N": apanhavam também janelas
+  # novas da mesma app (ex.: login do Gmail no Chrome) e mandavam-nas para
+  # longe. Janelas novas abrem no workspace atual; o arranjo do arranque vem
+  # do layout gravado com Alt+Esc e depois G (ver startup_commands).
+
+binding_modes:
+  # Alt+R entra no modo resize; H/J/K/L ou setas; Enter/Esc para sair.
+  - name: 'resize'
+    keybindings:
+      - commands: ['resize --width -2%']
+        bindings: ['h', 'left']
+      - commands: ['resize --width +2%']
+        bindings: ['l', 'right']
+      - commands: ['resize --height +2%']
+        bindings: ['k', 'up']
+      - commands: ['resize --height -2%']
+        bindings: ['j', 'down']
+      - commands: ['wm-disable-binding-mode --name resize']
+        bindings: ['escape', 'enter']
+
+  # Alt+Esc entra na camada "sistema" (os Super+Ctrl+letra do Omarchy 4, que
+  # aqui não cabem: Ctrl+Alt é o AltGr do teclado) e mostra um painel com as
+  # letras. Uma letra faz a ação, sai e esconde o painel. Alt+Esc outra vez,
+  # Esc ou Enter cancelam.
+  - name: 'sistema'
+    keybindings:
+      - commands: ['shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" awake toggle', 'wm-disable-binding-mode --name sistema', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layer-hide']
+        bindings: ['i']
+      - commands: ['shell-exec explorer ms-settings:nightlight', 'wm-disable-binding-mode --name sistema', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layer-hide']
+        bindings: ['n']
+      - commands: ['shell-exec explorer ms-settings:sound', 'wm-disable-binding-mode --name sistema', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layer-hide']
+        bindings: ['a']
+      - commands: ['shell-exec explorer ms-settings:bluetooth', 'wm-disable-binding-mode --name sistema', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layer-hide']
+        bindings: ['b']
+      - commands: ['shell-exec explorer ms-availablenetworks:', 'wm-disable-binding-mode --name sistema', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layer-hide']
+        bindings: ['w']
+      - commands: ['shell-exec explorer ms-settings:display', 'wm-disable-binding-mode --name sistema', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layer-hide']
+        bindings: ['d']
+      - commands: ['shell-exec explorer ms-settings:powersleep', 'wm-disable-binding-mode --name sistema', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layer-hide']
+        bindings: ['p']
+      - commands: ['shell-exec taskmgr', 'wm-disable-binding-mode --name sistema', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layer-hide']
+        bindings: ['t']
+      - commands: ['shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" lock', 'wm-disable-binding-mode --name sistema', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layer-hide']
+        bindings: ['l']
+      - commands: ['shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layout-save', 'wm-disable-binding-mode --name sistema', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layer-hide']
+        bindings: ['g']
+      - commands: ['shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" apps-edit', 'wm-disable-binding-mode --name sistema', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layer-hide']
+        bindings: ['c']
+      # Animação do arranque: tocar E troca (o painel fica aberto e mostra qual);
+      # segurar E mostra-a ao largar (o bar_helper.py sai da camada nessa altura).
+      - commands: ['shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" animacao tap']
+        bindings: ['e']
+      # Reiniciar / desligar pedem confirmação (o botão por omissão é "Não").
+      - commands: ['wm-disable-binding-mode --name sistema', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layer-hide', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" power reboot']
+        bindings: ['r']
+      - commands: ['wm-disable-binding-mode --name sistema', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layer-hide', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" power shutdown']
+        bindings: ['o']
+      # Sair do GlazeWM: aqui, longe do Alt+Shift+E.
+      - commands: ['wm-disable-binding-mode --name sistema', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layer-hide', 'wm-exit']
+        bindings: ['q']
+      - commands: ['wm-disable-binding-mode --name sistema', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layer-hide']
+        bindings: ['escape', 'enter', 'alt+escape']
+
+keybindings:
+  # --- Apps ---
+  # Os atalhos das apps (Alt+Enter, Alt+Shift+letra) vêm de
+  # Documentos\Guia de Atalhos\apps.txt: edite lá (Alt+Esc, C) e carregue
+  # Alt+Shift+R. O bloco abaixo é escrito automaticamente.
+  # >>> apps: gerado a partir de apps.txt (Alt+Shift+R) — não editar aqui >>>
+  # <<< apps <<<
+  # O Raycast fica na tecla Win sozinha (configurado no próprio Raycast).
+
+  # --- Janelas ---
+  - commands: ['close']
+    bindings: ['alt+w', 'alt+q', 'alt+shift+q']
+  - commands: ['toggle-fullscreen']
+    bindings: ['alt+f']
+  # Maximizar sem tapar a barra (Super+Alt+F no Omarchy).
+  - commands: ['toggle-fullscreen --maximized']
+    bindings: ['alt+e']
+  - commands: ['toggle-floating --centered']
+    bindings: ['alt+t']
+  # "Pop": flutuante e sempre por cima (Super+O).
+  - commands: ['toggle-floating --centered --shown-on-top']
+    bindings: ['alt+o']
+  # Alterna o FOCO entre janelas em mosaico, flutuantes e em ecrã inteiro.
+  - commands: ['wm-cycle-focus']
+    bindings: ['alt+c']
+  - commands: ['toggle-minimized']
+    bindings: ['alt+m']
+  # Restaura a minimizada mais recente (as outras aparecem na barra).
+  - commands: ['shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" restore-min']
+    bindings: ['alt+shift+m']
+  - commands: ['toggle-tiling-direction']
+    bindings: ['alt+v']
+  # Esconder/mostrar a barra (Super+Shift+Espaço).
+  - commands: ['shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" bar toggle']
+    bindings: ['alt+shift+space']
+
+  # Redimensionar direto (Super+- / Super+=); Alt+R = modo fino de 2%.
+  - commands: ['resize --width -5%']
+    bindings: ['alt+oem_minus']
+  - commands: ['resize --width +5%']
+    bindings: ['alt+oem_plus']
+  - commands: ['resize --height -5%']
+    bindings: ['alt+shift+oem_minus']
+  - commands: ['resize --height +5%']
+    bindings: ['alt+shift+oem_plus']
+  - commands: ['wm-enable-binding-mode --name resize']
+    bindings: ['alt+r']
+
+  # --- Sistema e utilitários ---
+  - commands: ['wm-enable-binding-mode --name sistema', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layer-show']
+    bindings: ['alt+escape']
+  # Captura de ecrã (Super+Shift+S no Omarchy 4 = Win+Shift+S do Windows).
+  - commands: ['shell-exec explorer ms-screenclip:']
+    bindings: ['alt+shift+s']
+  # Notificações (Super+,).
+  - commands: ['shell-exec explorer ms-actioncenter:']
+    bindings: ['alt+oem_comma']
+
+  # Foco (H/J/K/L ou setas)
+  - commands: ['focus --direction left']
+    bindings: ['alt+h', 'alt+left']
+  - commands: ['focus --direction right']
+    bindings: ['alt+l', 'alt+right']
+  # Alt+K fica para o guia (como Super+K no Omarchy); para cima = Alt+↑.
+  - commands: ['focus --direction up']
+    bindings: ['alt+up']
+  # Abre/fecha o guia (Documentos\Guia de Atalhos) e dá-lhe o foco.
+  - commands: ['shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" guide']
+    bindings: ['alt+k']
+  - commands: ['focus --direction down']
+    bindings: ['alt+j', 'alt+down']
+
+  # Mover janela
+  - commands: ['move --direction left']
+    bindings: ['alt+shift+h', 'alt+shift+left']
+  - commands: ['move --direction right']
+    bindings: ['alt+shift+l', 'alt+shift+right']
+  - commands: ['move --direction up']
+    bindings: ['alt+shift+k', 'alt+shift+up']
+  - commands: ['move --direction down']
+    bindings: ['alt+shift+j', 'alt+shift+down']
+
+  # --- Workspaces ---
+  - commands: ['focus --next-active-workspace']
+    bindings: ['alt+s']
+  - commands: ['focus --prev-active-workspace']
+    bindings: ['alt+a']
+  - commands: ['focus --recent-workspace']
+    bindings: ['alt+d']
+
+  - commands: ['focus --workspace 1']
+    bindings: ['alt+1']
+  - commands: ['focus --workspace 2']
+    bindings: ['alt+2']
+  - commands: ['focus --workspace 3']
+    bindings: ['alt+3']
+  - commands: ['focus --workspace 4']
+    bindings: ['alt+4']
+  - commands: ['focus --workspace 5']
+    bindings: ['alt+5']
+  - commands: ['focus --workspace 6']
+    bindings: ['alt+6']
+  - commands: ['focus --workspace 7']
+    bindings: ['alt+7']
+  - commands: ['focus --workspace 8']
+    bindings: ['alt+8']
+  - commands: ['focus --workspace 9']
+    bindings: ['alt+9']
+  - commands: ['focus --workspace 10']
+    bindings: ['alt+0']
+
+  # Scratchpad (Super+S / Super+` no Omarchy): a tecla º, à esquerda do 1.
+  # Carregar de novo esconde-o (toggle_workspace_on_refocus).
+  - commands: ['focus --workspace S']
+    bindings: ['alt+oem_pipe']
+  - commands: ['move --workspace S']
+    bindings: ['alt+shift+oem_pipe']
+
+  - commands: ['move --workspace 1', 'focus --workspace 1']
+    bindings: ['alt+shift+1']
+  - commands: ['move --workspace 2', 'focus --workspace 2']
+    bindings: ['alt+shift+2']
+  - commands: ['move --workspace 3', 'focus --workspace 3']
+    bindings: ['alt+shift+3']
+  - commands: ['move --workspace 4', 'focus --workspace 4']
+    bindings: ['alt+shift+4']
+  - commands: ['move --workspace 5', 'focus --workspace 5']
+    bindings: ['alt+shift+5']
+  - commands: ['move --workspace 6', 'focus --workspace 6']
+    bindings: ['alt+shift+6']
+  - commands: ['move --workspace 7', 'focus --workspace 7']
+    bindings: ['alt+shift+7']
+  - commands: ['move --workspace 8', 'focus --workspace 8']
+    bindings: ['alt+shift+8']
+  - commands: ['move --workspace 9', 'focus --workspace 9']
+    bindings: ['alt+shift+9']
+  - commands: ['move --workspace 10', 'focus --workspace 10']
+    bindings: ['alt+shift+0']
+
+  # --- GlazeWM ---  (sair: Alt+Esc e depois Q)
+  - commands: ['wm-toggle-pause']
+    bindings: ['alt+shift+p']
+  # Aplica apps.txt e recarrega o config (o apps-apply chama o wm-reload-config).
+  - commands: ['shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" apps-apply']
+    bindings: ['alt+shift+r']
+  - commands: ['wm-redraw']
+    bindings: ['alt+shift+w']

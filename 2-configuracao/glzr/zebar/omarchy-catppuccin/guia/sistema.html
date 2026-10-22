@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sistema</title>
+    <style>
+      /* Painel da camada Alt+Esc (como o menu do Omarchy). Mostrado pelo
+         bar_helper.py sem receber o foco: quem lê as teclas é o GlazeWM.
+         Tamanho da janela: zpack.json (widget "sistema"). */
+      :root {
+        --mauve: #cba6f7; --red: #f38ba8; --peach: #fab387; --yellow: #f9e2af;
+        --green: #a6e3a1; --blue: #89b4fa; --sky: #89dceb; --text: #cdd6f4;
+        --subtext0: #a6adc8; --overlay0: #6c7086; --surface0: #313244;
+        --surface1: #45475a; --base: #1e1e2e; --mantle: #181825;
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0; height: 100%; background: transparent; overflow: hidden;
+        font-family: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+        color: var(--text); user-select: none;
+      }
+      .card {
+        height: 100%;
+        background: var(--base);
+        border: 1px solid var(--surface1);
+        border-radius: 16px;
+        padding: 16px 18px 12px;
+        display: flex;
+        flex-direction: column;
+        opacity: 0;
+        transform: translateY(-8px) scale(0.98);
+        transition: opacity 120ms ease-out, transform 160ms ease-out;
+      }
+      body.open .card { opacity: 1; transform: none; }
+      header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+      header .logo { font-family: 'JetBrainsMono NF', monospace; font-size: 18px; color: var(--mauve); }
+      h1 { margin: 0; font-size: 15px; font-weight: 600; }
+      .hint { margin-left: auto; font-size: 11.5px; color: var(--overlay0); }
+
+      .groups { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+      .group { background: var(--mantle); border-radius: 12px; padding: 8px 8px 6px; }
+      .group.wide { grid-column: 1 / -1; }
+      .group h2 { margin: 0 0 4px 6px; font-size: 10.5px; font-weight: 600; letter-spacing: .08em;
+                  text-transform: uppercase; color: var(--c); opacity: .9; }
+      .group ul { list-style: none; margin: 0; padding: 0; }
+      .group.wide ul { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 8px; }
+      li { display: flex; align-items: center; gap: 10px; padding: 4px 6px; border-radius: 8px; font-size: 13px; }
+      .ico {
+        width: 28px; height: 28px; flex: none; border-radius: 8px;
+        display: grid; place-items: center;
+        font-family: 'JetBrainsMono NF', monospace; font-size: 15px;
+        color: var(--c); background: color-mix(in srgb, var(--c) 16%, transparent);
+      }
+      .lb { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      /* A letra a carregar: caixa escura com contorno na cor do grupo — é o
+         que o olho tem de encontrar primeiro. */
+      kbd {
+        font-family: 'JetBrainsMono NF', 'Cascadia Mono', Consolas, monospace;
+        font-size: 15px; font-weight: 800; line-height: 1;
+        min-width: 30px; height: 28px; padding: 0 7px; flex: none;
+        display: grid; place-items: center;
+        border-radius: 7px; color: var(--c); background: #11111b;
+        border: 1.5px solid color-mix(in srgb, var(--c) 60%, transparent);
+        box-shadow: 0 2px 0 color-mix(in srgb, var(--c) 35%, transparent), inset 0 1px 0 rgba(255,255,255,.04);
+      }
+      footer { margin-top: auto; padding-top: 10px; font-size: 11.5px; color: var(--overlay0); text-align: center; }
+      #anim { font-weight: 700; color: var(--mauve); display: inline-block; }
+      #anim.bump { animation: bump 260ms ease-out; }
+      @keyframes bump { 40% { transform: scale(1.18); } }
+      footer kbd { --c: var(--subtext0); display: inline-grid; font-size: 11px; height: 20px; min-width: 0; margin: 0 2px; vertical-align: middle; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <header>
+        <span class="logo">&#xf035c;</span>
+        <h1>Sistema</h1>
+        <span class="hint">carregue numa letra</span>
+      </header>
+      <div class="groups" id="groups"></div>
+      <footer><kbd>E</kbd> tocar troca a animação · segurar mostra-a &nbsp;·&nbsp; <kbd>Esc</kbd> fecha</footer>
+    </div>
+
+    <script type="module">
+      // Igual à camada "sistema" do config.yaml do GlazeWM (lá estão as ações).
+      // Ícones: códigos Nerd Font (fonte JetBrainsMono NF), família nf-md.
+      const GROUPS = [
+        { title: 'Ligações', color: 'var(--blue)', items: [
+          ['W', 0xf05a9, 'Wi-Fi'],
+          ['B', 0xf00af, 'Bluetooth'],
+          ['A', 0xf057e, 'Som'],
+        ] },
+        { title: 'Ecrã', color: 'var(--yellow)', items: [
+          ['D', 0xf0379, 'Ecrã'],
+          ['N', 0xf0594, 'Luz noturna'],
+          ['I', 0xf0176, 'Não suspender'],
+        ] },
+        { title: 'Sistema', color: 'var(--green)', items: [
+          ['T', 0xf0430, 'Gestor de Tarefas'],
+          ['P', 0xf0241, 'Energia'],
+          ['L', 0xf033e, 'Bloquear'],
+        ] },
+        { title: 'Personalizar', color: 'var(--mauve)', items: [
+          ['C', 0xf030c, 'Atalhos das apps'],
+          ['G', 0xf0193, 'Gravar arranjo'],
+          ['E', 0xf03d8, 'Animação: <b id="anim">…</b>', true],
+        ] },
+        { title: 'Sessão', color: 'var(--red)', wide: true, items: [
+          ['Q', 0xf0206, 'Sair do GlazeWM'],
+          ['R', 0xf0709, 'Reiniciar'],
+          ['O', 0xf0425, 'Desligar'],
+        ] },
+      ];
+      const esc = s => String(s).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
+      document.getElementById('groups').innerHTML = GROUPS.map(g => `
+        <section class="group${g.wide ? ' wide' : ''}" style="--c:${g.color}">
+          <h2>${esc(g.title)}</h2>
+          <ul>${g.items.map(([k, icon, label, html]) => `
+            <li><span class="ico" data-icon="${icon}"></span><span class="lb">${html ? label : esc(label)}</span><kbd>${esc(k)}</kbd></li>`).join('')}
+          </ul>
+        </section>`).join('');
+      drawIcons();
+
+      // Animação escolhida (arranque.txt, nesta mesma pasta): lida enquanto o
+      // painel está aberto, para se ver a troca a cada toque no E.
+      const NOMES = { cafe: 'Café' };
+      async function refreshAnim() {
+        try {
+          const res = await fetch(`./arranque.txt?t=${Date.now()}`, { cache: 'no-store' });
+          const line = (await res.text()).split(/\r?\n/)
+            .find(l => /^\s*anima[cç][aã]o\s*=/i.test(l));
+          const key = (line?.split('=')[1] ?? 'cafe').trim().toLowerCase().replace('é', 'e');
+          const el = document.getElementById('anim');
+          const label = NOMES[key] ?? key;
+          if (el.textContent !== label) {
+            el.textContent = label;
+            el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
+          }
+        } catch {}
+      }
+      refreshAnim();
+      setInterval(() => document.body.classList.contains('open') && refreshAnim(), 200);
+
+      // Ícones centrados a sério: na fonte "JetBrainsMono NF" cada ícone é mais
+      // largo do que a célula e fica desviado (cada um à sua maneira), por isso o
+      // CSS não os centra. Mede-se o desenho real (measureText) e pinta-se num
+      // canvas com o centro do desenho no centro da caixa.
+      async function drawIcons(root = document) {
+        try { await document.fonts.load('16px "JetBrainsMono NF"'); } catch {}
+        const dpr = window.devicePixelRatio || 1;
+        for (const el of root.querySelectorAll('.ico[data-icon]')) {
+          const size = el.offsetWidth || 28;
+          const css = getComputedStyle(el);
+          const cv = document.createElement('canvas');
+          cv.width = cv.height = Math.round(size * dpr);
+          cv.style.width = cv.style.height = `${size}px`;
+          const ctx = cv.getContext('2d');
+          ctx.scale(dpr, dpr);
+          ctx.font = `${css.fontSize} "JetBrainsMono NF"`;
+          ctx.fillStyle = css.color;
+          const ch = String.fromCodePoint(Number(el.dataset.icon));
+          const m = ctx.measureText(ch);
+          const x = size / 2 - (m.actualBoundingBoxRight - m.actualBoundingBoxLeft) / 2;
+          const y = size / 2 - (m.actualBoundingBoxDescent - m.actualBoundingBoxAscent) / 2;
+          ctx.fillText(ch, x, y);
+          el.replaceChildren(cv);
+        }
+      }
+
+      if (location.protocol !== 'file:') {
+        const zebar = await import('../vendor/zebar-3.3.1.mjs');
+        const win = zebar.currentWidget().tauriWindow;
+        await win.hide(); // pré-carregado: o Alt+Esc mostra-o (bar_helper.py layer-show)
+
+        // Anima ao entrar na camada; se a camada acabar e o painel ainda se vir
+        // (ex.: saída pela barra), pede ao bar_helper.py para o esconder.
+        const PYW = 'C:\\Windows\\pyw.exe';
+        const HELPER = '{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py';
+        const providers = zebar.createProviderGroup({ glazewm: { type: 'glazewm' } });
+        providers.onOutput(async () => {
+          const modes = providers.outputMap.glazewm?.bindingModes ?? [];
+          const active = modes.some(m => m.name === 'sistema');
+          document.body.classList.toggle('open', active);
+          if (!active && (await win.isVisible())) {
+            zebar.shellExec(PYW, ['-I', HELPER, 'layer-hide']).catch(console.error);
+          }
+        });
+      } else {
+        document.body.classList.add('open');
+      }
+    </script>
+  </body>
+</html>

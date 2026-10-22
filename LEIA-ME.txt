@@ -1,0 +1,33 @@
+﻿MORG KEYS
+=========
+
+Windows 11 conduzido pelo teclado, ao estilo do Omarchy: GlazeWM (janelas em
+mosaico), barra Zebar em Catppuccin, guia de atalhos (Alt+K), painel do sistema
+(Alt+Esc) e um ecrã de arranque que tapa tudo até estar pronto.
+Projeto não oficial, inspirado no Omarchy.
+
+INSTALAR
+  1. Copie esta pasta para o PC (não instale a partir da rede).
+  2. Inicie sessão com a conta de quem vai usar o PC.
+  3. Duplo clique em INSTALAR.cmd (sem "Executar como administrador").
+  4. Uma pergunta: programas .bat a correr escondidos ao iniciar (Enter = nenhum).
+  5. Se o Windows pedir, introduza as credenciais de administrador (só uma vez).
+
+Requisitos: Windows 11; pasta do utilizador sem espaços (C:\Users\nome);
+internet durante a instalação (os programas que faltem são descarregados dos
+sites oficiais e verificados). Sem internet: ponha os instaladores em
+1-instaladores\ antes (nomes no COMO-FOI-FEITO.md, secção 7).
+
+DEPOIS
+  Alt+K      guia com todos os atalhos
+  Alt+Esc    painel do sistema (Wi-Fi, som, bloquear, desligar...)
+  Alt+Enter  terminal
+  Alt+Esc, E animação do arranque: segurar mostra-a
+
+Mudar depois: Documentos\Guia de Atalhos\arranque.txt (animação e .bat)
+e Documentos\Guia de Atalhos\apps.txt (atalhos das apps).
+
+Tutorial completo: Tutorial.html (abre no navegador).
+Para o TI ou outro agente de IA manter/refazer: COMO-FOI-FEITO.md
+Desinstalar: DESINSTALAR.cmd (não apaga nada de forma definitiva).
+Licença: GPL-3.0 (ver LICENSE e LICENCAS.txt).

@@ -1,0 +1,24 @@
+# ARRANQUE DO PC
+#
+# Para abrir este ficheiro: Documentos\Guia de Atalhos\arranque.txt
+# As mudanças valem no próximo arranque (reinicie ou termine a sessão).
+#
+# ANIMAÇÃO do ecrã de arranque:   cafe  (por agora a única)
+#   Alt+Esc e depois E: segurar mostra-a (tocar passa à seguinte, se houver mais).
+animacao = {{ANIMACAO}}
+#
+# PROGRAMAS .bat a correr ESCONDIDOS ao iniciar o PC (um por linha).
+# Cada um fica com um ícone junto ao relógio (ícones ocultos): ver o registo,
+# reiniciar, parar. O ecrã de arranque só sai quando todos arrancaram.
+#
+#   bat = CAMINHO_DO_BAT | ENDEREÇO | NOME
+#
+#   ENDEREÇO (opcional): se o programa é um servidor local, ex. http://localhost:3000
+#            → o ícone ganha "Abrir no navegador" e o arranque espera que responda.
+#   NOME     (opcional): o que aparece no ecrã de arranque e no ícone.
+#
+# Exemplos:
+#   bat = C:\Projetos\site\iniciar.bat | http://localhost:3000 | Servidor do site
+#   bat = C:\Scripts\copias.bat
+#
+# Linhas começadas por # são ignoradas.

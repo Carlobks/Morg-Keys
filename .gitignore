@@ -1,0 +1,11 @@
+# Instaladores de terceiros: o instalar.ps1 descarrega-os dos sites oficiais (ver COMO-FOI-FEITO.md §6.1).
+1-instaladores/*.exe
+1-instaladores/*.part
+
+# Estado gerado em uso (não faz parte dos modelos)
+progress.json
+layout.json
+__pycache__/
+*.log
+.guide-*
+.anim-tap

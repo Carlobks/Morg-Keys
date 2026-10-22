@@ -1,0 +1,39 @@
+﻿LICENÇAS
+========
+
+Morg Keys (scripts, configuração, páginas e ajudantes deste repositório)
+  GNU General Public License v3.0 (ver LICENSE). As páginas do Zebar importam
+  o cliente do Zebar (GPL-3.0), por isso o conjunto é distribuído sob GPL-3.0.
+
+COMPONENTES INCLUÍDOS NO REPOSITÓRIO
+
+2-configuracao\glzr\zebar\omarchy-catppuccin\vendor\zebar-3.3.1.mjs
+  Cliente do Zebar: pacote npm "zebar" 3.3.1, © glzr-io, GPL-3.0, juntado num
+  só ficheiro (esbuild) para funcionar sem internet. Código-fonte correspondente:
+  https://github.com/glzr-io/zebar (tag v3.3.1). Inclui zod e luxon (MIT) e
+  @tauri-apps/api e @tauri-apps/plugin-dialog (MIT / Apache-2.0): os avisos
+  estão em THIRD-PARTY-NOTICES.txt.
+
+1-instaladores\fonte-JetBrainsMono-NF\
+  JetBrains Mono, © 2020 The JetBrains Mono Project Authors, SIL Open Font
+  License 1.1 (ver OFL.txt nessa pasta), com os ícones do projeto Nerd Fonts
+  (© Ryan L McIntyre; ver LICENSE-NerdFonts.md nessa pasta).
+  https://www.jetbrains.com/lp/mono/  e  https://www.nerdfonts.com/
+
+PROGRAMAS DESCARREGADOS NA INSTALAÇÃO (não vêm no repositório)
+
+GlazeWM 3.10.1 (inclui o Zebar 3.3.1), © glzr-io, GPL-3.0.
+  https://github.com/glzr-io/glazewm/releases/tag/v3.10.1
+  Código-fonte: https://github.com/glzr-io/glazewm e https://github.com/glzr-io/zebar
+
+Python 3.11.9, © Python Software Foundation, PSF License Agreement.
+  https://www.python.org/
+
+Microsoft Visual C++ 2015-2022 Redistributable (x64), sujeito aos termos de
+  licença da Microsoft. Descarregado de https://aka.ms/vs/17/release/vc_redist.x64.exe
+
+INSPIRAÇÃO E CORES
+  Omarchy (https://omarchy.org, MIT, © David Heinemeier Hansson): atalhos e
+  ideias; nenhum código copiado. Projeto não oficial, sem ligação ao Omarchy,
+  à 37signals nem ao autor.
+  Catppuccin Mocha (https://catppuccin.com, MIT, © 2021 Catppuccin): paleta de cores.

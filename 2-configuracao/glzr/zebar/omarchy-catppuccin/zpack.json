@@ -1,0 +1,153 @@
+{
+  "$schema": "https://github.com/glzr-io/zebar/raw/v3.3.1/resources/zpack-schema.json",
+  "name": "omarchy-catppuccin",
+  "version": "2.0.0",
+  "description": "Morg Keys: barra ao estilo Omarchy (Catppuccin Mocha), guia de atalhos (Alt+K), painel do sistema (Alt+Esc) e ecrã de arranque. Um só pack: o cliente do Zebar (vendor/) é partilhado.",
+  "tags": ["topbar"],
+  "previewImages": [],
+  "repositoryUrl": "",
+  "widgets": [
+    {
+      "name": "bar",
+      "htmlPath": "./bar.html",
+      "zOrder": "normal",
+      "shownInTaskbar": false,
+      "focused": false,
+      "resizable": false,
+      "transparent": true,
+      "includeFiles": ["bar.html", "*.css", "vendor/*.mjs"],
+      "caching": {
+        "defaultDuration": 604800,
+        "rules": []
+      },
+      "privileges": {
+        "shellCommands": [
+          {
+            "program": "C:\\Windows\\py.exe",
+            "argsRegex": "^-I {{HOME_RE}}/\\.glzr/zebar/omarchy-catppuccin/(claude_usage\\.py|bar_helper\\.py (awake (status|toggle)|quick))$"
+          }
+        ]
+      },
+      "presets": [
+        {
+          "name": "default",
+          "anchor": "top_left",
+          "offsetX": "0px",
+          "offsetY": "0px",
+          "width": "100%",
+          "height": "30px",
+          "monitorSelection": {
+            "type": "all"
+          },
+          "dockToEdge": {
+            "enabled": false,
+            "edge": null,
+            "windowMargin": "0px"
+          }
+        }
+      ]
+    },
+    {
+      "name": "guia",
+      "htmlPath": "./guia/guia.html",
+      "zOrder": "top_most",
+      "shownInTaskbar": false,
+      "focused": false,
+      "resizable": false,
+      "transparent": true,
+      "includeFiles": ["guia/*.html", "guia/*.txt", "vendor/*.mjs"],
+      "caching": {
+        "defaultDuration": 604800,
+        "rules": [{ "urlRegex": "apps\\.txt", "duration": 0 }]
+      },
+      "privileges": {
+        "shellCommands": [
+          {
+            "program": "C:\\Windows\\pyw.exe",
+            "argsRegex": "^-I {{HOME_RE}}/\\.glzr/zebar/omarchy-catppuccin/bar_helper\\.py guide-hide$"
+          }
+        ]
+      },
+      "presets": [
+        {
+          "name": "default",
+          "anchor": "center",
+          "offsetX": "0px",
+          "offsetY": "0px",
+          "width": "68%",
+          "height": "85%",
+          "monitorSelection": { "type": "primary" },
+          "dockToEdge": { "enabled": false, "edge": null, "windowMargin": "0px" }
+        }
+      ]
+    },
+    {
+      "name": "sistema",
+      "htmlPath": "./guia/sistema.html",
+      "zOrder": "top_most",
+      "shownInTaskbar": false,
+      "focused": false,
+      "resizable": false,
+      "transparent": true,
+      "includeFiles": ["guia/*.html", "guia/*.txt", "vendor/*.mjs"],
+      "caching": {
+        "defaultDuration": 604800,
+        "rules": [{ "urlRegex": "arranque\\.txt", "duration": 0 }]
+      },
+      "privileges": {
+        "shellCommands": [
+          {
+            "program": "C:\\Windows\\pyw.exe",
+            "argsRegex": "^-I {{HOME_RE}}/\\.glzr/zebar/omarchy-catppuccin/bar_helper\\.py layer-hide$"
+          }
+        ]
+      },
+      "presets": [
+        {
+          "name": "default",
+          "anchor": "center",
+          "offsetX": "0px",
+          "offsetY": "-120px",
+          "width": "560px",
+          "height": "455px",
+          "monitorSelection": { "type": "primary" },
+          "dockToEdge": { "enabled": false, "edge": null, "windowMargin": "0px" }
+        }
+      ]
+    },
+    {
+      "name": "splash",
+      "htmlPath": "./arranque/splash.html",
+      "zOrder": "top_most",
+      "shownInTaskbar": false,
+      "focused": false,
+      "resizable": false,
+      "transparent": true,
+      "includeFiles": ["arranque/*.html", "arranque/*.json", "vendor/*.mjs"],
+      "caching": {
+        "defaultDuration": 604800,
+        "rules": [{ "urlRegex": "progress\\.json", "duration": 0 }]
+      },
+      "privileges": {
+        "shellCommands": [
+          {
+            "program": "C:\\Windows\\pyw.exe",
+            "argsRegex": "^-I {{HOME_RE}}/\\.glzr/zebar/omarchy-catppuccin/bar_helper\\.py splash-ready$"
+          }
+        ]
+      },
+      "presets": [
+        {
+          "name": "default",
+          "anchor": "top_left",
+          "offsetX": "0px",
+          "offsetY": "0px",
+          "width": "100%",
+          "height": "100%",
+          "monitorSelection": { "type": "primary" },
+          "dockToEdge": { "enabled": false, "edge": null, "windowMargin": "0px" }
+        }
+      ]
+    }
+  ]
+}

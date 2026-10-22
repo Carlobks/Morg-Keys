@@ -1,0 +1,41 @@
+/* Ícones Nerd Font usados pela barra e pelo guia, em versão local.
+   Antes vinham de nerdfonts.com/assets/css/webfont.css (≈500 KB pela rede).
+   Os glifos estão na fonte instalada "JetBrainsMono NF"
+   (winget DEVCOM.JetBrainsMonoNerdFont). Para juntar um ícone:
+   procurar o código em https://www.nerdfonts.com/cheat-sheet e acrescentar
+   uma linha aqui. */
+
+.nf {
+  font-family: 'JetBrainsMono NF', 'JetBrainsMono Nerd Font', monospace;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+.nf-md-coffee:before { content: "\f0176"; }
+.nf-md-coffee_outline:before { content: "\f06ca"; }
+.nf-oct-cpu:before { content: "\f4bc"; }
+.nf-fae-chip:before { content: "\e266"; }
+.nf-md-volume_off:before { content: "\f0581"; }
+.nf-md-volume_low:before { content: "\f057f"; }
+.nf-md-volume_medium:before { content: "\f0580"; }
+.nf-md-volume_high:before { content: "\f057e"; }
+.nf-md-ethernet:before { content: "\f0200"; }
+.nf-md-wifi:before { content: "\f05a9"; }
+.nf-md-wifi_off:before { content: "\f05aa"; }
+.nf-md-shield_lock_outline:before { content: "\f0ccc"; }
+.nf-md-asterisk:before { content: "\f06c4"; }
+.nf-md-google_chrome:before { content: "\f02af"; }
+.nf-md-web:before { content: "\f059f"; }
+.nf-md-microsoft_edge:before { content: "\f01e9"; }
+.nf-md-notebook_outline:before { content: "\f0ebf"; }
+.nf-md-folder_outline:before { content: "\f0256"; }
+.nf-oct-terminal:before { content: "\f489"; }
+.nf-md-application_outline:before { content: "\f0614"; }
+.nf-md-bluetooth:before { content: "\f00af"; }
+.nf-md-bluetooth_off:before { content: "\f00b2"; }
+.nf-md-bluetooth_connect:before { content: "\f00b1"; }
+.nf-md-menu:before { content: "\f035c"; }
+.nf-md-apps:before { content: "\f003b"; }
+.nf-md-microsoft_windows:before { content: "\f05b3"; }
