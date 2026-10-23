@@ -149,7 +149,12 @@ Add-Type -Namespace MorgInst -Name Gdi -MemberDefinition @'
 '@
 foreach ($ttf in Get-ChildItem (Join-Path $Pacote '1-instaladores\fonte-JetBrainsMono-NF') -Filter *.ttf) {
   $dest = Join-Path $dirFontes $ttf.Name
-  Copy-Item $ttf.FullName $dest -Force
+  # Reinstalação: a fonte já instalada está aberta pelo Windows e não se deixa
+  # substituir. Se for igual, não há nada a copiar; se for diferente, avisa e segue.
+  if (-not ((Test-Path $dest) -and (Get-FileHash $dest).Hash -eq (Get-FileHash $ttf.FullName).Hash)) {
+    try { Copy-Item $ttf.FullName $dest -Force -ErrorAction Stop }
+    catch { Aviso "$($ttf.Name) está em uso e não foi atualizada (fica a versão já instalada)."; continue }
+  }
   $estilo = $ttf.BaseName -replace '^JetBrainsMonoNerdFont-', ''
   New-ItemProperty 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts' -Name "JetBrainsMono NF $estilo (TrueType)" `
     -Value $dest -PropertyType String -Force | Out-Null
