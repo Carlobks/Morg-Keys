@@ -16,6 +16,16 @@ RAIZ_REPOSITORIO = Path(__file__).resolve().parent.parent
 CAMINHOS_EXCLUIDOS = ("vendor/",)
 EXTENSOES_BINARIAS = (".ttf", ".png", ".bmp", ".ico", ".exe")
 MAIOR_LINHA_ACEITE = 2000  # o Tutorial tem linhas de ~650 caracteres; 2000 dá folga
+LIMITE_DE_LINHAS = 500  # regra do CLAUDE.md: ficheiros pequenos, uma responsabilidade cada
+# Textos de terceiros que não se dividem.
+SEM_LIMITE_DE_LINHAS = ("LICENSE",)
+# Ficheiros antigos acima do limite, com o tamanho que tinham em 2026-10-23: só podem encolher.
+# A fase 2 da experiência 0001 divide-os; quando um descer das 500 linhas, sai desta lista.
+GRANDES_POR_DIVIDIR = {
+    "2-configuracao/glzr/zebar/omarchy-catppuccin/bar_helper.py": 1982,
+    "2-configuracao/glzr/zebar/omarchy-catppuccin/painel/apps.html": 830,
+    "2-configuracao/glzr/zebar/omarchy-catppuccin/guia/guia.html": 622,
+}
 
 
 def ficheiros_de_texto_rastreados():
@@ -54,6 +64,23 @@ class FicheirosDeTextoIntactos(unittest.TestCase):
                 texto = (RAIZ_REPOSITORIO / caminho).read_text(encoding="utf-8-sig")
                 maior = max((len(linha) for linha in texto.splitlines()), default=0)
                 self.assertLessEqual(maior, MAIOR_LINHA_ACEITE, f"linha com {maior} caracteres")
+
+
+    def test_nenhum_ficheiro_passa_o_limite_de_linhas(self):
+        # Apanha também o que escapa ao hook .claude/hooks/limite_de_linhas.py (edições feitas pela shell).
+        for caminho in ficheiros_de_texto_rastreados():
+            if caminho in SEM_LIMITE_DE_LINHAS:
+                continue
+            with self.subTest(ficheiro=caminho):
+                linhas = len((RAIZ_REPOSITORIO / caminho).read_text(encoding="utf-8-sig").splitlines())
+                maximo = GRANDES_POR_DIVIDIR.get(caminho, LIMITE_DE_LINHAS)
+                self.assertLessEqual(linhas, maximo, f"{linhas} linhas (máximo {maximo})")
+
+    def test_lista_de_grandes_esta_atualizada(self):
+        for caminho in GRANDES_POR_DIVIDIR:
+            with self.subTest(ficheiro=caminho):
+                linhas = len((RAIZ_REPOSITORIO / caminho).read_text(encoding="utf-8-sig").splitlines())
+                self.assertGreater(linhas, LIMITE_DE_LINHAS, "já cabe no limite: tirar de GRANDES_POR_DIVIDIR")
 
 
 if __name__ == "__main__":

@@ -12,3 +12,6 @@ __pycache__/
 
 # Ferramentas de desenvolvimento (Biome via npm)
 node_modules/
+
+# Cobertura (gerada pelo scripts/testar.ps1)
+.coverage

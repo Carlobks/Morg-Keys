@@ -1,0 +1,35 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "r=\"$CLAUDE_PROJECT_DIR\"; [ -f \"$r/.claude/hooks/bloquear_arranque.py\" ] || r=\"$(git rev-parse --show-toplevel)\"; \"C:/Windows/py.exe\" -I \"$r/.claude/hooks/bloquear_arranque.py\"",
+            "timeout": 15,
+            "onFailure": "block",
+            "statusMessage": "A verificar a armadilha A2"
+          },
+          {
+            "type": "command",
+            "command": "r=\"$CLAUDE_PROJECT_DIR\"; [ -f \"$r/.claude/hooks/testes_antes_do_commit.py\" ] || r=\"$(git rev-parse --show-toplevel)\"; \"C:/Windows/py.exe\" -I \"$r/.claude/hooks/testes_antes_do_commit.py\"",
+            "timeout": 600,
+            "statusMessage": "A correr os testes antes do commit"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "r=\"$CLAUDE_PROJECT_DIR\"; [ -f \"$r/.claude/hooks/limite_de_linhas.py\" ] || r=\"$(git rev-parse --show-toplevel)\"; \"C:/Windows/py.exe\" -I \"$r/.claude/hooks/limite_de_linhas.py\"",
+            "timeout": 15,
+            "statusMessage": "A verificar o limite de 500 linhas"
+          }
+        ]
+      }
+    ]
+  }
+}

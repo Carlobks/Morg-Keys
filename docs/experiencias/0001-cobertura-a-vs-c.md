@@ -87,3 +87,4 @@ Se algo não der, regista-se aqui com a evidência e a C é medida sem essa part
 | Data (Lisboa) | Fase | O que aconteceu |
 |---|---|---|
 | 2026-10-23 | — | Plano aprovado; decisão 1 (C por cima de A) com a análise de viés acima |
+| 2026-10-23 | 0 | coverage 7.17.0, ruff 0.17.2, Biome 2.6.2 (no repositório); `scripts/testar.ps1` (0/1 provado); 3 hooks com 19 testes e 9 estragos apanhados; provados ao vivo. Incidentes A30 (650 processos) e A31 (hooks bloquearam tudo). Windows Sandbox instalado pelo utilizador. |

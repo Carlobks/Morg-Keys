@@ -1,0 +1,12 @@
+{
+  "name": "morg-keys",
+  "private": true,
+  "description": "Ferramentas de desenvolvimento do Morg Keys (só para testes e lint; nada disto é instalado no PC do utilizador).",
+  "license": "GPL-3.0-only",
+  "scripts": {
+    "lint:js": "biome lint 2-configuracao"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.2"
+  }
+}
