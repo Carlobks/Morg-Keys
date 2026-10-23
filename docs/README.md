@@ -12,6 +12,8 @@ O guia de quem usa o PC é o `Tutorial.html`; as regras de trabalho dos agentes 
 | [validacao-manual.md](validacao-manual.md) | O que só se verifica à mão e como (§10) |
 | [decisoes/](decisoes/) | Decisões (ADR): uma por ficheiro, `NNNN-titulo.md`, nunca se reutiliza um número |
 | [pesquisa/](pesquisa/README.md) | Pesquisas por tópico, com fontes e o que não foi verificado |
+| [experiencias/](experiencias/) | Experiências medidas (plano, medidas, resultados): `0001-cobertura-a-vs-c.md` |
+| [proposta-CLAUDE.md](proposta-CLAUDE.md) | Proposta do novo `CLAUDE.md` (≤ 100 linhas), à espera de fechar a regra de cobertura |
 | [painel-apps.md](painel-apps.md) | Plano do painel "Apps e arranque" (Alt+Esc, C) |
 
 ## Decisões

@@ -9,3 +9,6 @@ __pycache__/
 *.log
 .guide-*
 .anim-tap
+
+# Ferramentas de desenvolvimento (Biome via npm)
+node_modules/
