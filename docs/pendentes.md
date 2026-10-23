@@ -1,0 +1,18 @@
+# Pendentes (por ordem)
+
+Trabalho combinado com o utilizador e ainda não feito. Quando um item começa, ganha plano próprio (ou ADR);
+quando acaba, sai daqui.
+
+1. **Experiência 0001 — cobertura A contra C** (em curso): `experiencias/0001-cobertura-a-vs-c.md`.
+
+Depois da experiência:
+
+2. **Quota do Claude Code na barra** (pedido de 2026-10-23): melhorar a ligação ou, em alternativa, dar
+   opção de a ocultar. Hoje o `claude_usage.py` só lê `~/.claude/rate_limits.json`, que o
+   `~/.claude/statusline.py` escreve quando uma sessão do Claude Code **no terminal** recebe `rate_limits`;
+   a aplicação de ambiente de trabalho não corre a statusLine, por isso os valores ficam desatualizados
+   (a barra mostra a idade). Investigar uma fonte mais direta; se não houver, opção de ocultar.
+3. **Fundo à vista no arranque** (9,3 s = 3,3 s até a tarefa criar o `pythonw` + 5,8 s do Python a frio):
+   decidir fundo preto e/ou cortina sem Python.
+4. **Ícone de bateria na barra**, só se o PC tiver bateria.
+5. **Confirmação do utilizador** do painel `Alt+Esc, C` depois das correções A25 (foco) e A26 (ícones).
