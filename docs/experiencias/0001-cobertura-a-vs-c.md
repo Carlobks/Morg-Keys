@@ -56,6 +56,20 @@ comentários mantidos; um commit por passo, cada um com os testes verdes e a bat
 - **Validação real (utilizador)**: reinstalar com o `INSTALAR.cmd` e reiniciar a sessão (A7: o Zebar só lê o
   `zpack.json` ao arrancar); depois `docs/validacao-manual.md` §10. O agente não arranca o ambiente (A2).
 
+### Fase 2 — resto do plano (revisto em 2026-10-23, depois de 2a e 2b)
+| Passo | O quê | Validação |
+|---|---|---|
+| 2b-fim | Caracterizar `animacao_tap` (tocar, segurar, repetição já tratada) com falsos de `GetTickCount64`, ficheiro `.anim-tap`, mutex e camada; depois partir em "toque" e "segurar". Passar a bateria de estragos para `scripts/estragos.py` (hoje só existe numa pasta temporária). | testes + estragos |
+| 2c-1 | Capturas **antes**: painel e guia em pré-visualização no navegador interno (servidor local estático, não o Zebar — A2 não se aplica). | capturas guardadas |
+| 2c-2 | `painel/apps.html` (830) → `apps.html` + `apps.css` + `apps.mjs` + funções puras num `.mjs` à parte com testes `node --test` (`appLabel`, `iconFor`, `keyHtml`, `b64`). Caminho do ajudante num atributo `data-` (o instalador só troca `{{HOME}}` em .html). | node --test; captura **depois** igual à de antes; sem erros na consola |
+| 2c-3 | `guia/guia.html` (622) da mesma forma. `sistema.html` (204) fica. | idem |
+| 2c-4 | `zpack.json`: `includeFiles` com `painel/*.mjs`, `painel/*.css`, `guia/*.mjs`, `guia/*.css` (A23). Verificação única (não é teste do projeto, para não antecipar a versão C): cada ficheiro que as páginas pedem está coberto pelo `includeFiles`. | script de verificação |
+| 2d | Lint a bloquear no `testar.ps1`: corrigir só o que não muda comportamento (ex.: `check=False` explícito, `type="button"`); o que pode mudar o aspeto (ordem de regras CSS, `!important`) fica desligado no `biome.json` **com o motivo escrito**. PSScriptAnalyzer: só erros bloqueiam; `Write-Host` do instalador é de propósito. | `testar.ps1` verde; um aviso posto de propósito faz falhar |
+| Real | O utilizador reinstala (`INSTALAR.cmd`) e termina/volta a entrar na sessão (A7). Lista curta: barra (chávena, quota), Alt+K, Alt+Esc (camada e E), Alt+Esc C (escolher e enviar, Desfazer), Alt+Esc G, Alt+Shift+R, ecrã de arranque. | confirmação do utilizador |
+
+Mudança para quem desenvolve: a pré-visualização do painel deixa de abrir como ficheiro (`file:` não carrega
+módulos `.mjs`); passa a ser `py -m http.server` na pasta do pack e `…/painel/apps.html?preview`.
+
 ### Windows Sandbox: o que é e como ativar
 É um Windows descartável que abre numa janela dentro deste PC: começa sempre limpo, não vê os programas
 nem as definições deste Windows e **apaga tudo ao fechar**. Serve para instalar e arrancar o Morg Keys de raiz
