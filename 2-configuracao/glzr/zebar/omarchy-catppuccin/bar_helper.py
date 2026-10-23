@@ -246,31 +246,24 @@ def _bring_to_front(hwnd):
 
 
 def _focus_webview(hwnd):
-    """Dá o foco do teclado à página (o controlo do WebView2 dentro da janela).
+    """Dá o foco do teclado à página (o WebView2 dentro da janela do Zebar).
 
-    Pôr a janela em primeiro plano não chega: sem isto o Esc e a pesquisa não
-    recebem teclas. O controlo vive noutro processo, por isso liga-se a fila de
-    entrada desta thread à dele antes do SetFocus.
+    O foco vai para a JANELA DE TOPO: o wry (WebView2 do Tauri) reage ao
+    WM_SETFOCUS dela com ICoreWebView2Controller.MoveFocus, que é o caminho
+    suportado. Pôr o foco na janela interna Chrome_RenderWidgetHostHWND (como
+    se fazia) deixa a página "sem foco": aparece, mas não recebe teclas.
+    O WM_SETFOCUS vai também à mão, porque o SetFocus não o repete se a janela
+    já tinha o foco Win32 (ex.: escondida enquanto ativa).
     """
-    found = []
-
-    def visit(child, _):
-        buf = ctypes.create_unicode_buffer(64)
-        user32.GetClassNameW(child, buf, 64)
-        if buf.value == "Chrome_RenderWidgetHostHWND":
-            found.append(child)
-            return False
-        return True
-
-    user32.EnumChildWindows(hwnd, ENUM_PROC(visit), 0)
-    if not found:
-        return
-    target = user32.GetWindowThreadProcessId(found[0], None)
+    tid = user32.GetWindowThreadProcessId(hwnd, None)
     me = kernel32.GetCurrentThreadId()
-    if user32.AttachThreadInput(me, target, True):
-        user32.SetFocus(found[0])
-        user32.AttachThreadInput(me, target, False)
-
+    attached = tid and tid != me and user32.AttachThreadInput(me, tid, True)
+    try:
+        user32.SetFocus(hwnd)
+    finally:
+        if attached:
+            user32.AttachThreadInput(me, tid, False)
+    user32.PostMessageW(hwnd, 0x0007, 0, 0)  # WM_SETFOCUS
 
 # --- Guia de atalhos (Alt+K) ----------------------------------------------------
 LAST_KEY_FILE = HERE / ".guide-last"
@@ -998,6 +991,7 @@ def apps_edit():
 #   panel undo       -> desfaz a última mudança
 PANEL_TITLE = "Zebar - omarchy-catppuccin / apps"
 PANEL_UNDO = HERE / ".panel-undo.json"
+PANEL_PREV = HERE / ".panel-prev"  # janela que tinha o foco antes de abrir o painel
 PANEL_UNDO_MAX = 20
 WORKSPACE_NAMES = [str(n) for n in range(1, 11)]
 
@@ -1006,7 +1000,7 @@ def panel_show():
     """Alt+Esc, C: mostra o painel com foco; se já estiver visível, esconde-o."""
     hwnd = user32.FindWindowW(None, PANEL_TITLE)
     if hwnd and user32.IsWindowVisible(hwnd):
-        user32.ShowWindow(hwnd, 0)  # SW_HIDE (a página nota a perda de foco e fica "fechada")
+        _panel_release(hwnd)  # a página nota a perda de foco e fica "fechada"
         return
     if not hwnd:  # Zebar arrancado sem o painel: abre-o (só desta vez é lento)
         if not _start_widget("omarchy-catppuccin", "apps"):
@@ -1018,6 +1012,9 @@ def panel_show():
                 break
         if not hwnd:
             return
+    fg = user32.GetForegroundWindow()
+    if fg and fg != hwnd:
+        PANEL_PREV.write_text(str(fg))  # para onde volta o foco ao fechar
     _bring_to_front(hwnd)
     _focus_webview(hwnd)
     # Rede de segurança (como o guia): se a página não se esconder ao perder o
@@ -1028,7 +1025,26 @@ def panel_show():
 def panel_hide():
     hwnd = user32.FindWindowW(None, PANEL_TITLE)
     if hwnd:
-        user32.ShowWindow(hwnd, 0)  # SW_HIDE
+        _panel_release(hwnd)
+
+
+def _panel_release(hwnd):
+    """Esconde o painel e devolve o foco à janela de antes. Uma janela escondida
+    que continua ativa fazia a abertura seguinte não ser uma ativação a sério
+    (sem WM_SETFOCUS, a página não recebia o teclado)."""
+    user32.ShowWindow(hwnd, 0)  # SW_HIDE
+    if user32.GetForegroundWindow() != hwnd:
+        return
+    try:
+        prev = int(PANEL_PREV.read_text())
+    except (OSError, ValueError):
+        prev = 0
+    if prev and user32.IsWindow(prev) and user32.IsWindowVisible(prev) and not _is_cloaked(prev):
+        _bring_to_front(prev)
+    else:
+        bar = user32.FindWindowW(None, BAR_TITLE)  # nada a quem voltar: a barra fica ativa
+        if bar:
+            _bring_to_front(bar)
 
 
 def _key_text(key):

@@ -148,23 +148,30 @@
       // canvas com o centro do desenho no centro da caixa.
       async function drawIcons(root = document) {
         try { await document.fonts.load('16px "JetBrainsMono NF"'); } catch {}
-        const dpr = window.devicePixelRatio || 1;
         for (const el of root.querySelectorAll('.ico[data-icon]')) {
           const size = el.offsetWidth || 28;
           const css = getComputedStyle(el);
-          const cv = document.createElement('canvas');
-          cv.width = cv.height = Math.round(size * dpr);
-          cv.style.width = cv.style.height = `${size}px`;
-          const ctx = cv.getContext('2d');
-          ctx.scale(dpr, dpr);
-          ctx.font = `${css.fontSize} "JetBrainsMono NF"`;
-          ctx.fillStyle = css.color;
+          // SVG em vez de canvas: o canvas do WebView2 do Zebar saía às vezes com ícones
+          // estragados ou vazios; texto vetorial desenha-se como a barra (sempre certo).
+          // Mesma centragem: a origem do texto fica onde o desenho real fica centrado.
+          const mctx = document.createElement('canvas').getContext('2d');
+          mctx.font = `${css.fontSize} "JetBrainsMono NF"`;
           const ch = String.fromCodePoint(Number(el.dataset.icon));
-          const m = ctx.measureText(ch);
-          const x = size / 2 - (m.actualBoundingBoxRight - m.actualBoundingBoxLeft) / 2;
-          const y = size / 2 - (m.actualBoundingBoxDescent - m.actualBoundingBoxAscent) / 2;
-          ctx.fillText(ch, x, y);
-          el.replaceChildren(cv);
+          const m = mctx.measureText(ch);
+          const NS = 'http://www.w3.org/2000/svg';
+          const svg = document.createElementNS(NS, 'svg');
+          svg.setAttribute('width', size);
+          svg.setAttribute('height', size);
+          svg.style.display = 'block';
+          const tx = document.createElementNS(NS, 'text');
+          tx.setAttribute('x', size / 2 - (m.actualBoundingBoxRight - m.actualBoundingBoxLeft) / 2);
+          tx.setAttribute('y', size / 2 - (m.actualBoundingBoxDescent - m.actualBoundingBoxAscent) / 2);
+          tx.setAttribute('font-family', 'JetBrainsMono NF');
+          tx.setAttribute('font-size', css.fontSize);
+          tx.setAttribute('fill', css.color);
+          tx.textContent = ch;
+          svg.appendChild(tx);
+          el.replaceChildren(svg);
         }
       }
 
@@ -181,6 +188,9 @@
         providers.onOutput(async () => {
           const modes = providers.outputMap.glazewm?.bindingModes ?? [];
           const active = modes.some(m => m.name === 'sistema');
+          // Ícones redesenhados a cada abertura: desenhados só no arranque do Zebar (PC
+          // ocupado), alguns saíam incompletos ou vazios e ficavam assim até reiniciar.
+          if (active && !document.body.classList.contains('open')) drawIcons();
           document.body.classList.toggle('open', active);
           if (!active && (await win.isVisible())) {
             zebar.shellExec(PYW, ['-I', HELPER, 'layer-hide']).catch(console.error);
