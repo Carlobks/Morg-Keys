@@ -201,73 +201,88 @@ def _panel_do(op):
     """Aplica uma mudança do painel. Devolve (erro ou None)."""
     kind = op.get("op")
     apps_before, layout_before = _read_or_none(APPS_FILE), _read_or_none(LAYOUT_FILE)
-
     if kind in ("key", "unkey"):
-        key = _parse_key(str(op.get("key", "")))
-        if not key:
-            return "Tecla inválida."
-        lines = (apps_before or "").splitlines()
-        entries = _apps_entries(lines)
-        drop = {i for i, k, _ in entries if k == key}
-        if op.get("from"):  # vinha de outra tecla: sai de lá
-            src = _parse_key(str(op["from"]))
-            drop |= {i for i, k, _ in entries if k == src}
-        if kind == "key":
-            value = str(op.get("value", "")).strip()
-            if not value or "\n" in value or "\r" in value:
-                return "App inválida."
-        new = [l for i, l in enumerate(lines) if i not in drop]
-        if kind == "key":
-            new.append(f"{_key_text(key):<16} = {value}")
-        _panel_push_undo(apps_before or "", layout_before)
-        APPS_FILE.write_text("\n".join(new).rstrip("\n") + "\n", encoding="utf-8", newline="\n")
-        errors = _apps_apply_core(use_cache=True)
-        if errors:
-            APPS_FILE.write_text(apps_before or "", encoding="utf-8", newline="\n")
-            _panel_pop_undo()
-            # "linha 12: …" só faz sentido no apps.txt; no painel fica a explicação.
-            return "Não mudei nada: " + "; ".join(e.split(": ", 1)[-1] if e.startswith("linha ") else e
-                                                   for e in errors)
-        return None
-
+        return _panel_mudar_tecla(kind, op, apps_before, layout_before)
     if kind in ("ws-add", "ws-del", "ws-move"):
-        layout = _load_layout() or {"windows": []}
-        windows = layout.setdefault("windows", [])
-        if kind == "ws-add":
-            ws = str(op.get("ws", ""))
-            value = str(op.get("value", "")).strip()
-            if ws not in WORKSPACE_NAMES or not value:
-                return "Workspace ou app inválidos."
-            process, launch = _launch_for(value)
-            if not launch:
-                return f"Não encontrei a app '{value}' neste PC."
-            entry = {"workspace": ws, "process": process, "title_hash": "", "label": str(op.get("label") or value),
-                     "value": value, "launch": launch}
-            windows.append({k: v for k, v in entry.items() if v is not None})
-        else:
-            i = op.get("index")
-            if not isinstance(i, int) or not 0 <= i < len(windows):
-                return "Essa app já não está nesse workspace."
-            # O painel diz o que julga estar nesse índice: se não bater (pedidos em
-            # fila, Alt+Esc G entretanto), não mexe na entrada errada.
-            if "expect_ws" in op and (windows[i].get("workspace") != op["expect_ws"]
-                                      or _entry_label(windows[i]) != op.get("expect_label")):
-                return "O painel estava desatualizado: veja de novo e repita."
-            if kind == "ws-move" and windows[i].get("workspace") == str(op.get("ws", "")):
-                return None  # já está nesse workspace: nada a fazer (nem passo de desfazer)
-            if kind == "ws-del":
-                windows.pop(i)
-            else:
-                ws = str(op.get("ws", ""))
-                if ws not in WORKSPACE_NAMES:
-                    return "Workspace inválido."
-                windows[i]["workspace"] = ws
-        _panel_push_undo(apps_before or "", layout_before)
-        layout.setdefault("saved_at", int(time.time()))
-        _save_layout(layout)
-        return None
-
+        return _panel_mudar_workspace(kind, op, apps_before, layout_before)
     return "Pedido desconhecido."
+
+
+def _panel_mudar_tecla(kind, op, apps_before, layout_before):
+    """key: põe a app numa tecla (tirando-a da tecla `from`); unkey: tira a tecla. Aplica logo."""
+    key = _parse_key(str(op.get("key", "")))
+    if not key:
+        return "Tecla inválida."
+    lines = (apps_before or "").splitlines()
+    entries = _apps_entries(lines)
+    drop = {i for i, k, _ in entries if k == key}
+    if op.get("from"):  # vinha de outra tecla: sai de lá
+        src = _parse_key(str(op["from"]))
+        drop |= {i for i, k, _ in entries if k == src}
+    if kind == "key":
+        value = str(op.get("value", "")).strip()
+        if not value or "\n" in value or "\r" in value:
+            return "App inválida."
+    new = [l for i, l in enumerate(lines) if i not in drop]
+    if kind == "key":
+        new.append(f"{_key_text(key):<16} = {value}")
+    _panel_push_undo(apps_before or "", layout_before)
+    APPS_FILE.write_text("\n".join(new).rstrip("\n") + "\n", encoding="utf-8", newline="\n")
+    errors = _apps_apply_core(use_cache=True)
+    if errors:
+        APPS_FILE.write_text(apps_before or "", encoding="utf-8", newline="\n")
+        _panel_pop_undo()
+        # "linha 12: …" só faz sentido no apps.txt; no painel fica a explicação.
+        return "Não mudei nada: " + "; ".join(e.split(": ", 1)[-1] if e.startswith("linha ") else e
+                                               for e in errors)
+    return None
+
+
+def _panel_mudar_workspace(kind, op, apps_before, layout_before):
+    """ws-add: app nova num workspace; ws-del: tira; ws-move: muda de workspace. Grava o layout.json."""
+    layout = _load_layout() or {"windows": []}
+    windows = layout.setdefault("windows", [])
+    if kind == "ws-add":
+        erro = _panel_acrescentar_app(op, windows)
+        if erro:
+            return erro
+    else:
+        i = op.get("index")
+        if not isinstance(i, int) or not 0 <= i < len(windows):
+            return "Essa app já não está nesse workspace."
+        # O painel diz o que julga estar nesse índice: se não bater (pedidos em
+        # fila, Alt+Esc G entretanto), não mexe na entrada errada.
+        if "expect_ws" in op and (windows[i].get("workspace") != op["expect_ws"]
+                                  or _entry_label(windows[i]) != op.get("expect_label")):
+            return "O painel estava desatualizado: veja de novo e repita."
+        if kind == "ws-move" and windows[i].get("workspace") == str(op.get("ws", "")):
+            return None  # já está nesse workspace: nada a fazer (nem passo de desfazer)
+        if kind == "ws-del":
+            windows.pop(i)
+        else:
+            ws = str(op.get("ws", ""))
+            if ws not in WORKSPACE_NAMES:
+                return "Workspace inválido."
+            windows[i]["workspace"] = ws
+    _panel_push_undo(apps_before or "", layout_before)
+    layout.setdefault("saved_at", int(time.time()))
+    _save_layout(layout)
+    return None
+
+
+def _panel_acrescentar_app(op, windows):
+    """Acrescenta a `windows` a entrada de uma app nova num workspace; devolve o erro ou None."""
+    ws = str(op.get("ws", ""))
+    value = str(op.get("value", "")).strip()
+    if ws not in WORKSPACE_NAMES or not value:
+        return "Workspace ou app inválidos."
+    process, launch = _launch_for(value)
+    if not launch:
+        return f"Não encontrei a app '{value}' neste PC."
+    entry = {"workspace": ws, "process": process, "title_hash": "", "label": str(op.get("label") or value),
+             "value": value, "launch": launch}
+    windows.append({k: v for k, v in entry.items() if v is not None})
+    return None
 
 
 def _panel_pop_undo():

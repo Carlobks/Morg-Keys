@@ -66,71 +66,59 @@ from morg_janelas_zebar import (  # noqa: E402
 from morg_painel import panel_cli, panel_hide, panel_show  # noqa: E402
 
 
+# Comandos sem argumentos variáveis: palavras do comando -> função.
+COMANDOS = {
+    ("awake", "status"): lambda: print(awake_status()),
+    ("awake", "toggle"): lambda: print(awake_toggle()),
+    ("awake", "off"): lambda: print(awake_off()),
+    ("awake-hold",): awake_hold,
+    ("quick",): quick_settings,
+    ("guide",): guide,
+    ("guide-hide",): guide_hide,
+    ("guide-ensure-hidden",): guide_ensure_hidden,
+    ("bar", "toggle"): bar_toggle,
+    ("restore-min",): restore_minimized,
+    ("layout-save",): layout_save,
+    ("layout-restore",): layout_restore,
+    ("boot",): boot,
+    ("splash-ready",): splash_ready,
+    ("apps-apply",): apps_apply,
+    ("apps-apply", "--skip-missing"): lambda: apps_apply(skip_missing=True),
+    ("apps-edit",): apps_edit,
+    ("panel",): panel_show,
+    ("panel-hide",): panel_hide,
+    ("layer-show",): layer_show,
+    ("layer-hide",): layer_hide,
+    ("on-exit",): on_exit,
+    ("after-exit",): after_exit,
+    ("lock",): lock,
+}
+
+
 def main(argv):
     cmd = argv[1:] or [""]
-    if cmd == ["awake", "status"]:
-        print(awake_status())
-    elif cmd == ["awake", "toggle"]:
-        print(awake_toggle())
-    elif cmd == ["awake", "off"]:
-        print(awake_off())
-    elif cmd == ["awake-hold"]:
-        awake_hold()
-    elif cmd == ["quick"]:
-        quick_settings()
-    elif cmd == ["guide"]:
-        guide()
-    elif cmd == ["guide-hide"]:
-        guide_hide()
-    elif cmd == ["guide-ensure-hidden"]:
-        guide_ensure_hidden()
-    elif cmd == ["bar", "toggle"]:
-        bar_toggle()
-    elif cmd == ["restore-min"]:
-        restore_minimized()
-    elif cmd == ["layout-save"]:
-        layout_save()
-    elif cmd == ["layout-restore"]:
-        layout_restore()
-    elif cmd == ["boot"]:
-        boot()
-    elif cmd == ["splash-ready"]:
-        splash_ready()
+    if tuple(cmd) in COMANDOS:
+        COMANDOS[tuple(cmd)]()
     elif cmd[0] == "animacao" and len(cmd) <= 2:
-        if len(cmd) == 2 and cmd[1] == "preview":
-            animacao_preview()
-        elif len(cmd) == 2 and cmd[1] == "tap":
-            animacao_tap()
-        else:
-            animacao_set(cmd[1] if len(cmd) == 2 and cmd[1] != "next" else None)
-    elif cmd == ["apps-apply"]:
-        apps_apply()
-    elif cmd == ["apps-apply", "--skip-missing"]:
-        apps_apply(skip_missing=True)
-    elif cmd == ["apps-edit"]:
-        apps_edit()
-    elif cmd == ["panel"]:
-        panel_show()
-    elif cmd == ["panel-hide"]:
-        panel_hide()
+        _animacao(cmd)
     elif cmd[0] == "panel":
         panel_cli(cmd[1:])
-    elif cmd == ["layer-show"]:
-        layer_show()
-    elif cmd == ["layer-hide"]:
-        layer_hide()
-    elif cmd == ["on-exit"]:
-        on_exit()
-    elif cmd == ["after-exit"]:
-        after_exit()
-    elif cmd == ["lock"]:
-        lock()
     elif len(cmd) == 2 and cmd[0] == "power" and cmd[1] in ("reboot", "shutdown"):
         power(cmd[1])
     else:
         print(__doc__)
         return 2
     return 0
+
+
+def _animacao(cmd):
+    """animacao | animacao preview | animacao tap | animacao next | animacao <nome>."""
+    if len(cmd) == 2 and cmd[1] == "preview":
+        animacao_preview()
+    elif len(cmd) == 2 and cmd[1] == "tap":
+        animacao_tap()
+    else:
+        animacao_set(cmd[1] if len(cmd) == 2 and cmd[1] != "next" else None)
 
 
 if __name__ == "__main__":

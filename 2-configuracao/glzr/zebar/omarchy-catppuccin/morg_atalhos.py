@@ -145,16 +145,25 @@ def _apps_apply_core(skip_missing=False, use_cache=False):
     """Valida apps.txt e, se estiver tudo bem, escreve o bloco das apps no
     config.yaml e recarrega o GlazeWM. Devolve a lista de erros ([] = aplicado;
     com erros não muda nada). use_cache: lista do menu Iniciar em cache (painel)."""
-    def reload_and_exit():
-        _glaze("command", "wm-reload-config")
-        return []
-
     try:
         lines = APPS_FILE.read_text(encoding="utf-8-sig").splitlines()
         config = GLAZE_CONFIG.read_text(encoding="utf-8")
     except OSError as err:
         return [f"Não consegui ler os ficheiros: {err}"]
 
+    errors, entries, skipped = _apps_validar(lines, config, skip_missing, use_cache)
+    if skipped:
+        APPS_FILE.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    if errors:
+        return errors
+    _apps_escrever_bloco(config, entries)
+    _glaze("command", "wm-reload-config")
+    return []
+
+
+def _apps_validar(lines, config, skip_missing, use_cache):
+    """Lê as linhas do apps.txt: (erros, [(tecla, app, comando)], houve linhas comentadas).
+    Com skip_missing, comenta em `lines` as apps que não existem neste PC."""
     fixed = _fixed_bindings(config)
     start_apps = None
     errors, entries, used = [], [], {}
@@ -196,12 +205,11 @@ def _apps_apply_core(skip_missing=False, use_cache=False):
             continue
         used[key] = n
         entries.append((key, right.strip(), command))
+    return errors, entries, skipped
 
-    if skipped:
-        APPS_FILE.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    if errors:
-        return errors
 
+def _apps_escrever_bloco(config, entries):
+    """Escreve o bloco gerado (entre APPS_BEGIN e APPS_END) no config.yaml, se mudar."""
     block = [APPS_BEGIN]
     for key, label, command in entries:
         block.append(f"  # {label}")
@@ -218,7 +226,6 @@ def _apps_apply_core(skip_missing=False, use_cache=False):
         tmp = GLAZE_CONFIG.with_suffix(".tmp")
         tmp.write_text(new_config, encoding="utf-8")
         os.replace(tmp, GLAZE_CONFIG)
-    return reload_and_exit()
 
 
 def apps_edit():
