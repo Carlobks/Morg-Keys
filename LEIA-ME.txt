@@ -16,7 +16,7 @@ INSTALAR
 Requisitos: Windows 11; pasta do utilizador sem espaços (C:\Users\nome);
 internet durante a instalação (os programas que faltem são descarregados dos
 sites oficiais e verificados). Sem internet: ponha os instaladores em
-1-instaladores\ antes (nomes no COMO-FOI-FEITO.md, secção 7).
+1-instaladores\ antes (nomes em docs\instalacao.md, secção 7).
 
 DEPOIS
   Alt+K      guia com todos os atalhos
@@ -29,6 +29,6 @@ DEPOIS
 Programas .bat ao iniciar: Documentos\Guia de Atalhos\arranque.txt.
 
 Tutorial completo: Tutorial.html (abre no navegador).
-Para o TI ou outro agente de IA manter/refazer: COMO-FOI-FEITO.md
+Para o TI ou outro agente de IA manter/refazer: docs\README.md
 Desinstalar: DESINSTALAR.cmd (não apaga nada de forma definitiva).
 Licença: GPL-3.0 (ver LICENSE e LICENCAS.txt).

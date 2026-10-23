@@ -1385,7 +1385,7 @@ ARRANQUE_FILE = HERE / "guia" / "arranque.txt"
 # Animações do ecrã de arranque: nome -> (rótulo, imagem da cortina nativa, largura, altura).
 # A imagem é o 1.º quadro da animação, no mesmo tamanho e sítio (centro a ANIM_CY da altura)
 # em que o splash.html a desenha: assim a passagem cortina -> animação não se nota.
-# Nova animação: entrada aqui + bloco data-anim no splash.html + BMP (ver COMO-FOI-FEITO.md).
+# Nova animação: entrada aqui + bloco data-anim no splash.html + BMP (ver docs/receitas.md, receita 5b).
 ANIMACOES = {
     "cafe": ("Café", "cafe.bmp", 280, 280),
 }

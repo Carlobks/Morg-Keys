@@ -55,7 +55,7 @@ Tudo por **escolher e enviar** (rato ou só teclado), num painel leve no mesmo e
 - `zpack.json`: widget `apps` + permissões; `settings.json`: pré-carregar `apps`.
 - `config.yaml`: `Alt+Esc, C` → sair da camada, esconder o painel do sistema, `panel`.
 - `sistema.html` e `guia.html`: "C — Apps e arranque".
-- Documentação: `COMO-FOI-FEITO.md`, `Tutorial.html`, `LEIA-ME.txt`, `README.md`.
+- Documentação: `docs/` (arquitetura, armadilhas, receitas), `Tutorial.html`, `LEIA-ME.txt`, `README.md`.
 
 ## Verificação
 1. Estática: AST dos `.ps1`, `compile()` do Python, JSON válido, `argsRegex` contra os argumentos reais.

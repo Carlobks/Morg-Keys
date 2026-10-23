@@ -24,7 +24,7 @@ O instalador descarrega o que faltar dos sites oficiais e verifica cada ficheiro
 | Python 3.11.9 | [python.org](https://www.python.org/downloads/release/python-3119/) | SHA-256 fixo |
 | Visual C++ 2015-2022 x64 | [Microsoft](https://aka.ms/vs/17/release/vc_redist.x64.exe) | Assinatura digital da Microsoft |
 
-Sem internet: ponha os instaladores em `1-instaladores\` antes de correr (nomes em [COMO-FOI-FEITO.md §7](COMO-FOI-FEITO.md)).
+Sem internet: ponha os instaladores em `1-instaladores\` antes de correr (nomes em [docs/instalacao.md §7](docs/instalacao.md)).
 
 ## Usar
 
@@ -39,10 +39,10 @@ Sem internet: ponha os instaladores em `1-instaladores\` antes de correr (nomes 
 Sem editar ficheiros: os atalhos e as apps do arranque mudam-se no painel `Alt+Esc`, `C`. Os programas `.bat` ao iniciar ficam em `Documentos\Guia de Atalhos\arranque.txt`.
 
 - **Guia completo:** [Tutorial.html](Tutorial.html)
-- **Como funciona por dentro** (para quem mantém, ou para um agente de IA): [COMO-FOI-FEITO.md](COMO-FOI-FEITO.md)
+- **Como funciona por dentro** (para quem mantém, ou para um agente de IA): [docs/README.md](docs/README.md)
 - **Desinstalar:** `DESINSTALAR.cmd` (não apaga nada de forma definitiva)
 
-> ⚠️ Nunca arranque o GlazeWM ou o Zebar a partir de um terminal do Claude Code ou de outro agente: os programas herdam o ambiente desse terminal. Ver a "Regra n.º 1" no [COMO-FOI-FEITO.md](COMO-FOI-FEITO.md).
+> ⚠️ Nunca arranque o GlazeWM ou o Zebar a partir de um terminal do Claude Code ou de outro agente: os programas herdam o ambiente desse terminal. Ver a armadilha A2 em [docs/armadilhas.md](docs/armadilhas.md).
 
 ## Licença
 

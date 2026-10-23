@@ -117,7 +117,7 @@
 ├─ <b>INSTALAR.cmd</b> <span class="c">← duplo clique para instalar</span><br>
 ├─ DESINSTALAR.cmd <span class="c">← desfaz tudo (sem apagar nada de vez)</span><br>
 ├─ Tutorial.html <span class="c">← este documento</span><br>
-├─ README.md · LEIA-ME.txt · LICENSE · LICENCAS.txt · COMO-FOI-FEITO.md · CLAUDE.md <span class="c">← para o TI / agentes de IA</span><br>
+├─ README.md · LEIA-ME.txt · LICENSE · LICENCAS.txt · docs/ · CLAUDE.md <span class="c">← para o TI / agentes de IA</span><br>
 ├─ <span class="d">imagens\</span> <span class="c">fotografias dos ecrãs, usadas neste tutorial</span><br>
 ├─ <span class="d">1-instaladores\</span> <span class="c">fonte JetBrainsMono NF; os instaladores (GlazeWM 3.10.1 + Zebar 3.3.1, Python 3.11.9, Visual C++) são descarregados para aqui na instalação</span><br>
 ├─ <span class="d">2-configuracao\</span> <span class="c">modelos da configuração (a pasta do utilizador é preenchida na instalação)</span><br>
@@ -131,7 +131,7 @@
   <li><b>Tenha à mão uma conta de administrador.</b> O Windows pede-a <i>uma vez</i> (janela UAC) para instalar os programas. Se já estiverem instalados, não pede.</li>
   <li><b>A pasta do utilizador não pode ter espaços</b> (ex.: <code>C:\Users\joao</code> serve, <code>C:\Users\Joao Silva</code> não). O instalador verifica.</li>
   <li><b>Copie esta pasta para o PC</b> (ex.: Transferências). Não instale a partir de uma pasta de rede.</li>
-  <li><b>Internet durante a instalação</b>, para descarregar os programas que faltem (cerca de 80 MB). Sem internet: ponha antes os instaladores em <code>1-instaladores\</code> com os nomes indicados no <code>COMO-FOI-FEITO.md</code> (§7).</li>
+  <li><b>Internet durante a instalação</b>, para descarregar os programas que faltem (cerca de 80 MB). Sem internet: ponha antes os instaladores em <code>1-instaladores\</code> com os nomes indicados em <code>docs/instalacao.md</code> (§7).</li>
   <li>Espaço: cerca de 300 MB.</li>
 </ul>
 
@@ -308,7 +308,7 @@ bat = C:\Scripts\copias.bat</code></pre>
   <li><b>tocar</b> <kbd>E</kbd>: passa à animação seguinte. O painel fica aberto e mostra qual está escolhida (“Animação: Café”), por isso pode ir tocando até chegar à que quer;</li>
   <li><b>segurar</b> <kbd>E</kbd>: ao largar a tecla, o painel fecha e a animação escolhida aparece uns segundos, com etapas de exemplo, para ver como fica.</li>
 </ul>
-<p>Fica gravado no <code>arranque.txt</code>. Também pode escrever o nome no ficheiro (<code>animacao = cafe</code>). Por agora há uma só animação, por isso tocar <kbd>E</kbd> não muda nada; segurar mostra-a. O <code>COMO-FOI-FEITO.md</code> explica como acrescentar outras.</p>
+<p>Fica gravado no <code>arranque.txt</code>. Também pode escrever o nome no ficheiro (<code>animacao = cafe</code>). Por agora há uma só animação, por isso tocar <kbd>E</kbd> não muda nada; segurar mostra-a. O <code>docs/receitas.md</code> explica como acrescentar outras.</p>
 
 <h3>Programas .bat ao iniciar</h3>
 <p>Cada linha <code>bat = …</code> é um programa que corre <b>escondido</b> quando o PC liga (sem janela preta), com um ícone na área de notificação (junto ao relógio, nos ícones ocultos). Formato:</p>
@@ -379,7 +379,7 @@ bat = C:\Scripts\copias.bat</code></pre>
 <p>Os programas continuam instalados. Para os remover: Definições › Aplicações › Aplicações instaladas › GlazeWM, Python 3.11 e Microsoft Visual C++ (este último pode ser usado por outros programas, por isso é melhor deixá-lo).</p>
 
 <h2 id="tecnico">Notas técnicas (TI)</h2>
-<p>O documento completo para o TI, ou para um agente de IA manter ou refazer tudo, é o <code>COMO-FOI-FEITO.md</code> nesta pasta: arquitetura, cada ficheiro, o arranque passo a passo, a instalação à mão, a origem de cada componente, as armadilhas e as receitas de alteração. Resumo:</p>
+<p>O documento completo para o TI, ou para um agente de IA manter ou refazer tudo, está na pasta <code>docs/</code> (comece por <code>docs/README.md</code>): arquitetura, cada ficheiro, o arranque passo a passo, a instalação à mão, a origem de cada componente, as armadilhas e as receitas de alteração. Resumo:</p>
 <ul>
   <li><b>Onde fica tudo:</b> <code>%USERPROFILE%\.glzr\</code>. Lá estão <code>glazewm\config.yaml</code>, <code>zebar\settings.json</code> e o único pack do Zebar, <code>omarchy-catppuccin</code> (barra na raiz, guia e painel em <code>guia\</code>, ecrã de arranque em <code>arranque\</code>, uma só cópia do cliente do Zebar em <code>vendor\</code>). O <code>bar_helper.py</code> é o ajudante de tudo (arranque, café, guia, disposição, apps), e o <code>bat_tray.py</code> corre cada <code>.bat</code> com o seu ícone. As escolhas do utilizador estão em <code>zebar\omarchy-catppuccin\guia\apps.txt</code> e <code>arranque.txt</code>.</li>
   <li><b>Arranque por tarefa agendada, não pela chave Run:</b> o <code>glazewm.exe</code> tem <code>uiAccess=true</code> e só pode ser lançado por ShellExecute. A chave Run e o lançamento direto pelo Agendador falham (0x800702E4). Por isso a tarefa corre <code>pyw.exe -I bar_helper.py boot</code>, que lança o GlazeWM por ShellExecute.</li>

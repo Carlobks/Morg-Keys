@@ -38,6 +38,16 @@ class FicheirosDeTextoIntactos(unittest.TestCase):
                 texto = (RAIZ_REPOSITORIO / caminho).read_text(encoding="utf-8-sig")
                 self.assertGreaterEqual(texto.count("\n"), 2, "sem quebras de linha: foi estragado?")
 
+    def test_sem_caracteres_de_controlo(self):
+        # Regressão de 2026-10-23: texto escrito por uma string "…" do PowerShell perdeu as crases e
+        # transformou `a / `v / `0 em caracteres invisíveis (campainha, tabulação vertical, nulo) — A28.
+        proibidos = {chr(c) for c in range(32)} - {"\n", "\r", "\t"}
+        for caminho in ficheiros_de_texto_rastreados():
+            with self.subTest(ficheiro=caminho):
+                texto = (RAIZ_REPOSITORIO / caminho).read_text(encoding="utf-8-sig")
+                encontrados = sorted({hex(ord(c)) for c in texto if c in proibidos})
+                self.assertEqual(encontrados, [], "caracteres de controlo no ficheiro")
+
     def test_nenhuma_linha_e_absurdamente_longa(self):
         for caminho in ficheiros_de_texto_rastreados():
             with self.subTest(ficheiro=caminho):
