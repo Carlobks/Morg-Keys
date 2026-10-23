@@ -92,6 +92,21 @@ def _running_images():
     return names
 
 
+def _norm(processo):
+    """O GlazeWM e o AppID nem sempre usam as mesmas maiúsculas."""
+    return (processo or "").lower()
+
+
+class _Restauro:
+    """Estado partilhado pelas fases do restauro: janelas já colocadas e se alguma app foi aberta."""
+
+    def __init__(self, layout, log, on_launched, on_placed):
+        self.layout, self.log, self.on_launched, self.on_placed = layout, log, on_launched, on_placed
+        self.entries = list(layout.get("windows", []))
+        self.placed = set()
+        self.launched = False
+
+
 def _restore(layout, log, on_launched=None, on_placed=None, wait_s=10, poll=0.25):
     """Abre as apps gravadas que faltem e põe cada janela no seu workspace,
     uma só vez por janela. Devolve as entradas que ficaram por colocar.
@@ -102,110 +117,135 @@ def _restore(layout, log, on_launched=None, on_placed=None, wait_s=10, poll=0.25
       do prazo (ou quando já há tantas janelas da app como entradas) aceita
       "qualquer janela da app".
     """
-    entries = list(layout.get("windows", []))
-    norm = lambda p: (p or "").lower()  # o GlazeWM e o AppID nem sempre usam as mesmas maiúsculas
-    launched = False
-    placed = set()
-    learned = False
+    r = _Restauro(layout, log, on_launched, on_placed)
+    _restore_aprender_processos(r, poll)
+    running = _running_images()
+    windows_now = [(ws, w) for ws, w in _windows_by_workspace(_workspaces() or []) if w["id"] not in r.placed]
+    have_windows = {_norm(w["processName"]) for _, w in windows_now}
+    legacy = _restore_abrir_antigas(r, running, have_windows)
+    _restore_abrir_do_painel(r, legacy, windows_now, running, have_windows)
+    pending = [e for e in r.entries if e.get("process") and not e.pop("_placed", False)]
+    lost = [e for e in r.entries if not e.get("process")]  # nunca apareceram: ficam por colocar
+    return _restore_colocar(r, pending, wait_s, poll) + lost
 
+
+def _restore_aprender_processos(r, poll):
     # 1.º Apps do painel cujo processo ainda não se sabe: abrem-se ANTES de tudo o
     # resto, uma de cada vez, e ficam com a primeira janela nova que apareça e que
     # não seja de um processo de outra entrada (senão "aprendiam" a janela errada).
-    others = {norm(e.get("process")) for e in entries if e.get("process")}
-    for entry in [e for e in entries if e.get("launch") and not e.get("process")]:
+    others = {_norm(e.get("process")) for e in r.entries if e.get("process")}
+    learned = False
+    for entry in [e for e in r.entries if e.get("launch") and not e.get("process")]:
         before = {w["id"] for _, w in _windows_by_workspace(_workspaces() or [])}
-        if not _shell_open(entry["launch"], log):
+        if not _shell_open(entry["launch"], r.log):
             continue
-        launched = True
-        deadline = time.monotonic() + 12
-        while time.monotonic() < deadline:
-            time.sleep(poll)
-            new = [(ws, w) for ws, w in _windows_by_workspace(_workspaces() or [])
-                   if w["id"] not in before and w["id"] not in placed and norm(w["processName"]) not in others]
-            if new:
-                ws, win = new[0]
-                entry["process"] = win["processName"]
-                others.add(norm(win["processName"]))
-                learned = True
-                if ws != entry["workspace"]:
-                    _glaze("command", "--id", win["id"], "move", "--workspace", entry["workspace"])
-                placed.add(win["id"])
-                entry["_placed"] = True
-                log(f"aprendi {_entry_label(entry)} = {entry['process']}; ficou no {entry['workspace']}")
-                if on_placed:
-                    on_placed(entry)
-                break
+        r.launched = True
+        if _restore_esperar_janela_nova(r, entry, before, others, poll):
+            learned = True
         else:
-            log(f"{_entry_label(entry)}: nenhuma janela nova em 12 s")
+            r.log(f"{_entry_label(entry)}: nenhuma janela nova em 12 s")
     if learned:
-        _save_layout(layout)
+        _save_layout(r.layout)
 
-    running = _running_images()
-    windows_now = [(ws, w) for ws, w in _windows_by_workspace(_workspaces() or []) if w["id"] not in placed]
-    have_windows = {norm(w["processName"]) for _, w in windows_now}
+
+def _restore_esperar_janela_nova(r, entry, before, others, poll):
+    """Espera (até 12 s) pela 1.ª janela nova que não seja de outra entrada; aprende o processo."""
+    deadline = time.monotonic() + 12
+    while time.monotonic() < deadline:
+        time.sleep(poll)
+        new = [(ws, w) for ws, w in _windows_by_workspace(_workspaces() or [])
+               if w["id"] not in before and w["id"] not in r.placed and _norm(w["processName"]) not in others]
+        if new:
+            ws, win = new[0]
+            entry["process"] = win["processName"]
+            others.add(_norm(win["processName"]))
+            if ws != entry["workspace"]:
+                _glaze("command", "--id", win["id"], "move", "--workspace", entry["workspace"])
+            r.placed.add(win["id"])
+            entry["_placed"] = True
+            r.log(f"aprendi {_entry_label(entry)} = {entry['process']}; ficou no {entry['workspace']}")
+            if r.on_placed:
+                r.on_placed(entry)
+            return True
+    return False
+
+
+def _restore_abrir_antigas(r, running, have_windows):
+    """Devolve as entradas antigas (sem "launch")."""
     # 2.º Entradas gravadas com Alt+Esc, G (sem "launch"): uma abertura por processo, pela tabela LAUNCH.
-    legacy = [e for e in entries if not e.get("launch") and e.get("process")]
+    legacy = [e for e in r.entries if not e.get("launch") and e.get("process")]
     for process in dict.fromkeys(e["process"] for e in legacy):
-        if norm(process) in have_windows or norm(process) in running or process not in LAUNCH:
+        if _norm(process) in have_windows or _norm(process) in running or process not in LAUNCH:
             continue
         try:
             os.startfile(LAUNCH[process])
-            launched = True
-            log(f"abri {process}")
-            if on_launched:
-                on_launched(process)
+            r.launched = True
+            r.log(f"abri {process}")
+            if r.on_launched:
+                r.on_launched(process)
         except OSError as err:
-            log(f"não consegui abrir {process}: {err}")
+            r.log(f"não consegui abrir {process}: {err}")
+    return legacy
 
+
+def _restore_abrir_do_painel(r, legacy, windows_now, running, have_windows):
     # 3.º Entradas do painel com processo conhecido: cada uma é uma janela; abre as que faltam.
     # As janelas que já existem contam primeiro para as entradas antigas do mesmo processo.
     count = {}
     for _, w in windows_now:
-        count[norm(w["processName"])] = count.get(norm(w["processName"]), 0) + 1
+        count[_norm(w["processName"])] = count.get(_norm(w["processName"]), 0) + 1
     for e in legacy:
-        if count.get(norm(e["process"]), 0) > 0:
-            count[norm(e["process"])] -= 1
-    for entry in [e for e in entries if e.get("launch") and e.get("process") and not e.get("_placed")]:
-        p = norm(entry["process"])
+        if count.get(_norm(e["process"]), 0) > 0:
+            count[_norm(e["process"])] -= 1
+    for entry in [e for e in r.entries if e.get("launch") and e.get("process") and not e.get("_placed")]:
+        p = _norm(entry["process"])
         if count.get(p, 0) > 0:
             count[p] -= 1  # já há uma janela desta app para esta entrada
             continue
         if p in running and p not in have_windows and not entry["launch"].get("args"):
             continue  # está a arrancar sozinha (ex.: Arranque do Windows): espera pela janela
-        if _shell_open(entry["launch"], log):
-            launched = True
-            if on_launched:
-                on_launched(entry["process"])
+        if _shell_open(entry["launch"], r.log):
+            r.launched = True
+            if r.on_launched:
+                r.on_launched(entry["process"])
 
-    pending = [e for e in entries if e.get("process") and not e.pop("_placed", False)]
-    lost = [e for e in entries if not e.get("process")]  # nunca apareceram: ficam por colocar
+
+def _restore_colocar(r, pending, wait_s, poll):
+    """Põe cada janela que aparecer no seu workspace; devolve as entradas que ficaram por colocar."""
     start = time.monotonic()
-    wait = max(wait_s, 40 if launched else 0)
+    wait = max(wait_s, 40 if r.launched else 0)
     while pending and time.monotonic() - start < wait:
         late = time.monotonic() - start > wait * 2 / 3
-        current = [(ws, w) for ws, w in _windows_by_workspace(_workspaces() or []) if w["id"] not in placed]
+        current = [(ws, w) for ws, w in _windows_by_workspace(_workspaces() or []) if w["id"] not in r.placed]
         for exact_only in (True, False):
             for entry in list(pending):
-                same_app = [(ws, w) for ws, w in current if norm(w["processName"]) == norm(entry["process"])]
-                wanted = sum(1 for e in pending if norm(e["process"]) == norm(entry["process"]))
-                match = next(((ws, w) for ws, w in same_app
-                              if _title_hash(w.get("title")) == entry.get("title_hash")), None)
-                if not match and not exact_only and same_app and (late or len(same_app) >= wanted):
-                    match = same_app[0]
+                match = _restore_janela_para(entry, current, pending, exact_only, late)
                 if not match:
                     continue
                 ws, win = match
                 if ws != entry["workspace"]:
                     _glaze("command", "--id", win["id"], "move", "--workspace", entry["workspace"])
-                    log(f"movi {entry['process']} do {ws} para o {entry['workspace']}")
-                placed.add(win["id"])
+                    r.log(f"movi {entry['process']} do {ws} para o {entry['workspace']}")
+                r.placed.add(win["id"])
                 current.remove(match)
                 pending.remove(entry)
-                if on_placed:
-                    on_placed(entry)
+                if r.on_placed:
+                    r.on_placed(entry)
         if pending:
             time.sleep(poll)
-    return pending + lost
+    return pending
+
+
+def _restore_janela_para(entry, current, pending, exact_only, late):
+    """A janela para esta entrada: a do mesmo título; ou (2.ª volta) qualquer uma da app, se for tarde
+    ou já houver tantas janelas da app como entradas por colocar."""
+    same_app = [(ws, w) for ws, w in current if _norm(w["processName"]) == _norm(entry["process"])]
+    wanted = sum(1 for e in pending if _norm(e["process"]) == _norm(entry["process"]))
+    match = next(((ws, w) for ws, w in same_app
+                  if _title_hash(w.get("title")) == entry.get("title_hash")), None)
+    if not match and not exact_only and same_app and (late or len(same_app) >= wanted):
+        match = same_app[0]
+    return match
 
 
 def _entry_label(entry):
