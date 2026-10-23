@@ -9,7 +9,7 @@ Configurar, **sem abrir ficheiros de texto nem correr comandos**:
 - os atalhos das apps (hoje: `apps.txt` + `Alt+Shift+R`);
 - que apps abrem em cada workspace no arranque (hoje: `layout.json`, gravado com `Alt+Esc, G`).
 
-Tudo por arrastar e largar, num painel leve no mesmo estilo do guia (`Alt+K`) e do painel do sistema (`Alt+Esc`).
+Tudo por **escolher e enviar** (rato ou só teclado), num painel leve no mesmo estilo do guia (`Alt+K`) e do painel do sistema (`Alt+Esc`).
 
 ## Decisões do utilizador
 
@@ -19,7 +19,8 @@ Tudo por arrastar e largar, num painel leve no mesmo estilo do guia (`Alt+K`) e 
 | Atalhos | **Teclado desenhado**: larga-se a app numa tecla → `Alt+Shift+tecla`. |
 | Arranque | **10 caixas de workspace**; larga-se a app numa caixa → abre lá no arranque. O `Alt+Esc, G` continua (grava o arranjo atual e substitui o do painel). |
 | Abrir | `Alt+Esc, C` (deixa de abrir o `apps.txt` no editor). |
-| Aplicar | **Logo a cada arrasto**, com botão **Desfazer**. |
+| Aplicar | **Logo a cada envio**, com botão **Desfazer**. |
+| Interação (2026-10-22) | **Sem arrastar**: escolhe-se uma app (rato, ou ↑ ↓ e Enter) e aparece "Enviar … para" com os destinos acesos; clica-se no destino ou carrega-se a letra (tecla) / número (workspace), Del tira, Esc cancela. Motivo: o Tauri do Zebar não deixa o arrastar HTML5 funcionar no Windows. |
 | Âmbito v1 | Apps do menu Iniciar, Terminal / Claude Code / Explorador, e **sites** (`web:`). Programas `.bat` ficam para depois. |
 | Onde | Morg Keys (depois de instalado, substitui a versão anterior neste PC). |
 
@@ -36,9 +37,9 @@ Tudo por arrastar e largar, num painel leve no mesmo estilo do guia (`Alt+K`) e 
 ## Como funciona
 
 ### Página `painel/apps.html` (widget `apps`)
-- Esquerda: **Apps** (pesquisa + lista arrastável) e, por baixo, **+ site** (endereço → item `web:`).
-- Direita, em cima: **Atalhos** — teclado QWERTY de `Alt+Shift+letra` mais `Alt+Enter` e `Alt+Shift+Enter`. Teclas usadas pelo sistema aparecem bloqueadas. Cada tecla com app mostra o ícone e o nome; ✕ ao passar o rato limpa; arrastar de uma tecla para outra move.
-- Direita, em baixo: **Arranque** — workspaces 1–5 e 6–10, cada um uma caixa que aceita apps; ✕ tira; arrastar entre caixas move.
+- Esquerda: **Apps** (pesquisa + lista; ↑ ↓ e Enter escolhem) e, por baixo, **+ site** (endereço → item `web:`).
+- Direita, em cima: **Atalhos** — teclado QWERTY de `Alt+Shift+letra` mais `Alt+Enter` e `Alt+Shift+Enter`. Teclas usadas pelo sistema aparecem bloqueadas. Cada tecla com app mostra o ícone e o nome; ✕ ao passar o rato limpa; escolher uma tecla e enviá-la para outra move.
+- Direita, em baixo: **Arranque** — workspaces 1–5 e 6–10, cada um uma caixa que aceita apps; ✕ tira; escolher uma app de uma caixa e enviá-la para outra move.
 - Rodapé: estado ("Guardado", erros) e dica. Cabeçalho: título, dica, pesquisa, **Desfazer**, ✕.
 - Pré-carregado escondido com o Zebar (como o guia); `Esc`, ✕ ou clicar fora fecham.
 
@@ -59,5 +60,5 @@ Tudo por arrastar e largar, num painel leve no mesmo estilo do guia (`Alt+K`) e 
 ## Verificação
 1. Estática: AST dos `.ps1`, `compile()` do Python, JSON válido, `argsRegex` contra os argumentos reais.
 2. Lógica Python testada com cópias temporárias de `apps.txt`/`layout.json`/`config.yaml` (sem GlazeWM).
-3. Página aberta no navegador (modo `file:`, dados de exemplo) para ver o visual e os arrastos.
+3. Página aberta no navegador (modo `file:`, dados de exemplo) para ver o visual e testar escolher/enviar com rato e teclado.
 4. Teste real pelo utilizador depois de instalar (tarefa agendada / reinício).

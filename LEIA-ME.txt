@@ -1,4 +1,4 @@
-﻿MORG KEYS
+MORG KEYS
 =========
 
 Windows 11 conduzido pelo teclado, ao estilo do Omarchy: GlazeWM (janelas em
@@ -22,7 +22,7 @@ DEPOIS
   Alt+K      guia com todos os atalhos
   Alt+Esc    painel do sistema (Wi-Fi, som, bloquear, desligar...)
   Alt+Enter  terminal
-  Alt+Esc, C painel "Apps e arranque": arraste apps para teclas (atalhos)
+  Alt+Esc, C painel "Apps e arranque": escolha apps e envie-as para teclas (atalhos)
              e para workspaces (abrem lá ao ligar o PC)
   Alt+Esc, E animação do arranque: segurar mostra-a
 

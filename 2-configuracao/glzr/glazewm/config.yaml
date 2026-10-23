@@ -199,7 +199,7 @@ binding_modes:
         bindings: ['l']
       - commands: ['shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layout-save', 'wm-disable-binding-mode --name sistema', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layer-hide']
         bindings: ['g']
-      # Painel "Apps e arranque" (arrastar apps para teclas e workspaces). Sai da
+      # Painel "Apps e arranque" (escolher apps e enviá-las para teclas e workspaces). Sai da
       # camada primeiro: o painel tem de ficar com o foco (para Esc e pesquisa).
       - commands: ['wm-disable-binding-mode --name sistema', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layer-hide', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" panel']
         bindings: ['c']
@@ -221,8 +221,8 @@ binding_modes:
 keybindings:
   # --- Apps ---
   # Os atalhos das apps (Alt+Enter, Alt+Shift+letra) vêm de
-  # Documentos\Guia de Atalhos\apps.txt: edite lá (Alt+Esc, C) e carregue
-  # Alt+Shift+R. O bloco abaixo é escrito automaticamente.
+  # Documentos\Guia de Atalhos\apps.txt, que o painel Alt+Esc, C muda (ou à mão
+  # e depois Alt+Shift+R). O bloco abaixo é escrito automaticamente.
   # >>> apps: gerado a partir de apps.txt (Alt+Shift+R) — não editar aqui >>>
   # <<< apps <<<
   # O Raycast fica na tecla Win sozinha (configurado no próprio Raycast).

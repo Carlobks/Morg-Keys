@@ -32,7 +32,7 @@ Sem internet: ponha os instaladores em `1-instaladores\` antes de correr (nomes 
 |---|---|
 | `Alt+K` | Guia com todos os atalhos |
 | `Alt+Esc` | Painel do sistema (Wi-Fi, som, bloquear, desligar…) |
-| `Alt+Esc`, `C` | Painel **Apps e arranque**: arraste apps para teclas (atalhos) e para workspaces (abrem lá ao ligar o PC) |
+| `Alt+Esc`, `C` | Painel **Apps e arranque**: escolha apps (rato ou teclado) e envie-as para teclas (atalhos) e para workspaces (abrem lá ao ligar o PC) |
 | `Alt+Enter` | Terminal |
 | `Alt+1`…`Alt+0` | Workspaces |
 

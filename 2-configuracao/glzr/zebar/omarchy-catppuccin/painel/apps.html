@@ -185,13 +185,15 @@
       #list::-webkit-scrollbar-thumb, .right::-webkit-scrollbar-thumb { background: var(--surface1); border-radius: 4px; }
       #list .group { margin: 8px 4px 4px; font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--overlay0); }
       #list .group:first-child { margin-top: 0; }
-      #list.drop-remove { outline: 2px dashed color-mix(in srgb, var(--red) 70%, transparent); outline-offset: -2px; background: color-mix(in srgb, var(--red) 8%, transparent); }
+      /* Seleção (rato ou teclado): cursor = linha onde as setas estão; sel = escolhida para enviar. */
       .app {
         display: flex; align-items: center; gap: 10px;
         padding: 4px 6px; border-radius: 7px; font-size: 13px;
-        cursor: grab;
+        cursor: pointer;
       }
-      .app:hover { background: var(--surface0); }
+      .app:hover, .app.cursor { background: var(--surface0); }
+      .app.cursor { box-shadow: inset 2px 0 0 var(--green); }
+      .app.sel { background: color-mix(in srgb, var(--green) 18%, var(--surface0)); box-shadow: inset 2px 0 0 var(--green); }
       .app .ico { width: 22px; height: 22px; font-size: 12px; border-radius: 6px; }
       .app .lb { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       .app .used { font-size: 10.5px; color: var(--overlay0); }
@@ -230,10 +232,14 @@
       .key .what .ico { width: 18px; height: 18px; font-size: 11px; border-radius: 5px; }
       .key .what span:last-child { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       .key.free .what { color: var(--overlay0); }
-      .key.has { border-color: color-mix(in srgb, var(--k) 60%, transparent); cursor: grab; }
+      .key.has { border-color: color-mix(in srgb, var(--k) 60%, transparent); cursor: pointer; }
       .key.fixed { --k: var(--overlay0); opacity: 0.45; }
       .key.fixed .what { color: var(--overlay0); }
-      .key.over { --k: var(--green); background: color-mix(in srgb, var(--green) 12%, var(--crust)); }
+      /* A enviar: os destinos possíveis acendem (teclas livres ou ocupadas, workspaces). */
+      body.sending .key:not(.fixed), body.sending .box { cursor: pointer; }
+      body.sending .key:not(.fixed):not(.sel) { --k: var(--green); border-style: dashed; border-color: color-mix(in srgb, var(--green) 60%, transparent); }
+      body.sending .key:not(.fixed):hover, body.sending .box:hover { background: color-mix(in srgb, var(--green) 14%, var(--crust)); }
+      .key.sel, .chip.sel { outline: 2px solid var(--green); outline-offset: 1px; }
 
       .x {
         position: absolute; top: 3px; right: 3px;
@@ -258,7 +264,7 @@
         display: flex; flex-direction: column; gap: 4px;
       }
       .box.has { border-style: solid; }
-      .box.over { --k: var(--green); background: color-mix(in srgb, var(--green) 10%, var(--crust)); }
+      body.sending .box { --k: var(--green); border-color: color-mix(in srgb, var(--green) 60%, transparent); }
       .box .head { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--overlay0); margin-bottom: 2px; }
       .box .head kbd { --k: var(--mauve); }
       .box .hint { font-size: 11px; color: var(--overlay0); padding: 4px 2px; }
@@ -266,13 +272,23 @@
         position: relative;
         display: flex; align-items: center; gap: 6px;
         padding: 3px 24px 3px 4px; border-radius: 7px;
-        background: var(--mantle); font-size: 12px; cursor: grab;
+        background: var(--mantle); font-size: 12px; cursor: pointer;
       }
       .chip .ico { width: 18px; height: 18px; font-size: 11px; border-radius: 5px; }
       .chip span:nth-child(2) { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       .chip .x { top: 3px; right: 3px; }
 
-      .dragging { opacity: 0.4; }
+      body.busy main { pointer-events: none; }  /* um pedido de cada vez: nada muda por baixo dele */
+
+      /* Barra 'Enviar … para': aparece no lugar da dica quando há uma app escolhida. */
+      #send { display: none; align-items: center; gap: 7px; font-size: 12.5px; color: var(--text); }
+      #send .ico { width: 20px; height: 20px; font-size: 12px; border-radius: 6px; }
+      #send b { color: var(--green); font-weight: 600; max-width: 240px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      #send .opts { color: var(--subtext0); font-size: 12px; }
+      #send kbd { --k: var(--green); height: 20px; font-size: 11px; }
+      body.sending #send { display: flex; }
+      body.sending header .hint { display: none; }
+      #cancel { --k: var(--red); height: 26px; }
 
       footer {
         display: flex; align-items: center; gap: 10px;
@@ -290,7 +306,8 @@
     <div class="card">
       <header>
         <h1>Apps e arranque</h1>
-        <span class="hint">Arraste uma app para uma tecla ou para um workspace · <kbd>Esc</kbd> fecha</span>
+        <span class="hint">Escolha uma app e depois o destino: uma tecla ou um workspace · <kbd>Esc</kbd> fecha</span>
+        <span id="send"><span id="sendico"></span>Enviar <b id="sendname"></b> para… <span class="opts"><kbd>A</kbd>–<kbd>Z</kbd> tecla · <kbd>1</kbd>–<kbd>0</kbd> workspace · <kbd>Del</kbd> tirar · <kbd>Esc</kbd> cancelar</span><button id="cancel" class="btn" type="button">Cancelar</button></span>
         <span class="spacer"></span>
         <button id="undo" class="btn" title="Desfazer a última mudança (Ctrl+Z)" disabled><span class="ico" data-icon="984396"></span>Desfazer</button>
         <button id="close" class="close" title="Fechar (Esc)">✕</button>
@@ -320,7 +337,7 @@
       </main>
 
       <footer>
-        <span><b>Arrastar</b> para uma tecla ou workspace · <b>arrastar de volta</b> para a lista tira · cada mudança vale logo</span>
+        <span><b>Clique</b> numa app e depois no destino · teclado: <b>↑ ↓</b> e <b>Enter</b>, depois a <b>letra</b> ou o <b>número</b> · cada mudança vale logo</span>
         <span id="status"></span>
       </footer>
     </div>
@@ -411,7 +428,8 @@
       let startApps = [];          // [{name, value}] do menu Iniciar
       let extraSites = [];         // sites acrescentados nesta sessão (ainda sem tecla nem workspace)
       let call = null;             // (args) => Promise<objeto JSON> — Zebar ou exemplo
-      let dragging = false;
+      let sel = null;              // o que está escolhido para enviar (ou null)
+      let cursor = 0;              // linha da lista onde estão as setas
 
       const KEY_ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
       const SPECIAL_KEYS = [['alt+enter', 'Alt Enter'], ['alt+shift+enter', 'Alt Shift Enter']];
@@ -428,6 +446,7 @@
       }
 
       // --- Desenho ---
+      // Todos os elementos escolhíveis têm data-kind (app | key | ws), data-value e data-label.
       function renderList() {
         const q = $('filter').value.trim().toLowerCase();
         const used = new Map();
@@ -440,57 +459,63 @@
           ['Sites', sites],
           ['Menu Iniciar', startApps.map(a => ({ value: a.value, label: a.name }))],
         ];
-        let n = 0;
         const html = groups.map(([title, items]) => {
           const shown = items.filter(hits);
-          n += shown.length;
           if (!shown.length) return '';
           return `<div class="group">${esc(title)}</div>` + shown.map(it => {
             const k = used.get(it.value.toLowerCase());
-            return `<div class="app" draggable="true" data-kind="app" data-value="${esc(it.value)}" data-label="${esc(it.label)}">` +
+            const isSel = sel?.kind === 'app' && sel.value === it.value;
+            return `<div class="app${isSel ? ' sel' : ''}" data-kind="app" data-value="${esc(it.value)}" data-label="${esc(it.label)}">` +
               `${ico(it.value)}<span class="lb">${esc(it.label)}</span>` +
               `${k ? `<span class="used">${esc(keyLong(k))}</span>` : ''}</div>`;
           }).join('');
         }).join('');
         $('list').innerHTML = html || `<div class="empty">${startApps.length ? 'Nenhuma app com esse nome.' : 'A carregar as apps do menu Iniciar…'}</div>`;
         $('count').textContent = startApps.length ? `${startApps.length} no menu Iniciar` : '';
+        cursor = Math.min(cursor, $('list').querySelectorAll('.app').length - 1);
+        paintCursor(false);
         drawIcons($('list'));
       }
 
       function keyHtml(id, cap, wide = false) {
         const fixed = state.fixed.includes(id);
         const has = state.keys.find(k => k.key === id);
-        const cls = ['key', wide && 'wide', fixed ? 'fixed' : has ? 'has' : 'free'].filter(Boolean).join(' ');
+        const isSel = sel?.kind === 'key' && sel.key === id;
+        const cls = ['key', wide && 'wide', fixed ? 'fixed' : has ? 'has' : 'free', isSel && 'sel'].filter(Boolean).join(' ');
         const what = fixed ? '<span class="ico" data-icon="983870" style="--ic:var(--overlay0)"></span><span>sistema</span>'
           : has ? `${ico(has.value)}<span>${esc(appLabel(has.value))}</span>` : '';
-        const drag = has && !fixed ? ` draggable="true" data-kind="key" data-value="${esc(has.value)}" data-label="${esc(appLabel(has.value))}"` : '';
-        return `<div class="${cls}" data-key="${id}"${drag} title="${esc(has ? `${cap}: ${appLabel(has.value)}` : fixed ? `${cap}: usado pelo sistema` : `${cap}: livre`)}">` +
+        const data = has && !fixed ? ` data-kind="key" data-value="${esc(has.value)}" data-label="${esc(appLabel(has.value))}"` : '';
+        return `<div class="${cls}" data-key="${id}"${data} title="${esc(has ? `${cap}: ${appLabel(has.value)}` : fixed ? `${cap}: usado pelo sistema` : `${cap}: livre`)}">` +
           `<span class="cap">${esc(cap)}</span><span class="what">${what}</span>` +
           `${has && !fixed ? '<button class="x" data-unkey="' + id + '" title="Tirar o atalho">✕</button>' : ''}</div>`;
       }
 
       function renderKeys() {
+        // Atalhos do apps.txt que não estão no teclado desenhado (ex.: Alt+B sem Shift) também aparecem.
+        const drawn = new Set([...KEY_ROWS.join('')].map(keyId).concat(SPECIAL_KEYS.map(([id]) => id)));
+        const extra = state.keys.filter(k => !drawn.has(k.key)).map(k => [k.key, keyLong(k.key).replace(/\+/g, ' ')]);
         $('kb').innerHTML =
           KEY_ROWS.map(r => `<div class="krow">${[...r].map(l => keyHtml(keyId(l), l)).join('')}</div>`).join('') +
-          `<div class="krow special">${SPECIAL_KEYS.map(([id, cap]) => keyHtml(id, cap, true)).join('')}</div>`;
+          `<div class="krow special">${[...SPECIAL_KEYS, ...extra].map(([id, cap]) => keyHtml(id, cap, true)).join('')}</div>`;
         drawIcons($('kb'));
       }
 
       function renderWorkspaces() {
-        const boxes = [];
-        for (let n = 1; n <= 10; n++) {
-          const ws = String(n);
+        // 1–10 sempre; outros (ex.: o scratchpad S, gravado com Alt+Esc G) só se tiverem apps.
+        const names = [...Array.from({ length: 10 }, (_, i) => String(i + 1)),
+                       ...[...new Set(state.workspaces.map(w => w.workspace))].filter(w => !/^([1-9]|10)$/.test(w))];
+        $('wsgrid').innerHTML = names.map(ws => {
           const items = state.workspaces.filter(w => w.workspace === ws);
-          boxes.push(`<div class="box${items.length ? ' has' : ''}" data-ws="${ws}">` +
-            `<div class="head"><kbd>${ws}</kbd><span>${items.length ? `${items.length} ${items.length === 1 ? 'app' : 'apps'}` : ''}</span></div>` +
+          return `<div class="box${items.length ? ' has' : ''}" data-ws="${esc(ws)}">` +
+            `<div class="head"><kbd>${esc(ws)}</kbd><span>${items.length ? `${items.length} ${items.length === 1 ? 'app' : 'apps'}` : ''}</span></div>` +
             (items.length ? items.map(w => {
               const value = w.value || w.process || w.label;
-              return `<div class="chip" draggable="true" data-kind="ws" data-index="${w.index}" data-value="${esc(w.value || '')}" data-label="${esc(w.label)}" title="${esc(w.label)}">` +
+              const isSel = sel?.kind === 'ws' && sel.index === w.index;
+              return `<div class="chip${isSel ? ' sel' : ''}" data-kind="ws" data-index="${w.index}" data-ws="${esc(ws)}" data-value="${esc(w.value || '')}" data-label="${esc(w.label)}" title="${esc(w.label)}">` +
                 `${ico(value)}<span>${esc(w.label)}</span><button class="x" data-wsdel="${w.index}" title="Não abrir no arranque">✕</button></div>`;
-            }).join('') : '<div class="hint">largue aqui</div>') +
-            '</div>');
-        }
-        $('wsgrid').innerHTML = boxes.join('');
+            }).join('') : '<div class="hint">vazio</div>') +
+            '</div>';
+        }).join('');
         drawIcons($('wsgrid'));
       }
 
@@ -523,6 +548,7 @@
       const b64 = s => btoa(String.fromCharCode(...new TextEncoder().encode(s)))
         .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
       const op = (o, okText) => request(['do', b64(JSON.stringify(o))], okText);
+      const busy = () => document.body.classList.contains('busy');
 
       async function loadAll() {
         await request(['state'], '');
@@ -534,78 +560,99 @@
         }
       }
 
-      // --- Arrastar e largar ---
-      let dragData = null;
-      document.addEventListener('dragstart', e => {
-        const el = e.target.closest?.('[draggable="true"]');
-        if (!el) return;
-        dragging = true;
-        dragData = { kind: el.dataset.kind, value: el.dataset.value, label: el.dataset.label,
-                     key: el.dataset.key, index: el.dataset.index !== undefined ? Number(el.dataset.index) : undefined };
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/plain', dragData.label || '');
-        el.classList.add('dragging');
-      });
-      document.addEventListener('dragend', e => {
-        e.target.closest?.('[draggable="true"]')?.classList.remove('dragging');
-        document.querySelectorAll('.over, .drop-remove').forEach(x => x.classList.remove('over', 'drop-remove'));
-        dragging = false;
-        dragData = null;
-      });
-
-      // Onde se pode largar o quê.
-      function targetOf(el) {
-        const key = el.closest?.('.key');
-        if (key && !key.classList.contains('fixed')) return { el: key, type: 'key' };
-        const box = el.closest?.('.box');
-        if (box) return { el: box, type: 'ws' };
-        const list = el.closest?.('#list');
-        if (list && dragData && dragData.kind !== 'app') return { el: list, type: 'remove' };
-        return null;
+      // --- Escolher e enviar (rato ou teclado; sem arrastar: o Zebar/Tauri não o deixa) ---
+      // 1) escolher: clique numa app da lista, numa tecla com app ou numa app de um workspace
+      //    (teclado: ↑ ↓ na lista e Enter); 2) destino: clique numa tecla ou num workspace
+      //    (teclado: letra = Alt+Shift+letra, 1–0 = workspace, Enter = Alt+Enter,
+      //    Shift+Enter = Alt+Shift+Enter, Del = tirar); Esc cancela.
+      function readSel(el) {
+        return { kind: el.dataset.kind, value: el.dataset.value, label: el.dataset.label,
+                 key: el.dataset.key, ws: el.dataset.ws,
+                 index: el.dataset.index !== undefined ? Number(el.dataset.index) : undefined };
       }
-      document.addEventListener('dragover', e => {
-        if (!dragData) return;
-        const t = targetOf(e.target);
-        document.querySelectorAll('.over, .drop-remove').forEach(x => x !== t?.el && x.classList.remove('over', 'drop-remove'));
-        if (!t) return;
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-        t.el.classList.add(t.type === 'remove' ? 'drop-remove' : 'over');
-      });
-      document.addEventListener('drop', e => {
-        const d = dragData;
-        const t = d && targetOf(e.target);
-        if (!t) return;
-        e.preventDefault();
-        t.el.classList.remove('over', 'drop-remove');
-        if (t.type === 'key') {
-          const key = t.el.dataset.key;
-          if (d.kind === 'key' && d.key === key) return;
-          if (!d.value) return setStatus('Esta app não tem um nome do menu Iniciar: arraste-a da lista.', 'err');
-          const o = { op: 'key', key, value: d.value };
-          if (d.kind === 'key') o.from = d.key;
-          op(o, `✓ ${appLabel(d.value)} em ${keyLong(key)}`);
-        } else if (t.type === 'ws') {
-          const ws = t.el.dataset.ws;
-          if (d.kind === 'ws') return op({ op: 'ws-move', index: d.index, ws }, `✓ Agora abre no workspace ${ws}`);
-          if (!d.value) return;
-          op({ op: 'ws-add', ws, value: d.value, label: d.label || appLabel(d.value) }, `✓ ${d.label || appLabel(d.value)} abre no workspace ${ws}`);
-        } else if (t.type === 'remove') {
-          if (d.kind === 'key') op({ op: 'unkey', key: d.key }, '✓ Atalho tirado');
-          if (d.kind === 'ws') op({ op: 'ws-del', index: d.index }, '✓ Já não abre no arranque');
+      function select(s) {
+        sel = s;
+        document.body.classList.toggle('sending', !!sel);
+        if (sel) {
+          $('sendico').innerHTML = ico(sel.value || sel.label);
+          $('sendname').textContent = sel.label || appLabel(sel.value);
+          drawIcons($('send'));
+          document.activeElement?.blur();
+        } else {
+          $('filter').focus();
         }
-      });
+        render();
+      }
+      const expect = s => ({ expect_ws: s.ws, expect_label: s.label });
 
-      // Botões ✕ e Desfazer.
+      function sendToKey(key) {
+        const s = sel;
+        if (!s) return;
+        if (state.fixed.includes(key)) return setStatus(`${keyLong(key)} é usado pelo sistema: escolha outra tecla.`, 'err');
+        select(null);
+        if (s.kind === 'key' && s.key === key) return;
+        if (!s.value) return setStatus('Esta app não tem um nome do menu Iniciar: escolha-a na lista.', 'err');
+        const o = { op: 'key', key, value: s.value };
+        if (s.kind === 'key') o.from = s.key;  // vinha de outra tecla: muda-se de lá
+        op(o, `✓ ${appLabel(s.value)} em ${keyLong(key)}`);
+      }
+      function sendToWorkspace(ws) {
+        const s = sel;
+        if (!s) return;
+        select(null);
+        if (s.kind === 'ws') {
+          if (s.ws === ws) return;
+          return op({ op: 'ws-move', index: s.index, ws, ...expect(s) }, `✓ Agora abre no workspace ${ws}`);
+        }
+        if (!s.value) return;
+        op({ op: 'ws-add', ws, value: s.value, label: s.label || appLabel(s.value) }, `✓ ${s.label || appLabel(s.value)} abre no workspace ${ws}`);
+      }
+      function removeSel() {
+        const s = sel;
+        if (!s) return;
+        select(null);
+        if (s.kind === 'key') return op({ op: 'unkey', key: s.key }, '✓ Atalho tirado');
+        if (s.kind === 'ws') return op({ op: 'ws-del', index: s.index, ...expect(s) }, '✓ Já não abre no arranque');
+        const k = state.keys.find(k => k.value.toLowerCase() === s.value.toLowerCase());
+        if (k) return op({ op: 'unkey', key: k.key }, `✓ ${s.label} já não tem atalho`);
+        setStatus(`${s.label} não tem atalho para tirar.`, 'err');
+      }
+
       document.addEventListener('click', e => {
+        if (busy()) return;
         const un = e.target.closest?.('[data-unkey]');
-        if (un) return op({ op: 'unkey', key: un.dataset.unkey }, '✓ Atalho tirado');
+        if (un) { select(null); return op({ op: 'unkey', key: un.dataset.unkey }, '✓ Atalho tirado'); }
         const del = e.target.closest?.('[data-wsdel]');
-        if (del) return op({ op: 'ws-del', index: Number(del.dataset.wsdel) }, '✓ Já não abre no arranque');
+        if (del) {
+          const chip = del.closest('.chip');
+          select(null);
+          return op({ op: 'ws-del', index: Number(del.dataset.wsdel), ...expect(readSel(chip)) }, '✓ Já não abre no arranque');
+        }
+        if (sel) {  // a escolher o destino
+          const key = e.target.closest?.('.key');
+          if (key) return sendToKey(key.dataset.key);
+          const box = e.target.closest?.('.box');
+          if (box) return sendToWorkspace(box.dataset.ws);
+        }
+        const item = e.target.closest?.('[data-kind]');
+        if (item) {
+          const s = readSel(item);
+          if (sel && sel.kind === s.kind && sel.value === s.value && sel.key === s.key && sel.index === s.index) return select(null);
+          return select(s);
+        }
+        if (sel && !e.target.closest?.('header, footer, #site')) select(null);  // clique no vazio cancela
       });
-      $('undo').addEventListener('click', () => request(['undo'], '✓ Desfeito'));
+      $('cancel').addEventListener('click', e => { e.stopPropagation(); select(null); });
+      $('undo').addEventListener('click', () => { select(null); request(['undo'], '✓ Desfeito'); });
 
-      // + site: o endereço vira um "app" web: que se arrasta como os outros.
+      // Cursor do teclado na lista (setas): a linha fica marcada; Enter escolhe-a.
+      function paintCursor(scroll = true) {
+        const items = [...$('list').querySelectorAll('.app')];
+        items.forEach((el, i) => el.classList.toggle('cursor', i === cursor));
+        if (scroll && items[cursor]) items[cursor].scrollIntoView({ block: 'nearest' });
+      }
+
+      // + site: o endereço vira um "app" web: que se escolhe como os outros.
       $('site').addEventListener('submit', e => {
         e.preventDefault();
         let url = $('url').value.trim();
@@ -616,10 +663,10 @@
         if (!extraSites.includes(value)) extraSites.push(value);
         $('url').value = '';
         $('filter').value = '';
-        renderList();
-        setStatus(`${appLabel(value)} está na lista (em "Sites"): arraste-o.`, 'ok');
+        select({ kind: 'app', value, label: appLabel(value) });  // já fica escolhido: falta o destino
+        setStatus(`${appLabel(value)}: escolha agora uma tecla ou um workspace.`, 'ok');
       });
-      $('filter').addEventListener('input', renderList);
+      $('filter').addEventListener('input', () => { cursor = 0; renderList(); });
 
       // --- Zebar ou navegador ---
       let close = () => window.close();
@@ -710,6 +757,9 @@
           shown = 'open';
           $('filter').value = '';
           setStatus('');
+          sel = null;
+          document.body.classList.remove('sending');
+          cursor = 0;
           loadAll(); // apps.txt e layout.json podem ter mudado (Alt+Esc, G; outra app)
           $('filter').focus();
           document.body.classList.remove('open');
@@ -717,11 +767,11 @@
           requestAnimationFrame(() => document.body.classList.add('open'));
 
           // Clicar fora fecha (o WebView2 não dá "blur" fiável: pergunta-se à janela).
-          // Enquanto se arrasta ou um pedido está a correr, não fecha.
+          // Enquanto um pedido está a correr, não fecha.
           clearInterval(watch);
           const since = performance.now();
           watch = setInterval(async () => {
-            if (!win || dragging || document.body.classList.contains('busy') || performance.now() - since < OPEN_MS) return;
+            if (!win || document.body.classList.contains('busy') || performance.now() - since < OPEN_MS) return;
             if (!(await win.isFocused())) close();
           }, 150);
         });
@@ -729,14 +779,39 @@
 
       $('close').addEventListener('click', () => close());
       document.addEventListener('keydown', e => {
+        if (e.ctrlKey && e.key.toLowerCase() === 'z') {
+          e.preventDefault();
+          if (!$('undo').disabled && !busy()) { select(null); request(['undo'], '✓ Desfeito'); }
+          return;
+        }
+        // A escolher o destino: as teclas dizem para onde enviar.
+        if (sel) {
+          e.preventDefault();
+          if (busy()) return;
+          if (e.key === 'Escape') return select(null);
+          if (e.key === 'Delete' || e.key === 'Backspace') return removeSel();
+          if (e.key === 'Enter') return sendToKey(e.shiftKey ? 'alt+shift+enter' : 'alt+enter');
+          if (/^[0-9]$/.test(e.key)) return sendToWorkspace(e.key === '0' ? '10' : e.key);
+          if (/^[a-z]$/i.test(e.key)) return sendToKey(keyId(e.key));
+          return;
+        }
         if (e.key === 'Escape') {
           if (document.activeElement === $('url') && $('url').value) { $('url').value = ''; return; }
-          if ($('filter').value) { $('filter').value = ''; renderList(); return; }
-          close();
-        } else if ((e.ctrlKey && e.key.toLowerCase() === 'z') && !$('undo').disabled) {
+          if ($('filter').value) { $('filter').value = ''; cursor = 0; renderList(); return; }
+          return close();
+        }
+        if (document.activeElement === $('url')) return;  // a escrever um site
+        const items = [...$('list').querySelectorAll('.app')];
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
           e.preventDefault();
-          request(['undo'], '✓ Desfeito');
-        } else if (e.key.length === 1 && !e.ctrlKey && !e.altKey && document.activeElement !== $('filter') && document.activeElement !== $('url')) {
+          cursor = Math.max(0, Math.min(items.length - 1, cursor + (e.key === 'ArrowDown' ? 1 : -1)));
+          return paintCursor();
+        }
+        if (e.key === 'Enter' && items[cursor]) {
+          e.preventDefault();
+          return select(readSel(items[cursor]));
+        }
+        if (e.key.length === 1 && !e.ctrlKey && !e.altKey && document.activeElement !== $('filter')) {
           $('filter').focus(); // escrever em qualquer lado começa a procurar
         }
       });

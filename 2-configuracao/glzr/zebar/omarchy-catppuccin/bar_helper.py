@@ -545,7 +545,9 @@ def layout_save():
     for w in windows:
         prev = known.get(w["process"])
         if prev:  # uma entrada antiga por janela: 2 janelas do Chrome não herdam o mesmo site
-            e = prev.pop(0)
+            same = [e for e in prev if e.get("title_hash") == w["title_hash"]]
+            e = same[0] if same else prev[0]
+            prev.remove(e)
             w.update({k: e[k] for k in ("launch", "label", "value") if k in e})
     focused = next((w["name"] for w in workspaces if w.get("hasFocus")), None)
     _save_layout({"saved_at": int(time.time()), "focused": focused, "windows": windows})
@@ -590,55 +592,29 @@ def _restore(layout, log, on_launched=None, on_placed=None, wait_s=10, poll=0.25
       "qualquer janela da app".
     """
     entries = list(layout.get("windows", []))
-    running = _running_images()
-    windows_now = _windows_by_workspace(_workspaces() or [])
-    have_windows = {w["processName"] for _, w in windows_now}
+    norm = lambda p: (p or "").lower()  # o GlazeWM e o AppID nem sempre usam as mesmas maiúsculas
     launched = False
-    # Entradas gravadas com Alt+Esc, G (sem "launch"): uma abertura por processo, pela tabela LAUNCH.
-    for process in dict.fromkeys(e["process"] for e in entries if not e.get("launch") and e.get("process")):
-        if process in have_windows or process.lower() in running or process not in LAUNCH:
-            continue
-        try:
-            os.startfile(LAUNCH[process])
-            launched = True
-            log(f"abri {process}")
-            if on_launched:
-                on_launched(process)
-        except OSError as err:
-            log(f"não consegui abrir {process}: {err}")
-
-    # Entradas do painel (com "launch"): cada uma é uma janela; abre as que faltam.
     placed = set()
     learned = False
-    count = {}
-    for _, w in windows_now:
-        count[w["processName"]] = count.get(w["processName"], 0) + 1
-    for entry in [e for e in entries if e.get("launch")]:
-        process = entry.get("process")
-        if process:
-            if count.get(process, 0) > 0:
-                count[process] -= 1  # já há uma janela desta app para esta entrada
-                continue
-            if not _shell_open(entry["launch"], log):
-                continue
-            launched = True
-            if on_launched:
-                on_launched(process)
-            continue
-        # Processo ainda desconhecido (app do menu Iniciar): abre e fica com a
-        # janela nova que aparecer; o nome do processo fica gravado para a próxima.
+
+    # 1.º Apps do painel cujo processo ainda não se sabe: abrem-se ANTES de tudo o
+    # resto, uma de cada vez, e ficam com a primeira janela nova que apareça e que
+    # não seja de um processo de outra entrada (senão "aprendiam" a janela errada).
+    others = {norm(e.get("process")) for e in entries if e.get("process")}
+    for entry in [e for e in entries if e.get("launch") and not e.get("process")]:
         before = {w["id"] for _, w in _windows_by_workspace(_workspaces() or [])}
         if not _shell_open(entry["launch"], log):
             continue
         launched = True
-        deadline = time.monotonic() + 20
+        deadline = time.monotonic() + 12
         while time.monotonic() < deadline:
             time.sleep(poll)
             new = [(ws, w) for ws, w in _windows_by_workspace(_workspaces() or [])
-                   if w["id"] not in before and w["id"] not in placed]
+                   if w["id"] not in before and w["id"] not in placed and norm(w["processName"]) not in others]
             if new:
                 ws, win = new[0]
                 entry["process"] = win["processName"]
+                others.add(norm(win["processName"]))
                 learned = True
                 if ws != entry["workspace"]:
                     _glaze("command", "--id", win["id"], "move", "--workspace", entry["workspace"])
@@ -649,9 +625,46 @@ def _restore(layout, log, on_launched=None, on_placed=None, wait_s=10, poll=0.25
                     on_placed(entry)
                 break
         else:
-            log(f"{_entry_label(entry)}: nenhuma janela nova em 20 s")
+            log(f"{_entry_label(entry)}: nenhuma janela nova em 12 s")
     if learned:
         _save_layout(layout)
+
+    running = _running_images()
+    windows_now = [(ws, w) for ws, w in _windows_by_workspace(_workspaces() or []) if w["id"] not in placed]
+    have_windows = {norm(w["processName"]) for _, w in windows_now}
+    # 2.º Entradas gravadas com Alt+Esc, G (sem "launch"): uma abertura por processo, pela tabela LAUNCH.
+    legacy = [e for e in entries if not e.get("launch") and e.get("process")]
+    for process in dict.fromkeys(e["process"] for e in legacy):
+        if norm(process) in have_windows or norm(process) in running or process not in LAUNCH:
+            continue
+        try:
+            os.startfile(LAUNCH[process])
+            launched = True
+            log(f"abri {process}")
+            if on_launched:
+                on_launched(process)
+        except OSError as err:
+            log(f"não consegui abrir {process}: {err}")
+
+    # 3.º Entradas do painel com processo conhecido: cada uma é uma janela; abre as que faltam.
+    # As janelas que já existem contam primeiro para as entradas antigas do mesmo processo.
+    count = {}
+    for _, w in windows_now:
+        count[norm(w["processName"])] = count.get(norm(w["processName"]), 0) + 1
+    for e in legacy:
+        if count.get(norm(e["process"]), 0) > 0:
+            count[norm(e["process"])] -= 1
+    for entry in [e for e in entries if e.get("launch") and e.get("process") and not e.get("_placed")]:
+        p = norm(entry["process"])
+        if count.get(p, 0) > 0:
+            count[p] -= 1  # já há uma janela desta app para esta entrada
+            continue
+        if p in running and p not in have_windows and not entry["launch"].get("args"):
+            continue  # está a arrancar sozinha (ex.: Arranque do Windows): espera pela janela
+        if _shell_open(entry["launch"], log):
+            launched = True
+            if on_launched:
+                on_launched(entry["process"])
 
     pending = [e for e in entries if e.get("process") and not e.pop("_placed", False)]
     lost = [e for e in entries if not e.get("process")]  # nunca apareceram: ficam por colocar
@@ -662,8 +675,8 @@ def _restore(layout, log, on_launched=None, on_placed=None, wait_s=10, poll=0.25
         current = [(ws, w) for ws, w in _windows_by_workspace(_workspaces() or []) if w["id"] not in placed]
         for exact_only in (True, False):
             for entry in list(pending):
-                same_app = [(ws, w) for ws, w in current if w["processName"] == entry["process"]]
-                wanted = sum(1 for e in pending if e["process"] == entry["process"])
+                same_app = [(ws, w) for ws, w in current if norm(w["processName"]) == norm(entry["process"])]
+                wanted = sum(1 for e in pending if norm(e["process"]) == norm(entry["process"]))
                 match = next(((ws, w) for ws, w in same_app
                               if _title_hash(w.get("title")) == entry.get("title_hash")), None)
                 if not match and not exact_only and same_app and (late or len(same_app) >= wanted):
@@ -990,7 +1003,11 @@ WORKSPACE_NAMES = [str(n) for n in range(1, 11)]
 
 
 def panel_show():
+    """Alt+Esc, C: mostra o painel com foco; se já estiver visível, esconde-o."""
     hwnd = user32.FindWindowW(None, PANEL_TITLE)
+    if hwnd and user32.IsWindowVisible(hwnd):
+        user32.ShowWindow(hwnd, 0)  # SW_HIDE (a página nota a perda de foco e fica "fechada")
+        return
     if not hwnd:  # Zebar arrancado sem o painel: abre-o (só desta vez é lento)
         if not _start_widget("omarchy-catppuccin", "apps"):
             return
@@ -1003,6 +1020,9 @@ def panel_show():
             return
     _bring_to_front(hwnd)
     _focus_webview(hwnd)
+    # Rede de segurança (como o guia): se a página não se esconder ao perder o
+    # foco (ex.: erro ao carregar), esconde-a aqui — nunca fica por cima de tudo.
+    _hide_when_unfocused(hwnd)
 
 
 def panel_hide():
@@ -1053,7 +1073,7 @@ def _panel_state():
 
 
 def _panel_apps():
-    """Apps do menu Iniciar que fazem sentido arrastar (sem desinstaladores, ajudas, links)."""
+    """Apps do menu Iniciar que fazem sentido escolher (sem desinstaladores, ajudas, links)."""
     skip_ext = (".url", ".txt", ".chm", ".pdf", ".html", ".htm", ".hlp", ".rtf")
     skip_name = ("uninstall", "desinstal", "readme", "leia-me", "release notes")
     seen, out = set(), []
@@ -1068,7 +1088,7 @@ def _panel_apps():
 
 
 def _launch_for(value):
-    """Valor arrastado (nome do menu Iniciar, palavra especial, web:, .exe) ->
+    """App escolhida (nome do menu Iniciar, palavra especial, web:, .exe) ->
     (processo ou None, {"file", "args"}) para abrir no arranque."""
     v = value.strip()
     low = v.lower()
@@ -1103,6 +1123,26 @@ def _panel_push_undo(apps_text, layout_text):
         stack = []
     stack.append({"apps": apps_text, "layout": layout_text})
     PANEL_UNDO.write_text(json.dumps(stack[-PANEL_UNDO_MAX:]), encoding="utf-8")
+    _PANEL_PUSHED.append(True)
+
+
+_PANEL_PUSHED = []  # esta mudança guardou um passo de desfazer (para lhe juntar o "depois")
+
+
+def _files_hash():
+    """Impressão digital de apps.txt + layout.json: o Desfazer só repõe se ninguém
+    (Alt+Esc G, Alt+Shift+R, o arranque) mexeu neles depois da mudança do painel."""
+    return hashlib.sha256(((_read_or_none(APPS_FILE) or "") + "\0" + (_read_or_none(LAYOUT_FILE) or "")).encode("utf-8")).hexdigest()
+
+
+def _panel_mark_after():
+    try:
+        stack = json.loads(PANEL_UNDO.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return
+    if stack:
+        stack[-1]["after"] = _files_hash()
+        PANEL_UNDO.write_text(json.dumps(stack), encoding="utf-8")
 
 
 def _read_or_none(path):
@@ -1124,7 +1164,7 @@ def _panel_do(op):
         lines = (apps_before or "").splitlines()
         entries = _apps_entries(lines)
         drop = {i for i, k, _ in entries if k == key}
-        if op.get("from"):  # arrastada de outra tecla: sai de lá
+        if op.get("from"):  # vinha de outra tecla: sai de lá
             src = _parse_key(str(op["from"]))
             drop |= {i for i, k, _ in entries if k == src}
         if kind == "key":
@@ -1163,6 +1203,13 @@ def _panel_do(op):
             i = op.get("index")
             if not isinstance(i, int) or not 0 <= i < len(windows):
                 return "Essa app já não está nesse workspace."
+            # O painel diz o que julga estar nesse índice: se não bater (pedidos em
+            # fila, Alt+Esc G entretanto), não mexe na entrada errada.
+            if "expect_ws" in op and (windows[i].get("workspace") != op["expect_ws"]
+                                      or _entry_label(windows[i]) != op.get("expect_label")):
+                return "O painel estava desatualizado: veja de novo e repita."
+            if kind == "ws-move" and windows[i].get("workspace") == str(op.get("ws", "")):
+                return None  # já está nesse workspace: nada a fazer (nem passo de desfazer)
             if kind == "ws-del":
                 windows.pop(i)
             else:
@@ -1194,17 +1241,20 @@ def _panel_undo():
     last = _panel_pop_undo()
     if not last:
         return "Nada para desfazer."
-    if last["apps"] != (_read_or_none(APPS_FILE) or ""):
-        APPS_FILE.write_text(last["apps"], encoding="utf-8", newline="\n")
-        errors = _apps_apply_core(use_cache=True)
-        if errors:
-            return "Desfeito, mas: " + "; ".join(errors)
+    if last.get("after") and last["after"] != _files_hash():
+        PANEL_UNDO.write_text("[]", encoding="utf-8")  # o histórico já não corresponde aos ficheiros
+        return "Não desfiz: os atalhos ou o arranque mudaram fora do painel depois disso."
     if last["layout"] is None:
         LAYOUT_FILE.unlink(missing_ok=True)
     elif last["layout"] != _read_or_none(LAYOUT_FILE):
         tmp = LAYOUT_FILE.with_suffix(".tmp")
         tmp.write_text(last["layout"], encoding="utf-8", newline="\n")
         os.replace(tmp, LAYOUT_FILE)
+    if last["apps"] != (_read_or_none(APPS_FILE) or ""):
+        APPS_FILE.write_text(last["apps"], encoding="utf-8", newline="\n")
+        errors = _apps_apply_core(use_cache=True)
+        if errors:
+            return "Desfeito, mas: " + "; ".join(errors)
     return None
 
 
@@ -1217,13 +1267,17 @@ def panel_cli(args):
         elif args == ["apps"]:
             out = {"ok": True, "apps": _panel_apps()}
         elif args == ["undo"]:
-            err = _panel_undo()
+            with _NamedMutex("Local\\MorgPanel", 10000) as owned:
+                err = _panel_undo() if owned else "Ocupado, tente outra vez."
             out = {"ok": not err, "error": err, "state": _panel_state()}
         elif len(args) == 2 and args[0] == "do":
             raw = args[1] + "=" * (-len(args[1]) % 4)
             op = json.loads(base64.urlsafe_b64decode(raw).decode("utf-8"))
             with _NamedMutex("Local\\MorgPanel", 10000) as owned:
+                _PANEL_PUSHED.clear()
                 err = _panel_do(op) if owned else "Ocupado, tente outra vez."
+                if owned and not err and _PANEL_PUSHED:
+                    _panel_mark_after()
             out = {"ok": not err, "error": err, "state": _panel_state()}
         else:
             out = {"ok": False, "error": "Pedido desconhecido."}
