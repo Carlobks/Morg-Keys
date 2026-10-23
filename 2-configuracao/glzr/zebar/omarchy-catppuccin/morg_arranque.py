@@ -122,6 +122,19 @@ def _window_signature():
 
 
 
+class _EstadoDoArranque:
+    """O que os passos do arranque partilham: configuração, cortina, registo, progresso, layout, relógio."""
+
+    def __init__(self, cfg, cover, log):
+        self.cfg, self.cover, self.log = cfg, cover, log
+        self.t0 = time.monotonic()
+        self.progress = _Progress(cfg["animacao"])
+        self.layout = _load_layout()
+
+    def decorrido(self):
+        return time.monotonic() - self.t0
+
+
 def boot():
     t_boot = time.time()
     kernel32.SetPriorityClass(kernel32.GetCurrentProcess(), 0x20)  # NORMAL_PRIORITY_CLASS
@@ -131,122 +144,142 @@ def boot():
     t_cover = time.time()
     boot_mutex = kernel32.CreateMutexW(None, True, BOOT_MUTEX)  # o layout-restore do GlazeWM cede a vez
     ready = kernel32.CreateEventW(None, True, False, SPLASH_READY)
-    log = _new_log()
-    t0 = time.monotonic()
-    progress = _Progress(cfg["animacao"])
-    layout = _load_layout()
-    log(f"cortina preta: {time.monotonic() - t0:.1f} s")
+    a = _EstadoDoArranque(cfg, cover, _new_log())
+    a.log(f"cortina preta: {a.decorrido():.1f} s")
 
+    _boot_ecra_e_barra(a, ready)
+    _boot_glazewm(a)
+    # 4. Apps e arranjo dos workspaces (só depois de a shell estar pronta).
+    _wait_for(lambda: user32.FindWindowW("Shell_TrayWnd", None), 10, poll=0.2)
+    waiting_ports = _boot_bats(a)
+    _boot_apps(a)
+    _boot_esperar_assentar(a, waiting_ports)
+    _boot_sair(a)
+    try:  # só medição: nunca pode estragar o arranque
+        _boot_timing_log(a.log, t_boot, t_cover)
+    except Exception as err:
+        a.log(f"medição falhou: {err!r}")
+    kernel32.ReleaseMutex(boot_mutex)
+    kernel32.CloseHandle(boot_mutex)
+    kernel32.CloseHandle(ready)
+
+
+def _boot_ecra_e_barra(a, ready):
     # 1. Ecrã de arranque (arranca o Zebar só com este widget). Com o disco a frio o
     #    WebView2 demora vários segundos a pintar: a cortina preta tapa até lá.
     #    Quando a animação avisa que está desenhada (fundo preto também), a
     #    cortina sai — preto para preto, sem corte. Se não avisar em 20 s,
     #    segue-se na mesma por baixo da cortina.
-    if ZEBAR.exists():
-        _popen_detached([str(ZEBAR), "start-widget-preset", "--pack", "omarchy-catppuccin",
-                         "--widget-name", "splash", "--preset", "default"])
-        if kernel32.WaitForSingleObject(ready, 20000) == WAIT_OBJECT_0:
-            cover.close()
-            log(f"animação visível: {time.monotonic() - t0:.1f} s")
-        else:
-            log("a animação não avisou em 20 s; continua com a cortina preta")
-        # 2. Barra, guia e painel (startupConfigs) — "startup" funciona com o Zebar já a correr.
-        progress.step("barra", "Barra")
-        _popen_detached([str(ZEBAR), "startup"])
+    if not ZEBAR.exists():
+        return
+    _popen_detached([str(ZEBAR), "start-widget-preset", "--pack", "omarchy-catppuccin",
+                     "--widget-name", "splash", "--preset", "default"])
+    if kernel32.WaitForSingleObject(ready, 20000) == WAIT_OBJECT_0:
+        a.cover.close()
+        a.log(f"animação visível: {a.decorrido():.1f} s")
+    else:
+        a.log("a animação não avisou em 20 s; continua com a cortina preta")
+    # 2. Barra, guia e painel (startupConfigs) — "startup" funciona com o Zebar já a correr.
+    a.progress.step("barra", "Barra")
+    _popen_detached([str(ZEBAR), "startup"])
 
+
+def _boot_glazewm(a):
     # 3. GlazeWM (uiAccess: tem de ser por ShellExecute).
-    progress.step("glazewm", "Gestor de janelas")
+    a.progress.step("glazewm", "Gestor de janelas")
     try:
         os.startfile(str(GLAZEWM_EXE))
     except OSError as err:
-        log(f"não consegui abrir o GlazeWM: {err}")
+        a.log(f"não consegui abrir o GlazeWM: {err}")
     ok = _wait_for(lambda: _workspaces() is not None, 30, poll=0.25)
-    progress.step("glazewm", "Gestor de janelas", "feito" if ok else "falhou")
+    a.progress.step("glazewm", "Gestor de janelas", "feito" if ok else "falhou")
     bar = _wait_for(lambda: user32.FindWindowW(None, BAR_TITLE), 15, poll=0.2)
-    progress.step("barra", "Barra", "feito" if bar else "falhou")
+    a.progress.step("barra", "Barra", "feito" if bar else "falhou")
     _wait_for(lambda: user32.FindWindowW(None, "Zebar - omarchy-catppuccin / sistema"), 5, poll=0.2)
     _splash_to_top()
-    log(f"GlazeWM e barra: {time.monotonic() - t0:.1f} s")
+    a.log(f"GlazeWM e barra: {a.decorrido():.1f} s")
 
-    # 4. Apps e arranjo dos workspaces (só depois de a shell estar pronta).
-    _wait_for(lambda: user32.FindWindowW("Shell_TrayWnd", None), 10, poll=0.2)
+
+def _boot_bats(a):
+    """Lança os .bat de arranque.txt; devolve {etapa: (porta, rótulo)} dos que esperam por uma porta."""
     # Programas .bat de arranque.txt: cada um sem janela, com ícone na área de
     # notificação (bat_tray.py). Os que têm endereço local só contam como prontos
     # quando a porta responde; os outros, logo que arrancam.
     waiting_ports = {}  # step id -> (porta, rótulo)
-    for i, bat in enumerate(cfg["bats"]):
+    for i, bat in enumerate(a.cfg["bats"]):
         sid = f"bat:{i}"
         if not Path(bat["path"]).exists():
-            progress.step(sid, bat["name"], "falhou")
-            log(f"não existe: {bat['path']}")
+            a.progress.step(sid, bat["name"], "falhou")
+            a.log(f"não existe: {bat['path']}")
             continue
-        progress.step(sid, bat["name"])
+        a.progress.step(sid, bat["name"])
         _popen_detached([str(PYTHONW), "-I", str(BAT_TRAY), bat["path"], bat["url"], bat["name"]])
         port = _url_port(bat["url"]) if bat["url"] else None
         if port:
             waiting_ports[sid] = (port, bat["name"])
         else:
-            progress.step(sid, bat["name"], "feito")
-    pending = []
-    if layout:
+            a.progress.step(sid, bat["name"], "feito")
+    return waiting_ports
+
+
+def _boot_apps(a):
+    """Abre as apps do layout e põe cada janela no seu workspace, com uma etapa por app."""
+    if a.layout:
+        windows = a.layout.get("windows", [])
         # Chave fixa por app (o processo de uma app nova do painel só se sabe ao abrir).
-        for e in layout.get("windows", []):
+        for e in windows:
             e["_k"] = e.get("process") or f"?{_entry_label(e)}"
             e["_l"] = _entry_label(e)
-        keys = list(dict.fromkeys(e["_k"] for e in layout.get("windows", [])))
-        labels = {e["_k"]: e["_l"] for e in layout.get("windows", [])}
+        keys = list(dict.fromkeys(e["_k"] for e in windows))
+        labels = {e["_k"]: e["_l"] for e in windows}
         for k in keys:
-            progress.step(f"app:{k}", labels[k])
-        left = {k: sum(1 for e in layout["windows"] if e["_k"] == k) for k in keys}
+            a.progress.step(f"app:{k}", labels[k])
+        left = {k: sum(1 for e in windows if e["_k"] == k) for k in keys}
 
         def placed(entry):
             left[entry["_k"]] -= 1
             if left[entry["_k"]] == 0:
-                progress.step(f"app:{entry['_k']}", entry["_l"], "feito")
+                a.progress.step(f"app:{entry['_k']}", entry["_l"], "feito")
 
-        pending = _restore(layout, log, on_placed=placed, wait_s=10)
-        for entry in pending:
-            progress.step(f"app:{entry['_k']}", entry["_l"], "falhou")
-            log(f"não encontrei janela para {entry['_l']} (ws {entry['workspace']})")
-    log(f"janelas arrumadas: {time.monotonic() - t0:.1f} s")
+        for entry in _restore(a.layout, a.log, on_placed=placed, wait_s=10):
+            a.progress.step(f"app:{entry['_k']}", entry["_l"], "falhou")
+            a.log(f"não encontrei janela para {entry['_l']} (ws {entry['workspace']})")
+    a.log(f"janelas arrumadas: {a.decorrido():.1f} s")
 
+
+def _boot_esperar_assentar(a, waiting_ports):
     # 5. Só sai quando tudo assentou: nenhuma janela nova nem título a mudar
     #    (páginas a carregar) durante BOOT_QUIET_S seguidos. Limite: BOOT_CAP_S.
-    progress.step("fim", "A finalizar")
+    a.progress.step("fim", "A finalizar")
     _splash_to_top()
     sig, since = _window_signature(), time.monotonic()
-    while time.monotonic() - t0 < BOOT_CAP_S:
+    while a.decorrido() < BOOT_CAP_S:
         time.sleep(0.5)
         for sid, (port, name) in list(waiting_ports.items()):
             if _port_open(port):
                 del waiting_ports[sid]
-                progress.step(sid, name, "feito")
-                log(f"{name} a responder na porta {port}: {time.monotonic() - t0:.1f} s")
+                a.progress.step(sid, name, "feito")
+                a.log(f"{name} a responder na porta {port}: {a.decorrido():.1f} s")
         now = _window_signature()
         if now != sig:
             sig, since = now, time.monotonic()
         elif time.monotonic() - since >= BOOT_QUIET_S and not waiting_ports:
             break
-    for sid, (port, name) in waiting_ports.items():
-        progress.step(sid, name, "falhou")
-    _refocus_after_boot(layout)  # foco certo ainda por baixo do ecrã
-    progress.step("fim", "A finalizar", "feito")
-    progress.finish()
-    log(f"tudo assente, ecrã a sair: {time.monotonic() - t0:.1f} s")
+    for sid, (_port, name) in waiting_ports.items():
+        a.progress.step(sid, name, "falhou")
+    _refocus_after_boot(a.layout)  # foco certo ainda por baixo do ecrã
+    a.progress.step("fim", "A finalizar", "feito")
+    a.progress.finish()
+    a.log(f"tudo assente, ecrã a sair: {a.decorrido():.1f} s")
 
+
+def _boot_sair(a):
     # 6. O ecrã anima a saída e fecha-se; se não o fizer em 8 s, fecha-se à força.
     _wait_for(lambda: not user32.FindWindowW(None, SPLASH_TITLE), 8, poll=0.2)
     hwnd = user32.FindWindowW(None, SPLASH_TITLE)
     if hwnd:
         user32.PostMessageW(hwnd, 0x0010, 0, 0)  # WM_CLOSE
-        log("splash fechado à força")
-    cover.close()
-    _refocus_after_boot(layout)
-    log(f"fim: {time.monotonic() - t0:.1f} s")
-    try:  # só medição: nunca pode estragar o arranque
-        _boot_timing_log(log, t_boot, t_cover)
-    except Exception as err:
-        log(f"medição falhou: {err!r}")
-    kernel32.ReleaseMutex(boot_mutex)
-    kernel32.CloseHandle(boot_mutex)
-    kernel32.CloseHandle(ready)
+        a.log("splash fechado à força")
+    a.cover.close()
+    _refocus_after_boot(a.layout)
+    a.log(f"fim: {a.decorrido():.1f} s")
