@@ -8,7 +8,6 @@ import contextlib
 import io
 import json
 import unittest
-from unittest import mock
 
 from sistema_falso import SistemaFalso, config_minimo
 
@@ -201,9 +200,7 @@ class RespostasAPagina(unittest.TestCase):
         self.s = painel("Alt+O = Obsidian\n", {"windows": [{"workspace": "2", "process": "chrome", "title_hash": ""}]})
         self.addCleanup(self.s.__exit__, None, None, None)
         self.addCleanup(setattr, MutexFalso, "livre", True)
-        patcher = mock.patch.object(self.s.bh, "_NamedMutex", MutexFalso)
-        patcher.start()
-        self.addCleanup(patcher.stop)
+        self.s.trocar("_NamedMutex", MutexFalso)
 
     def pedir(self, *args):
         saida = io.StringIO()

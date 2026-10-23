@@ -15,4 +15,7 @@ Depois da experiência:
 3. **Fundo à vista no arranque** (9,3 s = 3,3 s até a tarefa criar o `pythonw` + 5,8 s do Python a frio):
    decidir fundo preto e/ou cortina sem Python.
 4. **Ícone de bateria na barra**, só se o PC tiver bateria.
-5. **Confirmação do utilizador** do painel `Alt+Esc, C` depois das correções A25 (foco) e A26 (ícones).
+5. **Bug antigo (encontrado na fase 2a):** `bar_helper.py` sem argumentos (ou com um comando desconhecido)
+   imprime a ajuda e rebenta num terminal cp1252 por causa do carácter "✕" (`UnicodeEncodeError`). Corrigir
+   com teste de regressão (ex.: escrever em UTF-8 ou trocar o carácter).
+6. **Confirmação do utilizador** do painel `Alt+Esc, C` depois das correções A25 (foco) e A26 (ícones).

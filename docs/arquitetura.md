@@ -27,7 +27,7 @@ Peças:
 - **GlazeWM 3.10.1**: gestor de janelas em mosaico (Rust). Instalado em `C:\Program Files\glzr.io\GlazeWM\`, com a CLI em `cli\glazewm.exe`.
 - **Zebar 3.3.1**: widgets em HTML/JS dentro de WebView2 (Tauri). Vem no mesmo instalador e fica em `C:\Program Files\glzr.io\Zebar\zebar.exe`.
 - **Python 3**: só biblioteca padrão. Corre **sempre** pelo lançador `C:\Windows\py.exe` (com consola, quando a página precisa da saída) ou `C:\Windows\pyw.exe` (sem janela), e sempre com `-I` (modo isolado).
-- **`bar_helper.py`**: o único "programa" nosso. É um ficheiro com subcomandos; a lista completa está no docstring do topo.
+- **`bar_helper.py`**: o único "programa" nosso (ponto de entrada). Só tem a lista de subcomandos (docstring do topo) e o `main`; o trabalho está nos módulos `morg_*.py` da mesma pasta, um por responsabilidade (tabela abaixo). Como é chamado com `py -I`, junta a sua pasta ao `sys.path` (o `-I` não o faz).
 
 ## 3. Mapa de ficheiros
 
@@ -40,7 +40,15 @@ Tudo vive em `%USERPROFILE%\.glzr\`. O pacote guarda os modelos em `2-configurac
 | `zebar\omarchy-catppuccin\` | O **único pack** do Zebar: barra na raiz, guia e painel em `guia\`, ecrã de arranque em `arranque\`, cliente do Zebar em `vendor\`. O Zebar só serve ficheiros de dentro da pasta do pack (ver §7), por isso todas as páginas partilham o mesmo `vendor\`. |
 | ↳ `zpack.json` | Cinco widgets (os títulos das janelas são `Zebar - omarchy-catppuccin / <widget>`, que o `bar_helper.py` procura):<br>• `bar`: 100%×30px, topo, `zOrder: normal`. Permissões: `py.exe` só com `claude_usage.py` ou `bar_helper.py awake status/toggle` ou `quick`.<br>• `guia` (`guia/guia.html`): 68%×85% do ecrã (≈1300×900 num 1920×1080; cabe num portátil 1366×768, com menos colunas e deslizar), centro, `top_most`. Permissão: `pyw.exe … guide-hide`.<br>• `sistema` (`guia/sistema.html`): 560×455, centro −120px. Permissão: `pyw.exe … layer-hide`.<br>• `apps` (`painel/apps.html`): 72%×74%, centro, `top_most`, `focused: false`. Permissões: `py.exe … panel (state|apps|undo|do <base64url>)` e `pyw.exe … panel-hide`.<br>• `splash` (`arranque/splash.html`): 100%×100%, `top_most`, `transparent: true`. Permissão: `pyw.exe … splash-ready`.<br>`guia`, `sistema` e `apps` têm `focused: false`, porque arrancam escondidos. O Zebar junta o `includeFiles` de todos os widgets do pack. |
 | ↳ `bar.html`, `styles.css`, `icons.css` | Barra. Os ícones são glifos Nerd Font da fonte `JetBrainsMono NF`. A constante `PACK` (pasta do pacote) e `PY` (`C:\Windows\py.exe`) estão no topo do script. |
-| ↳ `bar_helper.py` | Ajudante (ver §5). Constantes no topo: `GLAZE_CLI`, `ZEBAR`, `LAYOUT_FILE`, `APPS_FILE`, `BOOT_QUIET_S = 3`, `BOOT_CAP_S = 60`. |
+| ↳ `bar_helper.py` | Ponto de entrada (ver §5): lista de subcomandos e `main`. |
+| ↳ `morg_win32.py` | ctypes (user32, kernel32, dwmapi, shell32), `_NamedMutex`, foco e visibilidade das janelas (`_bring_to_front`, `_focus_webview`, `_hide_when_unfocused`). |
+| ↳ `morg_processos.py` | Caminhos (`HERE`, `BAR_HELPER`, `ZEBAR`, `GLAZE_CLI`, `PYTHONW`) e lançar processos (`_shell_open`, `_popen_detached`, `_start_widget`, `_wait_for`). |
+| ↳ `morg_glaze.py` | CLI do GlazeWM (`_glaze`, `_workspaces`), árvore de janelas, restaurar minimizadas. |
+| ↳ `morg_acordado.py` · `morg_acoes_windows.py` | Não suspender · Win+A, bloquear, energia, saída do GlazeWM. |
+| ↳ `morg_janelas_zebar.py` | Guia (Alt+K), barra (mostrar/esconder) e camada Alt+Esc. |
+| ↳ `morg_arranjo.py` | `layout.json` (`LAYOUT_FILE`, `LAUNCH`, `APP_LABELS`), `layout-save`, `_restore`, `layout-restore`. |
+| ↳ `morg_atalhos.py` · `morg_painel.py` | `apps.txt` → `config.yaml` (`APPS_FILE`, `GLAZE_CONFIG`) · painel Alt+Esc, C. |
+| ↳ `morg_config_arranque.py` · `morg_ecra_arranque.py` · `morg_cortina.py` · `morg_animacao.py` · `morg_arranque.py` | `arranque.txt` e `ANIMACOES` · splash e `progress.json` · cortina preta nativa · Alt+Esc, E · o `boot` (`BOOT_QUIET_S = 3`, `BOOT_CAP_S = 60`). |
 | ↳ `claude_usage.py` | Lê `~/.claude/rate_limits.json` e devolve JSON `{now, captured_at, five_hour, seven_day}` à barra. |
 | ↳ `uncloak.ps1` | Volta a mostrar janelas que o GlazeWM deixou "cloaked" ao sair (C# via Add-Type, `IApplicationView::SetCloak`). |
 | ↳ `vendor\zebar-3.3.1.mjs` | Cliente JS do Zebar, num só ficheiro (ver §7). **Uma só cópia**: a barra importa `./vendor/…`, as páginas em `guia\` e `arranque\` importam `../vendor/…`. |
@@ -64,7 +72,7 @@ Tudo vive em `%USERPROFILE%\.glzr\`. O pacote guarda os modelos em `2-configurac
 ## 4. O arranque (`bar_helper.py boot`) em detalhe
 
 1. **Prioridade normal.** A tarefa agendada corre com `Priority 4`; além disso, `SetPriorityClass(NORMAL)`. Com a prioridade por omissão das tarefas (7), o arranque era lento.
-2. **Cortina preta nativa** (`_BlackCover`). É uma janela Win32 `top_most`, com o título `Morg Keys arranque`, que pinta a imagem da animação escolhida em `arranque.txt` (tabela `ANIMACOES` em `bar_helper.py`) ao centro (x 50%, y `ANIM_CY` = 38%) e esconde o cursor. Aparece em menos de 1 s, antes de haver WebView2. O GlazeWM ignora-a por uma regra de título.
+2. **Cortina preta nativa** (`_BlackCover`). É uma janela Win32 `top_most`, com o título `Morg Keys arranque`, que pinta a imagem da animação escolhida em `arranque.txt` (tabela `ANIMACOES` em `morg_config_arranque.py`) ao centro (x 50%, y `ANIM_CY` = 38%) e esconde o cursor. Aparece em menos de 1 s, antes de haver WebView2. O GlazeWM ignora-a por uma regra de título.
 3. **Mutex `Local\MorgBootRunning`.** O `layout-restore` dos `startup_commands` do GlazeWM vê o mutex e cede a vez ao `boot`.
 4. **Splash.** O `boot` corre `zebar start-widget-preset --pack omarchy-catppuccin --widget-name splash --preset default`. A página desenha-se transparente por cima da cortina, igual ao BMP e no mesmo sítio. Depois chama `splash-ready`, que faz `SetEvent Local\MorgSplashReady`, e só então a cortina fecha: preto sobre preto, sem corte. Se o evento não chegar em 20 s, segue na mesma.
 5. **`zebar startup`.** Abre os `startupConfigs` no mesmo Zebar: barra, guia escondido e painel escondido.
@@ -84,7 +92,7 @@ O registo do último arranque fica em `zebar\omarchy-catppuccin\.layout-restore.
 - **Café (não suspender).** `awake toggle` lança `awake-hold`, um processo `pythonw` que chama `SetThreadExecutionState(ES_CONTINUOUS|ES_SYSTEM_REQUIRED|ES_DISPLAY_REQUIRED)` e espera pelo evento `Local\OmarchyAwakeStop`. Está "ligado" se o mutex `Local\OmarchyAwakeAlive` existir. Ao sair do GlazeWM, `after-exit` desliga-o.
 - **Som e Wi-Fi na barra.** Clicar no som envia `Win+A` por `SendInput` (`quick`). O Wi-Fi abre `ms-availablenetworks:`.
 - **Minimizadas.** A barra lista as janelas minimizadas (dados do provider `glazewm` do Zebar); um clique faz `toggle-minimized` + foco. `Alt+Shift+M` corre `restore-min`.
-- **Disposição.** `layout-save` (`Alt+Esc, G`) grava `layout.json`. `layout-restore` (nos `startup_commands`, quando não há `boot`) e o `boot` repõem. Os dicionários `LAUNCH` e `APP_LABELS` em `bar_helper.py` diz como abrir e como chamar cada processo conhecido.
+- **Disposição.** `layout-save` (`Alt+Esc, G`) grava `layout.json`. `layout-restore` (nos `startup_commands`, quando não há `boot`) e o `boot` repõem. Os dicionários `LAUNCH` e `APP_LABELS` em `morg_arranjo.py` dizem como abrir e como chamar cada processo conhecido.
 - **Painel Apps e arranque** (`Alt+Esc, C`). O `bar_helper.py panel` mostra o widget `apps` com foco (como o guia); a página pede tudo ao helper com `py.exe` e recebe JSON em ASCII:
   - `panel state`: atalhos (`apps.txt`), teclas bloqueadas (`_fixed_bindings` do `config.yaml`) e entradas do `layout.json`;
   - `panel apps`: lista do menu Iniciar (`Get-StartApps`, ~1,2 s), guardada em `.start-apps.json` (6 h) para o `apps-apply` do painel não a pedir de novo;

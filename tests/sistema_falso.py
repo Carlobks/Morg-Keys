@@ -20,15 +20,35 @@ from unittest import mock
 PASTA_PACK = Path(__file__).resolve().parent.parent / "2-configuracao" / "glzr" / "zebar" / "omarchy-catppuccin"
 
 
+class ModulosMorg:
+    """O bar_helper.py e os módulos morg_*.py vistos como um só: `bh.nome` procura o nome em todos.
+
+    Assim os testes de caracterização (escritos quando era um só ficheiro) não mudam com a divisão.
+    """
+
+    def __init__(self, modulos):
+        self.modulos = modulos
+
+    def __getattr__(self, nome):
+        for modulo in self.modulos:
+            if hasattr(modulo, nome):
+                return getattr(modulo, nome)
+        raise AttributeError(nome)
+
+    def com_o_nome(self, nome):
+        """Todos os módulos onde o nome existe (definido ou importado pelo nome)."""
+        return [modulo for modulo in self.modulos if hasattr(modulo, nome)]
+
+
 def carregar_bar_helper():
-    """Importa o bar_helper.py pelo caminho (só configura o ctypes; não chama o Windows)."""
-    if "bar_helper" in sys.modules:
-        return sys.modules["bar_helper"]
-    especificacao = importlib.util.spec_from_file_location("bar_helper", PASTA_PACK / "bar_helper.py")
-    modulo = importlib.util.module_from_spec(especificacao)
-    sys.modules["bar_helper"] = modulo
-    especificacao.loader.exec_module(modulo)
-    return modulo
+    """Importa o bar_helper.py pelo caminho (ele importa os morg_*.py; só configuram o ctypes)."""
+    if "bar_helper" not in sys.modules:
+        especificacao = importlib.util.spec_from_file_location("bar_helper", PASTA_PACK / "bar_helper.py")
+        modulo = importlib.util.module_from_spec(especificacao)
+        sys.modules["bar_helper"] = modulo
+        especificacao.loader.exec_module(modulo)
+    morg = sorted((m for n, m in sys.modules.items() if n.startswith("morg_")), key=lambda m: m.__name__)
+    return ModulosMorg([sys.modules["bar_helper"], *morg])
 
 
 class ToqueNoSistemaReal(AssertionError):
@@ -200,10 +220,18 @@ class SistemaFalso:
             "subprocess": Bomba("subprocess"),
         }
         for nome, valor in trocas.items():
-            self._pilha.enter_context(mock.patch.object(bh, nome, valor))
+            self.trocar(nome, valor)
         self._pilha.enter_context(mock.patch.object(bh.os, "startfile", self.abridor.startfile, create=True))
         bh._PANEL_PUSHED.clear()
         return self
+
+    def trocar(self, nome, valor):
+        """Troca `nome` por `valor` em todos os módulos que o têm (até ao fim do `with`)."""
+        modulos = self.bh.com_o_nome(nome)
+        if not modulos:
+            raise AttributeError(f"nenhum módulo tem {nome}")
+        for modulo in modulos:
+            self._pilha.enter_context(mock.patch.object(modulo, nome, valor))
 
     def __exit__(self, *erro):
         return self._pilha.__exit__(*erro)

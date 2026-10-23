@@ -22,7 +22,6 @@ SEM_LIMITE_DE_LINHAS = ("LICENSE",)
 # Ficheiros antigos acima do limite, com o tamanho que tinham em 2026-10-23: só podem encolher.
 # A fase 2 da experiência 0001 divide-os; quando um descer das 500 linhas, sai desta lista.
 GRANDES_POR_DIVIDIR = {
-    "2-configuracao/glzr/zebar/omarchy-catppuccin/bar_helper.py": 1982,
     "2-configuracao/glzr/zebar/omarchy-catppuccin/painel/apps.html": 830,
     "2-configuracao/glzr/zebar/omarchy-catppuccin/guia/guia.html": 622,
 }

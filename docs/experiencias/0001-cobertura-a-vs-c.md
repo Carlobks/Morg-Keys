@@ -36,6 +36,26 @@
 | 5 | **Bateria de bugs reais** (lista abaixo), um de cada vez numa cópia isolada, contra a suíte A e a suíte C | agente | tabela de bugs apanhados |
 | 6 | Resultados aqui; ADR 0008 com a regra de cobertura; aplicar o `CLAUDE.md` novo; juntar o ramo vencedor ao `main` | agente + OK do utilizador | — |
 
+### Fase 2 — plano detalhado (2026-10-23)
+Regra: comportamento igual; os testes da fase 1 não mudam nas asserções (só a ligação ao sistema falso);
+comentários mantidos; um commit por passo, cada um com os testes verdes e a bateria de estragos.
+- **2a. Dividir o `bar_helper.py` por responsabilidade** (código movido tal como está, mesmos nomes):
+  `morg_win32.py` (ctypes, mutex, foco e visibilidade das janelas), `morg_processos.py` (caminhos dos
+  programas, lançar processos), `morg_glaze.py` (CLI do GlazeWM, árvore, minimizadas), `morg_acordado.py`
+  (não suspender), `morg_janelas_zebar.py` (guia Alt+K, barra, camada), `morg_arranjo.py` (layout.json, restauro),
+  `morg_atalhos.py` (apps.txt → config.yaml), `morg_painel.py` (Alt+Esc, C), `morg_animacao.py`,
+  `morg_cortina.py` (cortina preta nativa), `morg_arranque.py` (boot), `morg_acoes_windows.py`
+  (Win+A, bloquear, energia, saída do GlazeWM). O `bar_helper.py` fica só com a lista de comandos e junta a sua
+  pasta ao `sys.path` (com `-I` o Python não o faz). Teste novo: o ponto de entrada corre com `py -I`.
+- **2b. Funções pequenas**: partir `_restore`, `boot`, `_apps_apply_core`, `_panel_do` e `main` em passos.
+- **2c. JS e CSS fora do HTML**: `painel/apps.html` e `guia/guia.html` → `.html` + `.css` + `.mjs`, e as funções
+  puras num `.mjs` próprio com testes `node --test` (caracterização do JS adiada da fase 1). Caminho do
+  ajudante num atributo `data-` do HTML (o instalador só troca `{{HOME}}` em .html/.py/…, não em .mjs).
+  `includeFiles` do `zpack.json` com os ficheiros novos (A23).
+- **2d. Lint passa a bloquear** no `testar.ps1` (ruff e Biome no código; PSScriptAnalyzer só erros).
+- **Validação real (utilizador)**: reinstalar com o `INSTALAR.cmd` e reiniciar a sessão (A7: o Zebar só lê o
+  `zpack.json` ao arrancar); depois `docs/validacao-manual.md` §10. O agente não arranca o ambiente (A2).
+
 ### Windows Sandbox: o que é e como ativar
 É um Windows descartável que abre numa janela dentro deste PC: começa sempre limpo, não vê os programas
 nem as definições deste Windows e **apaga tudo ao fechar**. Serve para instalar e arrancar o Morg Keys de raiz
@@ -89,3 +109,4 @@ Se algo não der, regista-se aqui com a evidência e a C é medida sem essa part
 | 2026-10-23 | — | Plano aprovado; decisão 1 (C por cima de A) com a análise de viés acima |
 | 2026-10-23 | 0 | coverage 7.17.0, ruff 0.17.2, Biome 2.6.2 (no repositório); `scripts/testar.ps1` (0/1 provado); 3 hooks com 19 testes e 9 estragos apanhados; provados ao vivo. Incidentes A30 (650 processos) e A31 (hooks bloquearam tudo). Windows Sandbox instalado pelo utilizador. |
 | 2026-10-23 | 1 | Testes de caracterização (base comum de A e C): `tests/sistema_falso.py` (ficheiros, GlazeWM, relógio e abridor falsos; Win32/subprocess são bombas) + 5 ficheiros, 71 testes novos (91 no total). Cobertura: `bar_helper.py` 0 % → 42 % (linhas e ramos), `claude_usage.py` 95 %. Prova por estragos: 22/22 apanhados, depois de reforçar 4 testes que deixavam escapar (aprender a janela errada, duas janelas a herdar a mesma entrada, espera mínima de 40 s, contagem das janelas antigas). **JS do painel adiado para o início da fase 2** (só 4 funções puras; o resto depende do DOM — testa-se ao passar para `.mjs`). Nota para a fase 5: estes testes são a base comum; regista-se também que bugs a base sozinha já apanha. |
+| 2026-10-23 | 2a | `bar_helper.py` (1982 linhas) dividido em 14 módulos `morg_*.py` (69–319 linhas) por um script que move blocos de linhas tal como estão; o `bar_helper.py` ficou com 137 (lista de comandos + `main`). Mudanças necessárias: `sys.path.insert` da própria pasta (o `-I` não a junta) e `BAR_HELPER` no lugar de `Path(__file__)` nos relançamentos (senão o "não suspender" relançaria o módulo errado). Testes: só a ligação ao sistema falso mudou (`ModulosMorg` procura os nomes em todos os módulos; os falsos aplicam-se em todos os que os usam); 92 verdes; teste novo do ponto de entrada com `py -I` noutra pasta; estragos 23/23. **Bug antigo encontrado (não corrigido, comportamento igual):** `bar_helper.py` sem argumentos rebenta ao imprimir a ajuda num terminal cp1252 (carácter "✕") — anotado em `docs/pendentes.md`. |
