@@ -15,7 +15,14 @@ try { $estado = Get-Content (Join-Path $Glzr 'instalacao.json') -Raw -Encoding U
 
 Passo 'Arranque automático'
 Unregister-ScheduledTask -TaskName 'GlazeWM (arranque)' -Confirm:$false -ErrorAction SilentlyContinue
-Info 'Tarefa "GlazeWM (arranque)" removida.'
+if (Get-ScheduledTask -TaskName 'GlazeWM (arranque)' -ErrorAction SilentlyContinue) {
+  # Criada com privilégios de administrador: só sai com eles. Sem a configuração
+  # (~\.glzr), a tarefa arranca e não faz nada, mas convém tirá-la.
+  Write-Host '    ! Não consegui remover a tarefa "GlazeWM (arranque)" (foi criada como administrador).' -ForegroundColor Yellow
+  Info 'Para a remover: PowerShell como administrador e  schtasks /Delete /TN "GlazeWM (arranque)" /F'
+} else {
+  Info 'Tarefa "GlazeWM (arranque)" removida.'
+}
 
 Passo 'A fechar GlazeWM, Zebar e os ajudantes'
 $cli = "$env:ProgramFiles\glzr.io\GlazeWM\cli\glazewm.exe"

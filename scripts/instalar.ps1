@@ -350,9 +350,21 @@ $gat  = New-ScheduledTaskTrigger -AtLogOn -User $quem
 $pri  = New-ScheduledTaskPrincipal -UserId $quem -LogonType Interactive -RunLevel Limited
 $def  = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable `
           -ExecutionTimeLimit ([TimeSpan]::Zero) -MultipleInstances IgnoreNew -Priority 4
-Register-ScheduledTask -TaskName 'GlazeWM (arranque)' -Action $acao -Trigger $gat -Principal $pri -Settings $def -Force `
-  -Description 'Arranque do PC: ecrã de arranque + barra (Zebar) + GlazeWM + apps + programas .bat de arranque.txt. Orquestrado por bar_helper.py boot.' | Out-Null
-Info "Tarefa 'GlazeWM (arranque)' registada para $quem."
+try {
+  Register-ScheduledTask -TaskName 'GlazeWM (arranque)' -Action $acao -Trigger $gat -Principal $pri -Settings $def -Force `
+    -Description 'Arranque do PC: ecrã de arranque + barra (Zebar) + GlazeWM + apps + programas .bat de arranque.txt. Orquestrado por bar_helper.py boot.' `
+    -ErrorAction Stop | Out-Null
+  Info "Tarefa 'GlazeWM (arranque)' registada para $quem."
+} catch {
+  # Uma tarefa antiga criada com privilégios de administrador não se deixa substituir
+  # sem eles. Se já faz o mesmo (mesmo programa e argumentos), serve tal como está.
+  $velha = Get-ScheduledTask -TaskName 'GlazeWM (arranque)' -ErrorAction SilentlyContinue
+  if ($velha -and $velha.Actions[0].Execute -ieq $pyw -and $velha.Actions[0].Arguments -eq "-I `"$helper`" boot") {
+    Aviso 'A tarefa de arranque já existia (criada como administrador) e faz o mesmo: fica a que estava.'
+  } else {
+    Parar "Não consegui criar a tarefa de arranque ($($_.Exception.Message)). Abra o PowerShell como administrador, corra  schtasks /Delete /TN `"GlazeWM (arranque)`" /F  e volte a correr o INSTALAR.cmd."
+  }
+}
 
 Copy-Item $Registo (Join-Path $Glzr 'instalacao.log') -Force
 if ($NaoIniciar) { Passo 'Concluído. Termine a sessão e volte a entrar para arrancar.' }
