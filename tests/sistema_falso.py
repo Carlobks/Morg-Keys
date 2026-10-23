@@ -80,6 +80,9 @@ class RelogioFalso:
     def time(self):
         return 1_800_000_000 + self.agora
 
+    def time_ns(self):
+        return int(self.time() * 1e9)
+
     def sleep(self, segundos):
         self.agora += segundos
         for funcao in list(self.ao_avancar):
@@ -163,6 +166,8 @@ class AbridorFalso:
                 log(f"não consegui abrir {ficheiro} (falso)")
             return False
         processo, titulo, atraso = self.janelas_por_ficheiro[ficheiro]
+        if processo is None:  # programa sem janela (ex.: o GlazeWM)
+            return True
         self._por_aparecer.append((self.relogio.agora + atraso, processo, titulo))
         self._fazer_aparecer(self.relogio.agora)
         return True
