@@ -2,6 +2,7 @@
 
 Os testes correm com MORG_A_TESTAR=1; com essa variável o hook não volta a correr os testes. Sem isto,
 um teste que lance o hook pode entrar em ciclo (aconteceu: 650 processos — armadilha A30).
+Corre antes do comando inteiro e reconhece o commit pelo texto do comando (limites na A32).
 Sai com 2 (bloqueia) e mostra o fim da saída dos testes no stderr; sai com 0 nos outros casos.
 """
 
