@@ -36,6 +36,8 @@
           <div class="stat clickable" id="audio" style="--c: var(--peach)"
                title="Clique: definições rápidas · Roda: volume · Botão direito: silenciar"></div>
           <div class="stat clickable" id="network" style="--c: var(--green)" title="Escolher rede Wi-Fi"></div>
+          <!-- Só aparece em PCs com bateria (comum/bateria.mjs). -->
+          <div class="stat" id="battery" style="--c: var(--green); display: none"></div>
         </div>
       </div>
     </div>
@@ -44,6 +46,7 @@
       // Cliente do Zebar guardado no pack (vendor/): funciona sem internet.
       // Gerado com esbuild a partir do pacote npm zebar@3.3.1 (= versão instalada).
       import * as zebar from './vendor/zebar-3.3.1.mjs';
+      import { bateria } from './comum/bateria.mjs';
 
       // Scripts Python locais (permitidos no zpack.json). py.exe = lançador
       // oficial do Python: o caminho não muda quando o Python é atualizado.
@@ -68,6 +71,7 @@
         network: { type: 'network', refreshInterval: 10000 },
         date: { type: 'date', refreshInterval: 1000 },
         audio: { type: 'audio' },
+        battery: { type: 'battery', refreshInterval: 30000 },
       });
 
       // Abre painéis do Windows através do GlazeWM: lançados pelo Zebar
@@ -223,6 +227,13 @@
             : vol < 34 ? ICON.volLow : vol < 67 ? ICON.volMed : ICON.volHigh;
           setHTML($('audio'), `${ico(icon)}<span class="${dev.isMuted ? 'muted' : ''}">${vol}%</span>`);
           $('audio').title = `${dev.name}\nClique: definições rápidas · Roda: volume · Botão direito: silenciar`;
+        }
+        // Bateria: num PC sem bateria o provider não dá saída e o indicador fica escondido.
+        const bat = bateria(out.battery);
+        $('battery').style.display = bat ? '' : 'none';
+        if (bat) {
+          setHTML($('battery'), `${ico(bat.icone)}<span class="${bat.nivel}">${bat.texto}</span>`);
+          $('battery').title = bat.dica;
         }
       }
 

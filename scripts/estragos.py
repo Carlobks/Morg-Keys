@@ -83,6 +83,10 @@ MUTANTES = [
     ('candidatos.append(Path(os.environ["APPDATA"]) / "npm" / "claude.cmd")', 'pass'),
     ('if p is None or p.suffix.lower() == ".exe":', 'if p is None:'),
     ('__doc__.encode(codificacao, "replace")', '__doc__.encode(codificacao, "strict")'),
+    # bateria na barra (comum/bateria.mjs)
+    ('const passo = Math.round(pct / 10);', 'const passo = Math.floor(pct / 10);'),
+    ("pct < BAIXA ? 'high'", "pct < AVISO ? 'high'"),
+    ("const carregar = !!b.isCharging || b.state === 'charging';", 'const carregar = !!b.isCharging;'),
 ]
 FICHEIROS = [*PACK.glob("*.py"), *PACK.glob("comum/*.mjs"), *PACK.glob("painel/*.mjs"), *PACK.glob("guia/*.mjs")]
 TESTES_PY = ["py", "-I", "-m", "unittest", "discover", "-s", "tests"]
