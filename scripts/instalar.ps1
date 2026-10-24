@@ -260,7 +260,7 @@ function EscolherArranque {
 }
 # Nome da saudação do ecrã de arranque ("Muito bem-vindo, Carlos"). $null = o arranque.txt mantido já o tem.
 function EscolherNome($arranqueAntigo, $manter) {
-  if ($manter -and (Select-String -Path $arranqueAntigo -Pattern '^\s*nome\s*=' -Quiet)) { return $null }
+  if ($manter -and (Select-String -Path $arranqueAntigo -Pattern '^\s*nome\s*=\s*\S' -Quiet)) { return $null }  # "nome =" vazio = pergunta
   $padrao = NomeDaConta
   $quem = if ($Nome) { $Nome } elseif ($SemPerguntas) { $padrao } else {
     "$(Read-Host "    Como quer ser chamado no ecrã de arranque? (Enter = $(if ($padrao) { $padrao } else { 'sem nome' }))")" }
@@ -330,8 +330,9 @@ function ManterPersonalizacoes($copia, $manterArranque, $saudacao) {
     $t = [IO.File]::ReadAllText($arr, $utf8)
     $novo = [regex]::Replace($t, '(?m)^(\s*anima(c|ç)(a|ã)o\s*=\s*)(?!\s*cafe\s*$).*$', '${1}cafe')
     if ($novo -ne $t) { [IO.File]::WriteAllText($arr, $novo, $utf8); Info 'arranque.txt: animação antiga trocada por cafe.' }
-    if ($null -ne $saudacao -and $novo -notmatch '(?m)^\s*nome\s*=') {  # arranque.txt de antes da saudação
-      [IO.File]::WriteAllText($arr, $novo.TrimEnd() + "`nnome = $saudacao`n", $utf8); Info "arranque.txt: nome = $saudacao"
+    if ($null -ne $saudacao) {  # arranque.txt de antes da saudação, ou com "nome =" vazio
+      $com = if ($novo -match '(?m)^\s*nome\s*=') { [regex]::Replace($novo, '(?m)^\s*nome\s*=[ \t]*$', "nome = $saudacao") } else { $novo.TrimEnd() + "`nnome = $saudacao`n" }
+      [IO.File]::WriteAllText($arr, $com, $utf8); Info "arranque.txt: nome = $saudacao"
     }
   }
 }

@@ -271,7 +271,7 @@ Describe 'Nome da saudação do ecrã de arranque' {
     Should -Invoke NomeDaConta -Times 0 -Exactly
   }
   It 'pergunta; com Enter usa o nome da conta (também quando o arranque.txt mantido não tem nome)' {
-    Escrever $antigo "animacao = cafe`n"
+    Escrever $antigo "animacao = cafe`nnome =  `n"  # linha vazia conta como sem nome
     Mock Read-Host { '  ' }
     EscolherNome $antigo $true | Should -Be 'Carlos'
     Should -Invoke Read-Host -ParameterFilter { $Prompt -match 'Como quer ser chamado.*\(Enter = Carlos\)' }

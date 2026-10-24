@@ -107,6 +107,9 @@ Describe 'Personalizações da instalação anterior' {
     Escrever (Join-Path $copia "$Pack\guia\arranque.txt") "animacao = cafe`nnome = Zé`n"
     ManterPersonalizacoes $copia $true 'Ana'
     Ler (Join-Path $Glzr "$Pack\guia\arranque.txt") | Should -Be "animacao = cafe`nnome = Zé`n"
+    Escrever (Join-Path $copia "$Pack\guia\arranque.txt") "animacao = cafe`nnome = `nbat = y`n"
+    ManterPersonalizacoes $copia $true 'Ana'
+    Ler (Join-Path $Glzr "$Pack\guia\arranque.txt") | Should -Be "animacao = cafe`nnome = Ana`nbat = y`n"
   }
   It 'sem manter o arranque, com a animação certa ou sem arranque.txt não troca nada' {
     Escrever (Join-Path $copia "$Pack\guia\arranque.txt") 'animacao = lua'
