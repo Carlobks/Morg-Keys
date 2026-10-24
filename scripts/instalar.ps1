@@ -407,14 +407,18 @@ print("ok")
 function AjustarAmbienteDeTrabalho($copia, $statusAplicado) {
   $adv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
   $estado = [ordered]@{ instalado_em = (Get-Date -Format s); copia_anterior = $copia; statusline = $statusAplicado }
-  $estado.hideicons_antes = (Get-ItemProperty $adv -Name HideIcons -ErrorAction SilentlyContinue).HideIcons
+  # Numa reinstalação, o "antes" é o da 1.ª instalação (senão o desinstalar repunha os nossos valores).
+  $orig = if ($copia -and (Test-Path (Join-Path $copia 'instalacao.json'))) { Get-Content (Join-Path $copia 'instalacao.json') -Raw -Encoding UTF8 | ConvertFrom-Json }
+  $hide = (Get-ItemProperty $adv -Name HideIcons -ErrorAction SilentlyContinue).HideIcons
+  $estado.hideicons_antes = if ($orig) { $orig.hideicons_antes } else { $hide }
   $reiniciarExplorer = $false
-  if (-not $ManterIcones) { Set-ItemProperty $adv -Name HideIcons -Value 1 -Type DWord; $reiniciarExplorer = $true; Info 'Ícones do ambiente de trabalho escondidos.' }
+  # Só reinicia o Explorador se algo mudar: reiniciá-lo fecha as janelas de pastas abertas.
+  if (-not $ManterIcones -and $hide -ne 1) { Set-ItemProperty $adv -Name HideIcons -Value 1 -Type DWord; $reiniciarExplorer = $true; Info 'Ícones do ambiente de trabalho escondidos.' }
   $sr = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3'
   $bin = (Get-ItemProperty $sr -Name Settings -ErrorAction SilentlyContinue).Settings
   if ($bin) {
-    $estado.barra_antes = [int]$bin[8]
-    if (-not $ManterBarraWindows) { $bin[8] = 3; Set-ItemProperty $sr -Name Settings -Value $bin; $reiniciarExplorer = $true; Info 'Barra de tarefas do Windows a esconder-se sozinha.' }
+    $estado.barra_antes = if ($orig -and $null -ne $orig.barra_antes) { [int]$orig.barra_antes } else { [int]$bin[8] }
+    if (-not $ManterBarraWindows -and $bin[8] -ne 3) { $bin[8] = 3; Set-ItemProperty $sr -Name Settings -Value $bin; $reiniciarExplorer = $true; Info 'Barra de tarefas do Windows a esconder-se sozinha.' }
   }
   [IO.File]::WriteAllText((Join-Path $Glzr 'instalacao.json'), ($estado | ConvertTo-Json), $utf8)
   if ($reiniciarExplorer) { Stop-Process -Name explorer -Force; Start-Sleep 3; if (-not (Get-Process explorer -ErrorAction SilentlyContinue)) { Start-Process explorer.exe } }

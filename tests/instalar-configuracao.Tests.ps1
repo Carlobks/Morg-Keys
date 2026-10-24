@@ -224,6 +224,17 @@ Describe 'Ambiente de trabalho do Windows' {
     Should -Invoke Set-ItemProperty -Times 0 -Exactly
     Should -Invoke Stop-Process -Times 0 -Exactly
   }
+  It 'reinstalação com tudo já escondido: não reinicia o Explorador (fecharia as janelas de pastas abertas)' {
+    Mock Get-ItemProperty { [pscustomobject]@{ HideIcons = 1 } } -ParameterFilter { $Name -eq 'HideIcons' }
+    Mock Get-ItemProperty { [pscustomobject]@{ Settings = [byte[]](0, 1, 2, 3, 4, 5, 6, 7, 3) } } -ParameterFilter { $Name -eq 'Settings' }
+    $copia = Join-Path $Casa 'copia'; New-Item -ItemType Directory -Force $copia | Out-Null
+    Escrever (Join-Path $copia 'instalacao.json') '{"hideicons_antes": 0, "barra_antes": 2}'
+    AjustarAmbienteDeTrabalho $copia $false
+    Should -Invoke Set-ItemProperty -Times 0 -Exactly
+    Should -Invoke Stop-Process -Times 0 -Exactly
+    $estado = Get-Content (Join-Path $Glzr 'instalacao.json') -Raw | ConvertFrom-Json
+    ($estado.hideicons_antes, $estado.barra_antes) | Should -Be @(0, 2)  # os da 1.ª instalação, para o desinstalar
+  }
   It 'sem a chave da barra; o Explorador que volta sozinho não se abre outra vez' {
     Mock Get-ItemProperty {} -ParameterFilter { $Name -eq 'Settings' }
     Mock Get-Process { 'explorer' } -ParameterFilter { $Name -eq 'explorer' }
