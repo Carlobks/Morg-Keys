@@ -74,7 +74,7 @@ class ArranqueFalso(SistemaFalso):
         self.trocar("PROGRESS_FILE", self.pasta / "progress.json")
         self.trocar("_popen_detached", self._lancar)
         self.trocar("_port_open", lambda porta: self.relogio.agora - self.inicio >= self.porta_abre_aos)
-        self.trocar("_boot_timing_log", lambda log, t_boot, t_cover: self.medicoes.append((t_boot, t_cover)))
+        self.trocar("_boot_timing_log", lambda log, t_boot, t_cover, cpu_boot: self.medicoes.append((t_boot, t_cover)))
         self.abridor.app(str(bh.GLAZEWM_EXE), None)
         CortinaFalsa.criadas.clear()
         self.eventos = CortinaFalsa.eventos = []

@@ -94,6 +94,9 @@ class RelogioFalso:
     def localtime(self, *segundos):
         return time_real.localtime(*segundos)
 
+    def process_time(self):
+        return 0.25  # CPU gasto pelo processo (só a medição do arranque o lê)
+
 
 class GlazeFalso:
     """Faz de CLI do GlazeWM (`_glaze`): responde a query workspaces e executa `move`."""

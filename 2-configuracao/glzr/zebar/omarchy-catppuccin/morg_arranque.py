@@ -18,6 +18,7 @@ from morg_config_arranque import _arranque_cfg
 from morg_cortina import _BlackCover
 from morg_ecra_arranque import SPLASH_READY, SPLASH_TITLE, _Progress, _splash_to_top
 from morg_glaze import _glaze, _windows_by_workspace, _workspaces
+from morg_inicio import T_INICIO
 from morg_janelas_zebar import BAR_TITLE
 from morg_processos import (
     HERE,
@@ -71,9 +72,15 @@ def _hms(t):
     return "?" if t is None else time.strftime("%H:%M:%S", time.localtime(t)) + f".{int(t % 1 * 1000):03d}"
 
 
-def _boot_timing_log(log, t_boot, t_cover):
-    """Escreve no registo do arranque as horas que mostram onde se perde tempo."""
+def _boot_timing_log(log, t_boot, t_cover, cpu_boot=None):
+    """Escreve no registo do arranque as horas que mostram onde se perde tempo.
+    cpu_boot: CPU gasto pelo processo até ao boot(); pouco CPU num tempo longo = o Python esteve à espera."""
     created = _process_created()
+    nan = float("nan")
+    log(f"medição: o nosso código começou {_hms(T_INICIO)}"
+        f" (Python a arrancar {(T_INICIO - created) if created else nan:.1f} s)"
+        f" · módulos carregados em {t_boot - T_INICIO:.1f} s"
+        f" · CPU até boot() {cpu_boot if cpu_boot is not None else nan:.1f} s")
     pid = wintypes.DWORD()
     tray = user32.FindWindowW("Shell_TrayWnd", None)
     explorer = _process_created(pid.value) if tray and user32.GetWindowThreadProcessId(tray, ctypes.byref(pid)) else None
@@ -137,6 +144,7 @@ class _EstadoDoArranque:
 
 def boot():
     t_boot = time.time()
+    cpu_boot = time.process_time()  # CPU gasto até aqui (medição)
     kernel32.SetPriorityClass(kernel32.GetCurrentProcess(), 0x20)  # NORMAL_PRIORITY_CLASS
     cfg = _arranque_cfg()
     # Primeiro de tudo: preto (com o 1.º quadro da animação) por cima do ambiente de trabalho.
@@ -156,7 +164,7 @@ def boot():
     _boot_esperar_assentar(a, waiting_ports)
     _boot_sair(a)
     try:  # só medição: nunca pode estragar o arranque
-        _boot_timing_log(a.log, t_boot, t_cover)
+        _boot_timing_log(a.log, t_boot, t_cover, cpu_boot)
     except Exception as err:  # noqa: BLE001 — só medição: nunca pode estragar o arranque
         a.log(f"medição falhou: {err!r}")
     kernel32.ReleaseMutex(boot_mutex)

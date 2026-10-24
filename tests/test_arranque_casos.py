@@ -51,22 +51,25 @@ class MedicaoDoArranque(unittest.TestCase):
         t = 1767225600.25
         self.assertEqual(bh._hms(t), time.strftime("%H:%M:%S", time.localtime(t)) + ".250")
 
-    def medir(self, bandeja, criado=1):
+    def medir(self, bandeja, criado=1, cpu=0.4):
         with SistemaFalso() as s:
             k32 = k32_com_tempos(ok=criado)
             s.trocar("kernel32", k32)
             s.trocar("user32", Gravador("user32", FindWindowW=bandeja,
                                         GetWindowThreadProcessId=lambda h, ref: setattr(ref._obj, "value", 77) or 9))
+            s.trocar("T_INICIO", EPOCA_2026 + 3)  # o nosso código começou 3 s depois de o pythonw ser criado
             registo = []
-            TIMING_LOG(registo.append, EPOCA_2026 + 5, EPOCA_2026 + 7.5)
+            TIMING_LOG(registo.append, EPOCA_2026 + 5, EPOCA_2026 + 7.5, cpu)
             return registo
 
     def test_boot_timing_log_com_e_sem_a_barra_de_tarefas(self):
         registo = self.medir(bandeja=13)
-        self.assertEqual(len(registo), 2)
-        self.assertIn("fundo à vista sem cortina ≈ 7.5 s (arranque do pythonw 5.0 s)", registo[1])
-        self.assertEqual(len(self.medir(bandeja=0)), 1)
-        self.assertEqual(len(self.medir(bandeja=13, criado=0)), 1)  # sem hora do explorador: só a 1.ª linha
+        self.assertEqual(len(registo), 3)
+        self.assertIn("(Python a arrancar 3.0 s) · módulos carregados em 2.0 s · CPU até boot() 0.4 s", registo[0])
+        self.assertIn("fundo à vista sem cortina ≈ 7.5 s (arranque do pythonw 5.0 s)", registo[2])
+        self.assertEqual(len(self.medir(bandeja=0)), 2)
+        self.assertEqual(len(self.medir(bandeja=13, criado=0)), 2)  # sem hora do explorador: sem a última linha
+        self.assertIn("CPU até boot() nan s", self.medir(bandeja=0, cpu=None)[0])
 
     def test_boot_timing_log_sem_hora_de_criacao(self):
         with SistemaFalso() as s:
@@ -74,8 +77,9 @@ class MedicaoDoArranque(unittest.TestCase):
             s.trocar("user32", Gravador("user32", FindWindowW=13, GetWindowThreadProcessId=9))
             registo = []
             TIMING_LOG(registo.append, EPOCA_2026 + 5, EPOCA_2026 + 7.5)
-            self.assertIn("pythonw criado ?", registo[0])
-            self.assertIn("(arranque do pythonw nan s)", registo[1])
+            self.assertIn("(Python a arrancar nan s)", registo[0])
+            self.assertIn("pythonw criado ?", registo[1])
+            self.assertIn("(arranque do pythonw nan s)", registo[2])
 
 
 class Portas(unittest.TestCase):

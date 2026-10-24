@@ -47,6 +47,7 @@ from pathlib import Path
 # sem isto os módulos morg_*.py não se importam.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import morg_inicio  # noqa: F401 — o 1.º: guarda a hora para a medição do arranque
 from morg_acoes_windows import after_exit, lock, on_exit, power, quick_settings
 from morg_acordado import awake_hold, awake_off, awake_status, awake_toggle
 from morg_animacao import animacao_preview, animacao_set, animacao_tap
