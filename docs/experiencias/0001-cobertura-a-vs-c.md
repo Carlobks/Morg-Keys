@@ -113,6 +113,63 @@ risco". O certo, segundo a A2 (`docs/armadilhas.md`):
 
 Resultados: tabela neste ficheiro, com data, versão do código (commit) e o que não foi possível medir.
 
+## Fases 3 e 4 — decisões e modelo de pedido (2026-10-24)
+Decisões do utilizador para a fase 3:
+- O `scripts/instalar.ps1` entra na A, testado com Pester 6.
+- O subagente **não lê** `docs/experiencias/` nem `docs/pesquisa/opcoes-cobertura.md`, porque ambos trazem a lista de bugs da fase 5.
+- `docs/armadilhas.md` fica acessível à A e à C, porque é conhecimento real do projeto. **Ressalva:** a taxa absoluta de bugs apanhados pode sair inflacionada; a comparação entre A e C não é afetada, porque as duas têm o mesmo acesso.
+
+Execução:
+- Subagente novo `general-purpose` no mesmo modelo nas duas fases.
+- Trabalha na pasta do repositório, no ramo da versão, sem worktree, porque os hooks dependem da pasta do projeto (A31).
+
+**Modelo de pedido.** Na fase 4, mudam só o ramo e o bloco "O quê".
+
+> **Quem és e onde:** estás no repositório Morg Keys (`C:\Users\Usuario\Documents\Omarchy to windows by bks\Morg-Keys`), no ramo `<RAMO>`. Lê primeiro `CLAUDE.md`, `COMO-FOI-FEITO.md` §1, `docs/arquitetura.md`, `docs/armadilhas.md` e `docs/validacao-manual.md`.
+>
+> **O quê:** `<OBJETIVO DA VERSÃO>`
+>
+> **Como:**
+> - Reutiliza o que existe: `tests/sistema_falso.py` (`Bomba`, `SistemaFalso`, `trocar()`), o estilo dos testes atuais (`unittest`, `node --test`) e `scripts/testar.ps1` (o comando único).
+> - Faz commits pequenos no `<RAMO>`, cada um com os testes verdes. O hook de commit corre os testes. Cria os ficheiros e faz o commit em comandos separados (A32).
+>
+> **O que não fazer:**
+> - Não ler `docs/experiencias/` nem `docs/pesquisa/opcoes-cobertura.md`.
+> - Não mudar comportamento; refatorar só para isolar a cola com o sistema.
+> - Não enfraquecer nem apagar testes existentes.
+> - Não acrescentar dependências à produção (Python só com a biblioteca padrão).
+> - Regra n.º 1 (A2): não arrancar `glazewm.exe`/`zebar.exe` nem `bar_helper.py boot|layout-restore|animacao`.
+> - Não correr o instalador de verdade nem mudar definições do sistema.
+> - Não fazer `git push` nem mexer no `main`.
+> - Ficheiros com 500 linhas no máximo.
+> - Excluir da cobertura só chamadas ao sistema, nunca lógica por ser difícil de testar.
+>
+> **Como validar (devolve as provas):**
+> - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\testar.ps1` sai com 0.
+> - `py -I scripts/estragos.py` apanha todos os estragos.
+> - Relatório final com: cobertura por ficheiro, exclusões e os seus motivos, ficheiros de produção mudados e porquê, e commits.
+
+Bloco "O quê" da **fase 3 (A)**:
+- **Objetivo:** 100 % de linhas e ramos da lógica testável:
+  - os `*.py` do pack;
+  - os `.mjs` de `comum/`, `painel/` e `guia/`;
+  - o `scripts/instalar.ps1`.
+- **Cola com o sistema:** isolada em funções finas e excluída com o motivo escrito. Conta como cola:
+  - ctypes/Win32, ShellExecute e subprocess real;
+  - DOM/WebView2;
+  - o processo do GlazeWM;
+  - a tarefa agendada, a instalação de fontes e a cópia para o perfil.
+- **Como marcar cada exclusão:**
+  - Python: `# pragma: no cover`;
+  - JS: `/* node:coverage ignore next */`;
+  - PowerShell: lista de funções excluídas no teste.
+- **Registo das exclusões:** cada uma fica listada numa secção nova "Excluído da cobertura" de `docs/validacao-manual.md` (ficheiro, função, motivo, como se verifica à mão).
+- **Limite obrigatório no `testar.ps1`:**
+  - Python: `coverage report --fail-under=100`, com a lógica do pack como `--source`;
+  - JS: `node --test --experimental-test-coverage --test-coverage-lines=100 --test-coverage-branches=100`;
+  - PowerShell: Pester com `CodeCoverage`, a falhar abaixo de 100 % nas funções não excluídas.
+- **Funções do `instalar.ps1` nos testes:** carregadas sem correr a instalação (por exemplo, com uma guarda no ponto de entrada).
+
 ## Riscos e o que pode não dar para validar
 - GlazeWM no Sandbox: precisa de `uiAccess` (binário assinado em pasta protegida); pode recusar arrancar.
 - Zebar pode ignorar `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS` (sem isso não há CDP para o Playwright).
