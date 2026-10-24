@@ -24,7 +24,7 @@ class _BlackCover:
         threading.Thread(target=self._run, daemon=True).start()
         self._ready.wait(2)
 
-    def _run(self):
+    def _run(self):  # pragma: no cover — cola Win32: janela, laço de mensagens e pintura GDI (validacao-manual)
         WNDPROC = ctypes.WINFUNCTYPE(ctypes.c_ssize_t, HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM)
         user32.DefWindowProcW.argtypes = [HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM]
         user32.DefWindowProcW.restype = ctypes.c_ssize_t
