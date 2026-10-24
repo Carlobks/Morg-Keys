@@ -28,14 +28,14 @@
 
         <!-- Direita: Claude, sistema, som, rede -->
         <div class="right">
-          <div class="stat claude clickable" id="claude" style="--c: var(--peach)" title="Uso do Claude">
+          <div class="stat claude clickable" id="claude" style="--c: var(--subtext0)" title="Uso do Claude">
             <span class="ico txt">✻</span><span id="claude-text" class="muted">…</span>
           </div>
-          <div class="stat" id="cpu" style="--c: var(--blue)"></div>
-          <div class="stat" id="memory" style="--c: var(--teal)"></div>
-          <div class="stat clickable" id="audio" style="--c: var(--peach)"
+          <div class="stat" id="cpu" style="--c: var(--subtext0)"></div>
+          <div class="stat" id="memory" style="--c: var(--subtext0)"></div>
+          <div class="stat clickable" id="audio" style="--c: var(--subtext0)"
                title="Clique: definições rápidas · Roda: volume · Botão direito: silenciar"></div>
-          <div class="stat clickable" id="network" style="--c: var(--green)" title="Escolher rede Wi-Fi"></div>
+          <div class="stat clickable" id="network" style="--c: var(--subtext0)" title="Escolher rede Wi-Fi"></div>
           <!-- Só aparece em PCs com bateria (comum/bateria.mjs). -->
           <div class="stat" id="battery" style="display: none"></div>
         </div>
@@ -327,6 +327,8 @@
       function renderClaude(u) {
         const v = claudeVista(u);
         $('claude').style.display = v.mostrar ? '' : 'none';
+        // Só o ✻ (sem valores): sem o texto vazio nem o espaço à direita que o separava da CPU.
+        $('claude').classList.toggle('so-icone', !v.html);
         setHTML($('claude-text'), v.html);
         $('claude-text').classList.toggle('stale', v.stale);
         $('claude').title = v.dica;

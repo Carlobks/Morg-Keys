@@ -13,7 +13,8 @@ export function fmtUntil(epoch, now) {
   return h ? `${h}h${String(mins % 60).padStart(2, '0')}` : `${mins}m`;
 }
 
-export const level = pct => (pct >= 80 ? 'high' : pct >= 50 ? 'warn' : 'ok');
+// Cor só como alerta (a barra é neutra, só a bateria tem cores): amarela a partir de 50 %, vermelha de 80 %.
+export const level = pct => (pct >= 80 ? 'high' : pct >= 50 ? 'warn' : '');
 
 const CLIQUE = 'Clique: abre a página de uso com os números exatos.';
 const ESCONDER = 'Para esconder: claude = esconder no arranque.txt (Documentos\\Guia de Atalhos).';

@@ -12,8 +12,8 @@ test('fmtUntil: dias, horas e minutos; nunca negativo', () => {
   assert.equal(fmtUntil(AGORA - 600, AGORA), '0m');
 });
 
-test('level: verde, amarelo a partir de 50 %, vermelho a partir de 80 %', () => {
-  assert.deepEqual([49, 50, 79, 80].map(level), ['ok', 'warn', 'warn', 'high']);
+test('level: sem cor abaixo de 50 %, amarelo a partir de 50 %, vermelho a partir de 80 %', () => {
+  assert.deepEqual([49, 50, 79, 80].map(level), ['', 'warn', 'warn', 'high']);
 });
 
 test('esconder (claude = esconder no arranque.txt): o indicador sai da barra', () => {
@@ -36,7 +36,7 @@ test('sem valores: só o ✻, com a dica a explicar porquê (e há quanto tempo 
 test('com as duas janelas: percentagens com cor, reposição e idade; frescos não ficam esbatidos', () => {
   const v = claudeVista({ now: AGORA, mostrar: true, captured_at: AGORA - 60,
     five_hour: { pct: 23.5, resets_at: AGORA + 3600 }, seven_day: { pct: 85, resets_at: AGORA + 86400 } });
-  assert.equal(v.html, '<span class="ok">5h 24%</span> <span class="sep">·</span> <span class="high">sem 85%</span>'
+  assert.equal(v.html, '<span class="">5h 24%</span> <span class="sep">·</span> <span class="high">sem 85%</span>'
     + ' <span class="sep">·</span> <span class="muted">↺ 1h00</span>');
   assert.equal(v.stale, false);
   assert.equal(v.dica.split('\n')[0], 'Sessão (5h): 23.5% — repõe em 1h00');

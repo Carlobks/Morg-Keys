@@ -221,6 +221,10 @@ button {
   background: var(--surface0);
 }
 
+/* Claude sem valores: só o ✻, com a mesma margem de um lado e do outro. */
+.stat.clickable.so-icone { padding: 2px; }
+.so-icone #claude-text { display: none; }
+
 .claude .sep {
   color: var(--overlay0);
 }
