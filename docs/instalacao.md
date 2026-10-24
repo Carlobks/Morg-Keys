@@ -59,6 +59,7 @@ Duplo clique em `INSTALAR.cmd`, com a sessão iniciada **na conta do utilizador 
    - gatilho: AtLogOn do utilizador;
    - principal: o próprio utilizador, Interactive, RunLevel Limited;
    - definições: sem limite de tempo, `IgnoreNew`, `Priority 4`, a correr também com bateria.
+   - Segunda tarefa, `Morg Keys (ecrã preto)`: o mesmo gatilho, ação `C:\Windows\System32\scrnsave.scr /s` (o protetor de ecrã "Em branco" do Windows), limite de 2 min. Tapa o papel de parede nos segundos em que, ao entrar, o Python ainda não arrancou; o `boot` fecha-a quando a cortina aparece (A38). Se não se conseguir criar, só avisa.
 9. Arranca a tarefa, exceto com `-NaoIniciar`.
 
 ### 6.2 À mão (se o script não puder correr)
@@ -93,7 +94,7 @@ Os três `.exe` **não estão no repositório** (estão no `.gitignore`): o inst
 | `VisualC++-Redistribuivel-x64.exe` | Microsoft (VC++ 2015-2022 x64, `aka.ms/vs/17/release/vc_redist.x64.exe`). Muda de versão no mesmo endereço. | verificado pela assinatura da Microsoft |
 | `JetBrainsMonoNerdFont-{Regular,Medium,SemiBold,Bold}.ttf` (no repositório, com `OFL.txt`) | Nerd Fonts, release `JetBrainsMono.zip` | Regular `C8AF9DFD…6925F`, Medium `F7523DBC…1C76A`, SemiBold `387FD979…A40E1`, Bold `546D7F5E…0B8DA` |
 | `vendor\zebar-3.3.1.mjs` | `npm i zebar@3.3.1` + `esbuild --bundle --format=esm`, num só ficheiro, para não depender de CDN. A versão tem de bater com o `zebar.exe` (3.0 não tinha `tauriWindow`). **Uma só cópia**: o Zebar só serve a cada página ficheiros de dentro da pasta do seu pack que batam com o `includeFiles` (código do Zebar 3.3.1: `asset_server.rs`, `widget_factory.rs`); por isso todas as páginas estão no mesmo pack. | `E160BB83…1929FA` |
-| `cafe.bmp` | `scripts\gerar-cafe-bmp.ps1`: desenha com System.Drawing (GDI+) a mesma geometria do `<svg id="cafe">`, sem vapor, a 280×280, em BMP 24-bit, em fundo preto. Não precisa de navegador. | — |
+| `cafe.bmp` | `scripts\gerar-cafe-bmp.ps1`: desenha com System.Drawing (GDI+) a mesma geometria do `<svg id="cafe">`, sem vapor, a 560×560 (2× o tamanho no ecrã; a cortina reduz ao DPI do ecrã), em BMP 24-bit, em fundo preto. Não precisa de navegador. | — |
 | `2-configuracao\` | `scripts\gerar-modelos.ps1` no PC onde se mantém a configuração (ver abaixo). | — |
 
 **Atualizar o pacote depois de mudar a configuração ativa (`~\.glzr`):** correr `scripts\gerar-modelos.ps1`. Ele:

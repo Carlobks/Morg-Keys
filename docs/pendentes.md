@@ -7,7 +7,5 @@ quando acaba, sai daqui.
 
 A fazer agora, no `exp/a`, antes da fase 4 da experiência (pedido de 2026-10-24). Já feitos: correções
 pequenas, bateria na barra e quota do Claude (via oficial + `claude = esconder`; pesquisa em
-`pesquisa/quota-claude.md`). Falta:
+`pesquisa/quota-claude.md`). Já feito também: fundo à vista no arranque (A38) e o piscar na passagem cortina → animação.
 
-3. **Fundo à vista no arranque** (9,3 s = 3,3 s até a tarefa criar o `pythonw` + 5,8 s do Python a frio):
-   decidir fundo preto e/ou cortina sem Python.

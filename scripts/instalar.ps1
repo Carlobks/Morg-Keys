@@ -43,6 +43,7 @@ $utf8 = New-Object Text.UTF8Encoding $false
 $py  = Join-Path $env:windir 'py.exe'
 $pyw = Join-Path $env:windir 'pyw.exe'
 $GlazeCli = "$env:ProgramFiles\glzr.io\GlazeWM\cli\glazewm.exe"
+$TarefaEcraPreto = 'Morg Keys (ecrã preto)'   # o desinstalar.ps1 usa o mesmo nome
 $DirFontes = Join-Path $env:LOCALAPPDATA 'Microsoft\Windows\Fonts'
 # Instaladores: usa os de 1-instaladores\ se lá estiverem e forem os certos; senão descarrega
 # dos sites oficiais. Nunca corre um ficheiro que não passe na verificação.
@@ -421,6 +422,28 @@ function RegistarTarefa {
   }
 }
 
+# Ecrã preto logo ao entrar na sessão. Nos primeiros segundos depois de aparecer o ambiente de trabalho,
+# todos os processos novos ficam parados (o Python ~5 s antes da 1.ª linha) e via-se o papel de parede até
+# à cortina. O protetor de ecrã "Em branco" do Windows (scrnsave.scr: assinado pela Microsoft, só DLLs do
+# sistema) aparece em milissegundos e o boot fecha-o quando a cortina está visível. Não mexe no papel de
+# parede nem bloqueia a sessão (só bloqueia quando é o Windows a lançá-lo). Limite de 2 min: rede de segurança.
+function RegistarEcraPreto {
+  $quem = "$env:USERDOMAIN\$env:USERNAME"
+  $acao = New-ScheduledTaskAction -Execute (Join-Path $env:windir 'System32\scrnsave.scr') -Argument '/s'
+  $gat  = New-ScheduledTaskTrigger -AtLogOn -User $quem
+  $pri  = New-ScheduledTaskPrincipal -UserId $quem -LogonType Interactive -RunLevel Limited
+  $def  = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable `
+            -ExecutionTimeLimit (New-TimeSpan -Minutes 2) -MultipleInstances IgnoreNew -Priority 4
+  try {
+    Register-ScheduledTask -TaskName $TarefaEcraPreto -Action $acao -Trigger $gat -Principal $pri -Settings $def -Force `
+      -Description 'Ecrã preto ao entrar na sessão, até a cortina do arranque (bar_helper.py boot) aparecer e o fechar.' `
+      -ErrorAction Stop | Out-Null
+    Info "Tarefa '$TarefaEcraPreto' registada (ecrã preto ao entrar na sessão)."
+  } catch {
+    Aviso "Não consegui criar a tarefa '$TarefaEcraPreto' ($($_.Exception.Message)): ao entrar vê-se o fundo uns segundos."
+  }
+}
+
 function Concluir {
   Copy-Item $Registo (Join-Path $Glzr 'instalacao.log') -Force
   if ($NaoIniciar) { Passo 'Concluído. Termine a sessão e volte a entrar para arrancar.' }
@@ -459,6 +482,7 @@ function Instalar {
   AjustarAmbienteDeTrabalho $copia $statusAplicado
   Passo 'Arranque automático (tarefa agendada)'
   RegistarTarefa
+  RegistarEcraPreto
   Concluir
 }
 

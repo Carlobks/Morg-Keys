@@ -92,6 +92,9 @@ MUTANTES = [
     ('return value.strip().lower() not in ESCONDER', 'return True'),
     ("if (u.mostrar === false) return", 'if (false) return'),
     ('if (!five && !week) {', 'if (!five) {'),
+    # arranque: café da cortina ao DPI do ecrã e o ecrã preto do Windows (A38)
+    ('w, h = round(img_w * dpi / 96), round(img_h * dpi / 96)', 'w, h = img_w, img_h'),
+    ('    if _fechar_ecra_preto():', '    if True:'),
 ]
 FICHEIROS = [*PACK.glob("*.py"), *PACK.glob("comum/*.mjs"), *PACK.glob("painel/*.mjs"), *PACK.glob("guia/*.mjs")]
 TESTES_PY = ["py", "-I", "-m", "unittest", "discover", "-s", "tests"]

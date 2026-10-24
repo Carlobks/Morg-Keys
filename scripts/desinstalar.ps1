@@ -36,6 +36,8 @@ function LerEstado {
 }
 
 function RemoverTarefa {
+  # A do ecrã preto ao entrar (protetor "Em branco"), registada pelo instalar.ps1 com o mesmo nome.
+  Unregister-ScheduledTask -TaskName 'Morg Keys (ecrã preto)' -Confirm:$false -ErrorAction SilentlyContinue
   Unregister-ScheduledTask -TaskName 'GlazeWM (arranque)' -Confirm:$false -ErrorAction SilentlyContinue
   if (Get-ScheduledTask -TaskName 'GlazeWM (arranque)' -ErrorAction SilentlyContinue) {
     # Criada com privilégios de administrador: só sai com eles. Sem a configuração

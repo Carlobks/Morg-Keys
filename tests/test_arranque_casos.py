@@ -121,6 +121,15 @@ class CasosDoBoot(unittest.TestCase):
             s.bh._refocus_after_boot(None)
             self.assertEqual(comandos[-1], ("command", "focus", "--container-id", "j3"))
 
+    def test_sem_ecra_preto_do_windows_nao_regista_nada(self):
+        # Ex.: tarefa "Morg Keys (ecrã preto)" em falta, ou o utilizador mexeu no rato e o protetor fechou.
+        with ArranqueFalso() as s:
+            s.ecra_preto = 0
+            s.bh.boot()
+            self.assertNotIn("ecrã preto do Windows fechado", s.registo_do_arranque())
+            self.assertEqual(s.eventos.count("ecrã preto fechado"), 3)  # procurou à cortina, antes de sair e no fim
+            self.assertTrue(s.progresso()["fim"])
+
     def test_medicao_que_rebenta_nao_estraga_o_arranque(self):
         def rebenta(*a):
             raise RuntimeError("sem relógio")

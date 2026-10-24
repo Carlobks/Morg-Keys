@@ -70,6 +70,8 @@ class ArranqueFalso(SistemaFalso):
         self.trocar("user32", Bomba("user32", u32))
         self.trocar("dwmapi", Bomba("dwmapi", {"DwmFlush": lambda: self.eventos.append("DwmFlush") or 0}))
         self.trocar("_BlackCover", CortinaFalsa)
+        self.ecra_preto = 1  # janelas do protetor "Em branco" que o _fechar_ecra_preto encontra
+        self.trocar("_fechar_ecra_preto", lambda: self.eventos.append("ecrã preto fechado") or self.ecra_preto)
         self.trocar("ZEBAR", self.zebar)
         self.trocar("ARRANQUE_FILE", self.arranque_txt)
         self.trocar("PROGRESS_FILE", self.pasta / "progress.json")
@@ -130,12 +132,14 @@ class Arranque(unittest.TestCase):
             self.assertEqual(s.chamadas_k32, ["SetPriorityClass", "CreateMutexW", "ReleaseMutex"])
             self.assertEqual(len(s.medicoes), 1)
             self.assertEqual(s.mensagens, [])  # o splash fechou-se sozinho
+            # O ecrã preto do Windows (protetor "Em branco") fecha-se logo que a cortina está por cima.
             # A cortina sai quando a animação avisa (logo a seguir ao splash), antes da barra: antes disso a
             # animação vai para cima da cortina e o DWM compõe 2 vezes com ela à vista (sem piscar).
-            self.assertEqual(s.eventos[:7], ["lançou start-widget-preset --pack", "splash ao topo", "splash ao topo",
-                                             "DwmFlush", "DwmFlush", "cortina fechada", "lançou startup"])
+            self.assertEqual(s.eventos[:9], ["ecrã preto fechado", "lançou start-widget-preset --pack",
+                                             "splash ao topo", "splash ao topo", "DwmFlush", "DwmFlush",
+                                             "ecrã preto fechado", "cortina fechada", "lançou startup"])
             registo = s.registo_do_arranque()
-            for frase in ["cortina preta:", "animação visível:", "GlazeWM e barra:", "não existe: C:\\nao\\existe.bat",
+            for frase in ["cortina preta:", "ecrã preto do Windows fechado:", "animação visível:", "GlazeWM e barra:", "não existe: C:\\nao\\existe.bat",
                           "Servidor a responder na porta 3000:", "janelas arrumadas:", "tudo assente, ecrã a sair:",
                           "fim:"]:
                 self.assertIn(frase, registo)

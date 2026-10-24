@@ -4,9 +4,36 @@ import ctypes
 from ctypes import wintypes
 
 from morg_config_arranque import ANIM_CY, ANIMACOES, SPLASH_DIR
-from morg_win32 import HWND, kernel32, user32
+from morg_win32 import ENUM_PROC, HWND, kernel32, user32
 
 COVER_TITLE = "Morg Keys arranque"
+
+
+def _fechar_ecra_preto():  # pragma: no cover — cola Win32: janelas e processos reais (validacao-manual)
+    """Fecha o protetor de ecrã "Em branco" (scrnsave.scr) que a tarefa "Morg Keys (ecrã preto)" lança ao
+    entrar na sessão (instalar.ps1, RegistarEcraPreto), depois de a cortina estar visível por cima dele.
+    A classe da janela vem traduzida: procura-se pelo programa do processo. Devolve quantas fechou."""
+    kernel32.QueryFullProcessImageNameW.argtypes = [wintypes.HANDLE, wintypes.DWORD, wintypes.LPWSTR,
+                                                    ctypes.POINTER(wintypes.DWORD)]
+    user32.EnumWindows.argtypes = [ENUM_PROC, wintypes.LPARAM]
+    alvos = []
+
+    def ver(hwnd, _):
+        pid = wintypes.DWORD()
+        user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+        h = kernel32.OpenProcess(0x1000, False, pid.value)  # PROCESS_QUERY_LIMITED_INFORMATION
+        if h:
+            nome, n = ctypes.create_unicode_buffer(260), wintypes.DWORD(260)
+            if kernel32.QueryFullProcessImageNameW(h, 0, nome, ctypes.byref(n)) \
+                    and nome.value.lower().endswith("\\scrnsave.scr"):
+                alvos.append(hwnd)
+            kernel32.CloseHandle(h)
+        return True
+
+    user32.EnumWindows(ENUM_PROC(ver), 0)
+    for hwnd in alvos:
+        user32.PostMessageW(hwnd, 0x0010, 0, 0)  # WM_CLOSE
+    return len(alvos)
 
 
 def _rect_cortina(sw, sh, dpi, img_w, img_h):

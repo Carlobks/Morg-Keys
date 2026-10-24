@@ -15,7 +15,7 @@ from morg_arranjo import (
     _restore,
 )
 from morg_config_arranque import _arranque_cfg
-from morg_cortina import _BlackCover
+from morg_cortina import _BlackCover, _fechar_ecra_preto
 from morg_ecra_arranque import SPLASH_READY, SPLASH_TITLE, _Progress, _splash_to_top
 from morg_glaze import _glaze, _windows_by_workspace, _workspaces
 from morg_inicio import T_INICIO
@@ -154,6 +154,7 @@ def boot():
     ready = kernel32.CreateEventW(None, True, False, SPLASH_READY)
     a = _EstadoDoArranque(cfg, cover, _new_log())
     a.log(f"cortina preta: {a.decorrido():.1f} s")
+    _fechar_ecra_preto_e_registar(a)
 
     _boot_ecra_e_barra(a, ready)
     _boot_glazewm(a)
@@ -188,6 +189,7 @@ def _boot_ecra_e_barra(a, ready):
         _splash_to_top()
         for _ in range(2):
             dwmapi.DwmFlush()
+        _fechar_ecra_preto_e_registar(a)  # se a tarefa do ecrã preto chegou depois da cortina
         a.cover.close()
         a.log(f"animação visível: {a.decorrido():.1f} s")
     else:
@@ -195,6 +197,13 @@ def _boot_ecra_e_barra(a, ready):
     # 2. Barra, guia e painel (startupConfigs) — "startup" funciona com o Zebar já a correr.
     a.progress.step("barra", "Barra")
     _popen_detached([str(ZEBAR), "startup"])
+
+
+def _fechar_ecra_preto_e_registar(a):
+    """Fecha o ecrã preto do Windows (tarefa "Morg Keys (ecrã preto)") que tapou o fundo até a cortina
+    aparecer; a cortina, criada depois, já está por cima dele."""
+    if _fechar_ecra_preto():
+        a.log(f"ecrã preto do Windows fechado: {a.decorrido():.1f} s")
 
 
 def _esperar_splash(ready, fatias=200):
@@ -304,6 +313,7 @@ def _boot_sair(a):
     if hwnd:
         user32.PostMessageW(hwnd, 0x0010, 0, 0)  # WM_CLOSE
         a.log("splash fechado à força")
+    _fechar_ecra_preto_e_registar(a)
     a.cover.close()
     _refocus_after_boot(a.layout)
     a.log(f"fim: {a.decorrido():.1f} s")

@@ -18,6 +18,7 @@ Describe 'Tarefa de arranque' {
     Mock Get-ScheduledTask {}
     RemoverTarefa
     Should -Invoke Unregister-ScheduledTask -ParameterFilter { $TaskName -eq 'GlazeWM (arranque)' }
+    Should -Invoke Unregister-ScheduledTask -ParameterFilter { $TaskName -eq 'Morg Keys (ecrã preto)' }
     Should -Invoke Write-Host -ParameterFilter { $Object -eq '    Tarefa "GlazeWM (arranque)" removida.' }
   }
   It 'criada como administrador: avisa e diz como a tirar' {

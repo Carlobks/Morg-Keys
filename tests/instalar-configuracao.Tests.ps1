@@ -244,6 +244,18 @@ Describe 'Tarefa agendada e fim' {
     { RegistarTarefa } | Should -Throw 'Sair'
     Registado | Should -Match 'Não consegui criar a tarefa de arranque \(Acesso negado\)'
   }
+  It 'regista a tarefa do ecrã preto (protetor "Em branco" ao entrar, no máximo 2 min); se falhar só avisa' {
+    Mock Register-ScheduledTask {}
+    RegistarEcraPreto
+    Should -Invoke Register-ScheduledTask -ParameterFilter { $TaskName -eq 'Morg Keys (ecrã preto)' -and $Force -and
+      $Action.Execute -eq (Join-Path $env:windir 'System32\scrnsave.scr') -and $Action.Arguments -eq '/s' -and
+      $Settings.ExecutionTimeLimit -eq 'PT2M' -and $Settings.Priority -eq 4 -and $Principal.RunLevel -eq 'Limited' -and
+      $Trigger.UserId -eq "$env:USERDOMAIN\$env:USERNAME" }
+    Registado | Should -Match "Tarefa 'Morg Keys \(ecrã preto\)' registada"
+    Mock Register-ScheduledTask { throw 'Acesso negado' }
+    RegistarEcraPreto
+    Registado | Should -Match "! Não consegui criar a tarefa 'Morg Keys \(ecrã preto\)' \(Acesso negado\)"
+  }
   It 'Concluir guarda o registo e arranca já (ou não, com -NaoIniciar)' {
     Escrever $Registo "Instalação`n"
     Mock Start-ScheduledTask {}
@@ -263,7 +275,7 @@ Describe 'Instalar (a ordem dos passos)' {
     $ordem = [System.Collections.Generic.List[string]]::new()
     foreach ($f in 'Verificar', 'InstalarProgramas', 'InstalarFontes', 'FecharAmbienteAntigo', 'CopiarModelos',
                    'ManterPersonalizacoes', 'VerificarMarcadores', 'CriarAtalhoNosDocumentos', 'AplicarApps',
-                   'AjustarAmbienteDeTrabalho', 'RegistarTarefa', 'Concluir') {
+                   'AjustarAmbienteDeTrabalho', 'RegistarTarefa', 'RegistarEcraPreto', 'Concluir') {
       Mock $f ([scriptblock]::Create("`$ordem.Add('$f')"))
     }
     Mock EscolherArranque { $ordem.Add('EscolherArranque'); @{ Manter = $true; Animacao = 'lua'; Linhas = @('bat = x') } }
@@ -272,7 +284,7 @@ Describe 'Instalar (a ordem dos passos)' {
     Instalar
     $ordem | Should -Be @('Verificar', 'InstalarProgramas', 'InstalarFontes', 'EscolherArranque', 'FecharAmbienteAntigo',
       'GuardarCopiaAnterior', 'CopiarModelos', 'ManterPersonalizacoes', 'VerificarMarcadores', 'CriarAtalhoNosDocumentos',
-      'AplicarApps', 'ConfigurarStatusLine', 'AjustarAmbienteDeTrabalho', 'RegistarTarefa', 'Concluir')
+      'AplicarApps', 'ConfigurarStatusLine', 'AjustarAmbienteDeTrabalho', 'RegistarTarefa', 'RegistarEcraPreto', 'Concluir')
     Should -Invoke CopiarModelos -ParameterFilter { $animacao -eq 'lua' -and $linhasBat -contains 'bat = x' }
     Should -Invoke ManterPersonalizacoes -ParameterFilter { $copia -eq 'C:\copia' -and $manterArranque }
     Should -Invoke AjustarAmbienteDeTrabalho -ParameterFilter { $copia -eq 'C:\copia' -and $statusAplicado }
