@@ -38,38 +38,44 @@ try {
         if ($LASTEXITCODE -ne 0) { $Falhas.Add('JavaScript (testes ou cobertura)') }
     }
 
-    # 3. PowerShell: Pester 6, se houver testes, com cobertura do scripts\instalar.ps1. Abaixo de 100 % nas
-    #    funções não excluídas falha. As excluídas (cola com o Windows) e o motivo de cada uma estão em
-    #    $FuncoesExcluidas, no tests\instalar.Comum.ps1 (lido daqui sem o correr).
+    # 3. PowerShell: Pester 6, se houver testes, com cobertura do scripts\instalar.ps1 e do scripts\desinstalar.ps1.
+    #    Abaixo de 100 % nas funções não excluídas falha. As excluídas (cola com o Windows) e o motivo de cada
+    #    uma estão em $FuncoesExcluidas, no tests\instalar.Comum.ps1 e no tests\desinstalar.Comum.ps1.
     $TestesPs = @(Get-ChildItem -Path (Join-Path $Raiz 'tests') -Recurse -Filter '*.Tests.ps1' -ErrorAction SilentlyContinue)
     if ($TestesPs.Count -gt 0) {
-        Write-Titulo 'PowerShell (Pester + cobertura do instalar.ps1)'
+        Write-Titulo 'PowerShell (Pester + cobertura do instalar.ps1 e do desinstalar.ps1)'
         Import-Module Pester -MinimumVersion 6.0
         $Config = New-PesterConfiguration
         $Config.Run.Path = [string[]]($TestesPs | ForEach-Object { $_.FullName })
         $Config.Run.PassThru = $true
         $Config.Output.Verbosity = 'Normal'
         $Config.CodeCoverage.Enabled = $true
-        $Config.CodeCoverage.Path = [string[]](Join-Path $Raiz 'scripts\instalar.ps1')
+        $Scripts = @{ 'instalar.ps1' = 'Instalar'; 'desinstalar.ps1' = 'Desinstalar' }   # script -> ponto de entrada
+        $Config.CodeCoverage.Path = [string[]]($Scripts.Keys | ForEach-Object { Join-Path $Raiz "scripts\$_" })
         $Config.CodeCoverage.OutputPath = Join-Path $env:TEMP 'morg-keys-cobertura-instalar.xml'
         $Resultado = Invoke-Pester -Configuration $Config
         if ($Resultado.FailedCount -gt 0) { $Falhas.Add('PowerShell') }
 
-        $Arvore = [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $Raiz 'tests\instalar.Comum.ps1'), [ref]$null, [ref]$null)
-        $Lista = $Arvore.Find({ param($n) $n -is [System.Management.Automation.Language.AssignmentStatementAst] -and
-                                $n.Left.VariablePath.UserPath -eq 'FuncoesExcluidas' }, $true)
-        $Excluidas = $Lista.Right.Expression.SafeGetValue()
-        # Conta só fora das funções excluídas. A última linha do instalar.ps1 (a chamada a Instalar, o ponto
-        # de entrada) só corre pelo INSTALAR.cmd: os testes carregam o ficheiro com ". instalar.ps1".
-        $Conta = { param($c) -not ($Excluidas.ContainsKey([string]$c.Function) -or (-not $c.Function -and $c.Command -eq 'Instalar')) }
         $Cobertura = $Resultado.CodeCoverage
-        $EmFalta = @($Cobertura.CommandsMissed | Where-Object { & $Conta $_ })
-        $Feitos = @($Cobertura.CommandsExecuted | Where-Object { & $Conta $_ })
-        $Total = $EmFalta.Count + $Feitos.Count
-        Write-Output ("Cobertura do instalar.ps1 fora das {0} funções excluídas: {1}/{2} comandos ({3:N1} %)" -f
-            $Excluidas.Count, $Feitos.Count, $Total, (100 * $Feitos.Count / [Math]::Max($Total, 1)))
-        $EmFalta | ForEach-Object { Write-Output "  falta: linha $($_.Line) [$($_.Function)] $($_.Command)" }
-        if ($Total -eq 0 -or $EmFalta.Count -gt 0) { $Falhas.Add('Cobertura PowerShell') }
+        foreach ($Script in $Scripts.Keys) {
+            # Funções excluídas deste script: $FuncoesExcluidas em tests\<script sem .ps1>.Comum.ps1 (lido sem o correr).
+            $Comum = Join-Path $Raiz ("tests\" + [IO.Path]::GetFileNameWithoutExtension($Script) + '.Comum.ps1')
+            $Arvore = [System.Management.Automation.Language.Parser]::ParseFile($Comum, [ref]$null, [ref]$null)
+            $Lista = $Arvore.Find({ param($n) $n -is [System.Management.Automation.Language.AssignmentStatementAst] -and
+                                    $n.Left.VariablePath.UserPath -eq 'FuncoesExcluidas' }, $true)
+            $Excluidas = $Lista.Right.Expression.SafeGetValue()
+            # Conta só os comandos deste script fora das funções excluídas. A última linha (a chamada ao ponto de
+            # entrada) só corre pelo .cmd: os testes carregam o ficheiro com ". <script>".
+            $Conta = { param($c) ([IO.Path]::GetFileName($c.File) -eq $Script) -and -not ($Excluidas.ContainsKey([string]$c.Function) -or
+                                  (-not $c.Function -and $c.Command -eq $Scripts[$Script])) }
+            $EmFalta = @($Cobertura.CommandsMissed | Where-Object { & $Conta $_ })
+            $Feitos = @($Cobertura.CommandsExecuted | Where-Object { & $Conta $_ })
+            $Total = $EmFalta.Count + $Feitos.Count
+            Write-Output ("Cobertura do {0} fora das {1} funções excluídas: {2}/{3} comandos ({4:N1} %)" -f
+                $Script, $Excluidas.Count, $Feitos.Count, $Total, (100 * $Feitos.Count / [Math]::Max($Total, 1)))
+            $EmFalta | ForEach-Object { Write-Output "  falta: linha $($_.Line) [$($_.Function)] $($_.Command)" }
+            if ($Total -eq 0 -or $EmFalta.Count -gt 0) { $Falhas.Add("Cobertura PowerShell ($Script)") }
+        }
     }
 
     # 4. Lint.

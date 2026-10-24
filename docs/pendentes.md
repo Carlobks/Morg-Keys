@@ -5,7 +5,8 @@ quando acaba, sai daqui.
 
 1. **Experiência 0001 — cobertura A contra C** (em curso): `experiencias/0001-cobertura-a-vs-c.md`.
 
-Depois da experiência:
+A fazer agora, no `exp/a`, antes da fase 4 da experiência (pedido de 2026-10-24). Ordem: 4, 2, 3 (as correções
+pequenas, M1, já estão feitas).
 
 2. **Quota do Claude Code na barra** (pedido de 2026-10-23): melhorar a ligação ou, em alternativa, dar
    opção de a ocultar. Hoje o `claude_usage.py` só lê `~/.claude/rate_limits.json`, que o
@@ -20,12 +21,3 @@ Depois da experiência:
 3. **Fundo à vista no arranque** (9,3 s = 3,3 s até a tarefa criar o `pythonw` + 5,8 s do Python a frio):
    decidir fundo preto e/ou cortina sem Python.
 4. **Ícone de bateria na barra**, só se o PC tiver bateria.
-5. **Bug antigo (encontrado na fase 2a):** `bar_helper.py` sem argumentos (ou com um comando desconhecido)
-   imprime a ajuda e rebenta num terminal cp1252 por causa do carácter "✕" (`UnicodeEncodeError`). Corrigir
-   com teste de regressão (ex.: escrever em UTF-8 ou trocar o carácter).
-6. **Desinstalar incompleto** (encontrado em 2026-10-24): o `desinstalar.ps1` não tira as pastas do próprio
-   Zebar (`%APPDATA%\zebar` e `%LOCALAPPDATA%\com.glzr.zebar`, com a cache do WebView2). Movê-las para
-   `.removido-<data>`, como faz com a `~\.glzr`, e testar com Pester.
-7. **Aviso "sem a app: claude-code"** em todas as instalações deste PC, com o Claude Code instalado. Ver
-   porque o `apps-apply` não o encontra.
-8. **Confirmação do utilizador** do painel `Alt+Esc, C` depois das correções A25 (foco) e A26 (ícones).
