@@ -165,7 +165,7 @@ def _apps_validar(lines, config, skip_missing, use_cache):
     """Lê as linhas do apps.txt: (erros, [(tecla, app, comando)], houve linhas comentadas).
     Com skip_missing, comenta em `lines` as apps que não existem neste PC."""
     fixed = _fixed_bindings(config)
-    start_apps = None
+    menu = _MenuIniciar(use_cache)
     errors, entries, used = [], [], {}
     skipped = False
     for n, raw in enumerate(lines, 1):
@@ -177,23 +177,11 @@ def _apps_validar(lines, config, skip_missing, use_cache):
             continue
         left, right = line.split("=", 1)
         key = _parse_key(left)
-        if not key:
-            errors.append(f"linha {n}: tecla inválida '{left.strip()}' (use Alt+Shift+letra, sem Ctrl)")
+        erro = _erro_da_tecla(n, left, key, fixed, used)
+        if erro:
+            errors.append(erro)
             continue
-        if key in fixed:
-            errors.append(f"linha {n}: {left.strip()} já é usado por outro atalho do sistema")
-            continue
-        if key in used:
-            errors.append(f"linha {n}: {left.strip()} repetido (linha {used[key]})")
-            continue
-        if start_apps is None and right.strip().lower() not in SPECIAL_APPS \
-                and not right.strip().lower().startswith("web:"):
-            start_apps = _start_apps(use_cache)
-        command = _resolve_app(right, start_apps or {})
-        if not command and use_cache and start_apps is not None:
-            start_apps = _start_apps()  # app instalada depois da cache: lista nova
-            use_cache = False
-            command = _resolve_app(right, start_apps)
+        command = menu.comando(right)
         if command and skip_missing and not _special_available(right):
             command = None
         if not command:
@@ -206,6 +194,36 @@ def _apps_validar(lines, config, skip_missing, use_cache):
         used[key] = n
         entries.append((key, right.strip(), command))
     return errors, entries, skipped
+
+
+def _erro_da_tecla(n, left, key, fixed, used):
+    """Texto do erro da tecla da linha n (inválida, do sistema ou repetida); None se estiver bem."""
+    if not key:
+        return f"linha {n}: tecla inválida '{left.strip()}' (use Alt+Shift+letra, sem Ctrl)"
+    if key in fixed:
+        return f"linha {n}: {left.strip()} já é usado por outro atalho do sistema"
+    if key in used:
+        return f"linha {n}: {left.strip()} repetido (linha {used[key]})"
+    return None
+
+
+class _MenuIniciar:
+    """Lista do menu Iniciar, lida só quando uma linha precisa dela (é lenta: ~1-2 s)."""
+
+    def __init__(self, use_cache):
+        self.apps, self.use_cache = None, use_cache
+
+    def comando(self, right):
+        """Comando do GlazeWM para a app da direita de uma linha do apps.txt (ou None)."""
+        if self.apps is None and right.strip().lower() not in SPECIAL_APPS \
+                and not right.strip().lower().startswith("web:"):
+            self.apps = _start_apps(self.use_cache)
+        command = _resolve_app(right, self.apps or {})
+        if not command and self.use_cache and self.apps is not None:
+            self.apps = _start_apps()  # app instalada depois da cache: lista nova
+            self.use_cache = False
+            command = _resolve_app(right, self.apps)
+        return command
 
 
 def _apps_escrever_bloco(config, entries):

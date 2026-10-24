@@ -19,7 +19,7 @@ MUTANTES = [
     ('if not parts or parts[0] != "alt":', 'if not parts or parts[0] not in ("alt", "shift"):'),
     ('app_id = found[0] if len(found) == 1 else None', 'app_id = found[0] if len(found) >= 1 else None'),
     ('    if APPS_BEGIN in text and APPS_END in text:\n        text = text.split', '    if False:\n        text = text.split'),
-    ('        if key in fixed:', '        if False and key in fixed:'),
+    ('    if key in fixed:', '    if False and key in fixed:'),
     ('format(command.replace("\'", "\'\'"))', 'format(command)'),
     ('if "expect_ws" in op and (', 'if False and ('),
     ('if kind == "ws-move" and windows[i].get("workspace") == str(op.get("ws", "")):', 'if False:'),
