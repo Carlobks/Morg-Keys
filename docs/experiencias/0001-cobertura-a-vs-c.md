@@ -170,6 +170,26 @@ Bloco "O quê" da **fase 3 (A)**:
   - PowerShell: Pester com `CodeCoverage`, a falhar abaixo de 100 % nas funções não excluídas.
 - **Funções do `instalar.ps1` nos testes:** carregadas sem correr a instalação (por exemplo, com uma guarda no ponto de entrada).
 
+**Decisão do utilizador (2026-10-24): o Sandbox fica adiado.** Fases revistas:
+- **4:** C só com contratos.
+- **5:** A contra C-contratos. Os bugs que só o Windows real apanharia ficam marcados "à espera da fase 7".
+- **6:** decisão provisória quanto ao Sandbox.
+- **7 (adiada):** testes no Windows Sandbox por cima do ramo vencedor. Já está decidido que é o subagente que abre o Sandbox, com um `.wsb` automático. Falta decidir o limite de tempo; a recomendação é cerca de 2 h.
+
+Bloco "O quê" da **fase 4 (C-contratos)**, no ramo `exp/c`, criado a partir do `exp/a`:
+- **Objetivo:** testes de contrato estáticos, que verificam que as partes do projeto concordam umas com as outras sem correr o Windows real:
+  - os comandos que as páginas e o `config.yaml` mandam ao Zebar e ao `bar_helper.py` batem com o `argsRegex` e com a lista de comandos do ajudante;
+  - o `includeFiles` do `zpack.json` cobre todos os ficheiros que as páginas carregam;
+  - os títulos de janela que o ajudante procura existem nas páginas;
+  - os ficheiros que o Zebar e o GlazeWM leem estão sem BOM e com JSON ou YAML válido;
+  - as imagens (BMP e SVG) têm o formato que o código espera;
+  - os marcadores `{{…}}` dos modelos são todos substituídos pelo instalador.
+- **Prova de que cada contrato funciona:** cada um tem de falhar de verdade quando se estraga de propósito o ficheiro do outro lado. Esses estragos entram em `scripts/estragos.py`.
+- **Onde correm:** os contratos entram no `testar.ps1`, que mantém os três limites de 100 % da versão A.
+- **O que não fazer, além das regras do modelo de pedido:**
+  - não mudar código de produção, exceto para corrigir um contrato que esteja de facto partido, e nesse caso explicar porquê;
+  - nada de Sandbox nem de processos reais.
+
 ## Riscos e o que pode não dar para validar
 - GlazeWM no Sandbox: precisa de `uiAccess` (binário assinado em pasta protegida); pode recusar arrancar.
 - Zebar pode ignorar `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS` (sem isso não há CDP para o Playwright).
