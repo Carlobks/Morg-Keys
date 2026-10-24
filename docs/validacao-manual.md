@@ -6,7 +6,7 @@ O que os testes automáticos não cobrem e como se verifica à mão (com o passo
 
 ## 10. Verificação (depois de instalar ou alterar)
 
-1. Termine a sessão e volte a entrar: só ecrã preto com a animação e a lista, e depois o ambiente pronto, sem clarões.
+1. Termine a sessão e volte a entrar: o ambiente de trabalho escurece aos poucos até ao preto; a chávena entra, "Muito bem-vindo, <nome>", a hora e a frase do dia, e a lista por baixo; depois o ambiente pronto, sem clarões nem piscar. (Os segundos de papel de parede antes do escurecer são a A38, por resolver.)
 2. A barra no topo tem ícones (não quadrados) e mostra o relógio e os workspaces.
 3. `Alt+K` abre o guia e fecha com `Esc`, `Alt+K` e com um clique fora. Segurar `Alt+K` abre uma só vez.
 4. `Alt+Esc` mostra o painel; `Esc` fecha. `Alt+Esc`, `I` faz aparecer o café. `Alt+Esc`, tocar `E`: o painel mostra "Animação: X" (muda quando há mais de uma). Segurar `E`: ao largar, a animação aparece uns segundos.
@@ -27,12 +27,12 @@ página, no caso do DOM). Cada exclusão está marcada no código com o motivo e
 
 | Ficheiro | Função | Motivo | Como se verifica à mão |
 |---|---|---|---|
-| `morg_cortina.py` | `_BlackCover._run` (`# pragma: no cover`) | Janela Win32 preta, laço de mensagens e pintura GDI do BMP. | §10, passo 1: ecrã preto com a animação, sem clarões nem salto para o SVG. |
+| `morg_cortina.py` | `_BlackCover._run` (`# pragma: no cover`) | Janela Win32 em camadas, temporizador e laço de mensagens. | §10, passo 1: o ambiente de trabalho escurece aos poucos (não de repente) e passa ao ecrã de boas-vindas sem piscar. Medido a 2026-10-24 com um script: brilho do ecrã 88 → 31 → 1 → 0 em 1,5 s. |
 | `painel/apps.mjs` | tudo depois dos `import` (`/* node:coverage disable */`) | Ligação ao DOM e ao Zebar (WebView2, Tauri). As decisões e o HTML estão em `apps-logica.mjs`, testados; o `tests/paginas.test.mjs` só carrega a página num DOM falso. | `painel/apps.html?preview` (servidor `pack-preview` do `.claude/launch.json`): escolher uma app e uma tecla, mover e tirar de um workspace, "+ site", filtro, setas, Esc. No Zebar: §10, passo 5b. |
 | `guia/guia.mjs` | tudo depois dos `import` (`/* node:coverage disable */`) | Ligação ao DOM e ao Zebar; tabela, HTML e filtro estão em `guia-logica.mjs` e `comum.mjs`, testados. | `guia/guia.html?preview`: quatro colunas, filtro e Esc. No Zebar: §10, passo 3. |
-| `morg_cortina.py` | `_fechar_ecra_preto` (`# pragma: no cover`) | Procura e fecha as janelas reais do processo `scrnsave.scr` (EnumWindows, OpenProcess). | §10, passo 1: ao entrar, preto logo a seguir ao "Bem-vindo" (sem papel de parede), depois o café; no fim, `tasklist /FI "IMAGENAME eq scrnsave.scr"` vazio. Simulado em 2026-10-24 (protetor aberto → cortina por cima com o café → protetor fechado, 0 processos). |
 | `scripts\instalar.ps1` | `Sair` | `exit 1` terminaria o próprio Pester. | Correr o `INSTALAR.cmd` num caso que pare (ex.: pasta do utilizador com espaços): mensagem `ERRO:` e sai. |
 | `scripts\instalar.ps1` | `BuildDoWindows`, `EAdministrador`, `TipoDaUnidade`, `PastaDocumentos` | Perguntas ao .NET sobre o Windows real (build, administrador, disco de rede, pasta Documentos). | `instalacao.log` tem "Windows build …"; como administrador pergunta "Continuar? (S/N)"; corrido de uma unidade de rede para; `Documentos\Guia de Atalhos` abre a pasta `guia`. |
+| `scripts\instalar.ps1` | `NomeDaConta` | .NET `UserPrincipal.Current`: o nome da conta real do Windows. | A pergunta do nome mostra "(Enter = <1.º nome>)" numa conta Microsoft com nome; numa conta local sem nome completo, "(Enter = sem nome)". |
 | `scripts\instalar.ps1` | `PythonServe`, `CorrerAppsApply`, `CorrerPython` | Correm o `py.exe` real (versão do Python, `apps-apply`, statusLine no `settings.json`). | Com Python ≥ 3.10 o passo dos programas diz "Já está tudo instalado"; o `instalacao.log` tem a saída do `apps-apply` e os atalhos das apps funcionam (§10, passo 5); `~\.claude\settings.json` tem a `statusLine` (§10, passo 8). |
 | `scripts\instalar.ps1` | `AtivarTls12` | Muda o TLS do processo (.NET `ServicePointManager`). | Num PC sem os programas, os instaladores descarregam-se e verificam-se ("descarregado e verificado"). |
 | `scripts\instalar.ps1` | `CarregarGdi`, `RegistarFonteNoWindows`, `AvisarMudancaDeFontes` | `Add-Type` com gdi32/user32: instala a fonte na sessão real e avisa todas as janelas. | Depois de instalar, a barra mostra ícones e não quadrados (§10, passo 2); a fonte aparece em Definições > Tipos de letra. |

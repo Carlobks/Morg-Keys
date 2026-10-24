@@ -15,7 +15,8 @@
     -Animacao cafe                           animação do ecrã de arranque (por agora só há esta)
     -Bat "C:\x\iniciar.bat|http://localhost:3000|Nome"   .bat ao iniciar (vários: separe por ;);
                                              endereço e nome são opcionais
-    -SemPerguntas                            não pergunta nada (sem .bat, salvo -Bat)
+    -Nome Carlos                             nome da saudação do ecrã de arranque ("Muito bem-vindo, Carlos")
+    -SemPerguntas                            não pergunta nada (sem .bat, salvo -Bat; nome da conta do Windows)
     -ManterIcones                            não esconde os ícones do ambiente de trabalho
     -ManterBarraWindows                      não põe a barra de tarefas a esconder-se sozinha
     -NaoIniciar                              instala mas não arranca já (arranca no próximo início de sessão)
@@ -28,6 +29,7 @@
 param(
   [ValidateSet('cafe')][string]$Animacao,
   [string[]]$Bat,
+  [string]$Nome,
   [switch]$SemPerguntas,
   [switch]$ManterIcones,
   [switch]$ManterBarraWindows,
@@ -43,7 +45,6 @@ $utf8 = New-Object Text.UTF8Encoding $false
 $py  = Join-Path $env:windir 'py.exe'
 $pyw = Join-Path $env:windir 'pyw.exe'
 $GlazeCli = "$env:ProgramFiles\glzr.io\GlazeWM\cli\glazewm.exe"
-$TarefaEcraPreto = 'Morg Keys (ecrã preto)'   # o desinstalar.ps1 usa o mesmo nome
 $DirFontes = Join-Path $env:LOCALAPPDATA 'Microsoft\Windows\Fonts'
 # Instaladores: usa os de 1-instaladores\ se lá estiverem e forem os certos; senão descarrega
 # dos sites oficiais. Nunca corre um ficheiro que não passe na verificação.
@@ -94,6 +95,12 @@ function AvisarMudancaDeFontes {
 function GlazeSair { try { & $GlazeCli command wm-exit 2>$null | Out-Null } catch {} }
 function MatarArvore($id) { taskkill /PID $id /T /F 2>$null | Out-Null }
 function PastaDocumentos { [Environment]::GetFolderPath('MyDocuments') }
+function NomeDaConta {  # 1.º nome da conta do Windows (vazio se não houver: contas locais sem nome completo)
+  try {
+    Add-Type -AssemblyName System.DirectoryServices.AccountManagement
+    return "$([System.DirectoryServices.AccountManagement.UserPrincipal]::Current.DisplayName)".Trim().Split(' ')[0]
+  } catch { return '' }
+}
 function RemoverJuncao($caminho) { cmd /c rmdir "$caminho" | Out-Null }  # A10: nunca Remove-Item numa junction
 function CorrerAppsApply($helper) {
   try { & $py -I $helper apps-apply --skip-missing 2>&1 | ForEach-Object { Add-Content $Registo "    $_" -Encoding UTF8 } } catch { Aviso "apps-apply: $_" }
@@ -248,7 +255,18 @@ function EscolherArranque {
     }
     if (-not $linhasBat) { Info 'Sem programas .bat ao iniciar.' }
   }
-  return @{ Manter = [bool]$manterArranque; Animacao = $anim; Linhas = $linhasBat }
+  $quem = EscolherNome $arranqueAntigo $manterArranque
+  return @{ Manter = [bool]$manterArranque; Animacao = $anim; Linhas = $linhasBat; Nome = $quem }
+}
+# Nome da saudação do ecrã de arranque ("Muito bem-vindo, Carlos"). $null = o arranque.txt mantido já o tem.
+function EscolherNome($arranqueAntigo, $manter) {
+  if ($manter -and (Select-String -Path $arranqueAntigo -Pattern '^\s*nome\s*=' -Quiet)) { return $null }
+  $padrao = NomeDaConta
+  $quem = if ($Nome) { $Nome } elseif ($SemPerguntas) { $padrao } else {
+    "$(Read-Host "    Como quer ser chamado no ecrã de arranque? (Enter = $(if ($padrao) { $padrao } else { 'sem nome' }))")" }
+  $quem = "$quem".Trim(); if (-not $quem) { $quem = $padrao }
+  Info "Saudação: Muito bem-vindo$(if ($quem) { ", $quem" })!"
+  return $quem
 }
 
 # ---------------------------------------------------------------------------
@@ -271,35 +289,37 @@ function GuardarCopiaAnterior {
   Info "A configuração anterior ficou guardada em $copia"
   return $copia
 }
-# Texto de um modelo com os marcadores trocados ({{HOME}}, {{HOME_RE}} e, no arranque.txt, a animação e os .bat).
-function TextoDoModelo($rel, $texto, $animacao, $linhasBat) {
+# Texto de um modelo com os marcadores trocados ({{HOME}}, {{HOME_RE}} e, no arranque.txt, a animação, o nome
+# da saudação e os .bat).
+function TextoDoModelo($rel, $texto, $animacao, $linhasBat, $saudacao) {
   $homeFwd = $Casa -replace '\\', '/'
   $homeRe  = [regex]::Escape($homeFwd) -replace '\\', '\\'      # dentro de JSON: cada \ vira \\
   $t = $texto.Replace('{{HOME_RE}}', $homeRe).Replace('{{HOME}}', $homeFwd)
   if ($rel -eq "$Pack\guia\arranque.txt") {
-    $t = $t.Replace('{{ANIMACAO}}', $(if ($animacao) { $animacao } else { 'cafe' }))
+    $t = $t.Replace('{{ANIMACAO}}', $(if ($animacao) { $animacao } else { 'cafe' })).Replace('{{NOME}}', "$saudacao")
     if ($linhasBat) { $t = $t.TrimEnd() + "`n" + ($linhasBat -join "`n") + "`n" }
   }
   return $t
 }
-function CopiarModelos($animacao, $linhasBat) {
+function CopiarModelos($animacao, $linhasBat, $saudacao) {
   $modelos = Join-Path $Pacote '2-configuracao\glzr'
   foreach ($f in Get-ChildItem -Recurse -File $modelos) {
     $rel = $f.FullName.Substring($modelos.Length + 1)
     $dest = Join-Path $Glzr $rel
     New-Item -ItemType Directory -Force (Split-Path $dest) | Out-Null
     if ($f.Extension -notin '.yaml', '.json', '.html', '.css', '.py', '.ps1', '.txt') { Copy-Item $f.FullName $dest; continue }
-    [IO.File]::WriteAllText($dest, (TextoDoModelo $rel ([IO.File]::ReadAllText($f.FullName, $utf8)) $animacao $linhasBat), $utf8)
+    [IO.File]::WriteAllText($dest, (TextoDoModelo $rel ([IO.File]::ReadAllText($f.FullName, $utf8)) $animacao $linhasBat $saudacao), $utf8)
   }
 }
-# Reinstalação: mantém as personalizações de quem já usava (apps, arranque e disposição das janelas).
-function ManterPersonalizacoes($copia, $manterArranque) {
+# Reinstalação: mantém as personalizações de quem já usava (apps, frases, arranque e disposição das janelas).
+# $saudacao: nome a acrescentar ao arranque.txt mantido que ainda não o tem ($null = não mexer).
+function ManterPersonalizacoes($copia, $manterArranque, $saudacao) {
   if (-not $copia) { return }
   if (Test-Path (Join-Path $copia 'arranque')) {  # registos e .bat que o utilizador lá tenha posto
     Copy-Item (Join-Path $copia 'arranque') (Join-Path $Glzr 'arranque') -Recurse -Force
   }
   if (Test-Path (Join-Path $copia 'layout.json')) { Copy-Item (Join-Path $copia 'layout.json') (Join-Path $Glzr 'layout.json') -Force; Info 'mantido layout.json' }
-  $nomes = @('apps.txt'); if ($manterArranque) { $nomes += 'arranque.txt' }
+  $nomes = @('apps.txt', 'frases.txt'); if ($manterArranque) { $nomes += 'arranque.txt' }
   foreach ($nome in $nomes) {
     $de = PessoalAntigo $copia $nome
     if ($de) { Copy-Item $de (Join-Path $Glzr "$Pack\guia\$nome") -Force; Info "mantido $nome" }
@@ -310,6 +330,9 @@ function ManterPersonalizacoes($copia, $manterArranque) {
     $t = [IO.File]::ReadAllText($arr, $utf8)
     $novo = [regex]::Replace($t, '(?m)^(\s*anima(c|ç)(a|ã)o\s*=\s*)(?!\s*cafe\s*$).*$', '${1}cafe')
     if ($novo -ne $t) { [IO.File]::WriteAllText($arr, $novo, $utf8); Info 'arranque.txt: animação antiga trocada por cafe.' }
+    if ($null -ne $saudacao -and $novo -notmatch '(?m)^\s*nome\s*=') {  # arranque.txt de antes da saudação
+      [IO.File]::WriteAllText($arr, $novo.TrimEnd() + "`nnome = $saudacao`n", $utf8); Info "arranque.txt: nome = $saudacao"
+    }
   }
 }
 function VerificarMarcadores {
@@ -398,6 +421,9 @@ function AjustarAmbienteDeTrabalho($copia, $statusAplicado) {
 
 # ---------------------------------------------------------------------------
 function RegistarTarefa {
+  # A tarefa "Morg Keys (ecrã preto)" de uma versão anterior (protetor "Em branco" ao entrar) não resolveu
+  # o fundo à vista (A38): sai, se existir.
+  Unregister-ScheduledTask -TaskName 'Morg Keys (ecrã preto)' -Confirm:$false -ErrorAction SilentlyContinue
   $helper = Join-Path $Glzr "$Pack\bar_helper.py"
   $quem = "$env:USERDOMAIN\$env:USERNAME"
   $acao = New-ScheduledTaskAction -Execute $pyw -Argument "-I `"$helper`" boot"
@@ -419,28 +445,6 @@ function RegistarTarefa {
     } else {
       Parar "Não consegui criar a tarefa de arranque ($($_.Exception.Message)). Abra o PowerShell como administrador, corra  schtasks /Delete /TN `"GlazeWM (arranque)`" /F  e volte a correr o INSTALAR.cmd."
     }
-  }
-}
-
-# Ecrã preto logo ao entrar na sessão. Nos primeiros segundos depois de aparecer o ambiente de trabalho,
-# todos os processos novos ficam parados (o Python ~5 s antes da 1.ª linha) e via-se o papel de parede até
-# à cortina. O protetor de ecrã "Em branco" do Windows (scrnsave.scr: assinado pela Microsoft, só DLLs do
-# sistema) aparece em milissegundos e o boot fecha-o quando a cortina está visível. Não mexe no papel de
-# parede nem bloqueia a sessão (só bloqueia quando é o Windows a lançá-lo). Limite de 2 min: rede de segurança.
-function RegistarEcraPreto {
-  $quem = "$env:USERDOMAIN\$env:USERNAME"
-  $acao = New-ScheduledTaskAction -Execute (Join-Path $env:windir 'System32\scrnsave.scr') -Argument '/s'
-  $gat  = New-ScheduledTaskTrigger -AtLogOn -User $quem
-  $pri  = New-ScheduledTaskPrincipal -UserId $quem -LogonType Interactive -RunLevel Limited
-  $def  = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable `
-            -ExecutionTimeLimit (New-TimeSpan -Minutes 2) -MultipleInstances IgnoreNew -Priority 4
-  try {
-    Register-ScheduledTask -TaskName $TarefaEcraPreto -Action $acao -Trigger $gat -Principal $pri -Settings $def -Force `
-      -Description 'Ecrã preto ao entrar na sessão, até a cortina do arranque (bar_helper.py boot) aparecer e o fechar.' `
-      -ErrorAction Stop | Out-Null
-    Info "Tarefa '$TarefaEcraPreto' registada (ecrã preto ao entrar na sessão)."
-  } catch {
-    Aviso "Não consegui criar a tarefa '$TarefaEcraPreto' ($($_.Exception.Message)): ao entrar vê-se o fundo uns segundos."
   }
 }
 
@@ -470,8 +474,8 @@ function Instalar {
   Passo 'Configuração (~\.glzr)'
   FecharAmbienteAntigo
   $copia = GuardarCopiaAnterior
-  CopiarModelos $arranque.Animacao $arranque.Linhas
-  ManterPersonalizacoes $copia $arranque.Manter
+  CopiarModelos $arranque.Animacao $arranque.Linhas $arranque.Nome
+  ManterPersonalizacoes $copia $arranque.Manter $arranque.Nome
   VerificarMarcadores
   CriarAtalhoNosDocumentos
   Passo 'Atalhos das apps (a partir de apps.txt)'
@@ -482,7 +486,6 @@ function Instalar {
   AjustarAmbienteDeTrabalho $copia $statusAplicado
   Passo 'Arranque automático (tarefa agendada)'
   RegistarTarefa
-  RegistarEcraPreto
   Concluir
 }
 

@@ -18,7 +18,7 @@ $files = @(
   "$p\bar_helper.py", "$p\claude_usage.py", "$p\uncloak.ps1", "$p\bat_tray.py",
   "$p\vendor\zebar-3.3.1.mjs",
   "$p\guia\guia.html", "$p\guia\sistema.html", "$p\guia\apps.txt",
-  "$p\arranque\splash.html", "$p\arranque\cafe.bmp",
+  "$p\arranque\splash.html",
   "$p\painel\apps.html"
 )
 # Verifica tudo ANTES de apagar os modelos atuais.

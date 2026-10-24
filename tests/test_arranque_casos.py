@@ -3,8 +3,10 @@
 import json
 import socket
 import sys
+import tempfile
 import time
 import unittest
+from pathlib import Path
 
 from falsos_windows import Gravador
 from sistema_falso import SistemaFalso, carregar_bar_helper
@@ -82,20 +84,36 @@ class MedicaoDoArranque(unittest.TestCase):
             self.assertIn("(arranque do pythonw nan s)", registo[2])
 
 
-class GeometriaDaCortina(unittest.TestCase):
-    """O café da cortina tem de cair em cima do 1.º quadro do SVG do splash.html (A21): CSS
-    left = 50% - 140px, top = 38% - 140px, 280×280 px CSS, × o DPR do ecrã."""
+class FraseDoDia(unittest.TestCase):
+    """frases.txt: uma frase por dia do mês ("frase | personagem | obra"); comentários e linhas vazias não contam."""
 
-    def test_igual_ao_svg_em_varias_escalas(self):
-        rect = sys.modules["morg_cortina"]._rect_cortina
-        for sw, sh, dpi in [(1920, 1080, 96), (1920, 1080, 120), (2560, 1440, 144), (1366, 768, 96)]:
-            with self.subTest(ecra=(sw, sh), dpi=dpi):
-                dpr = dpi / 96
-                x, y, w, h = rect(sw, sh, dpi, 280, 280)
-                self.assertEqual((w, h), (round(280 * dpr), round(280 * dpr)))
-                self.assertLessEqual(abs(x - (sw / 2 - 140 * dpr)), 1)
-                self.assertLessEqual(abs(y - (sh * 0.38 - 140 * dpr)), 1)
-        self.assertEqual(rect(1920, 1080, 120, 280, 280), (785, 235, 350, 350))
+    LINHAS = ("# cabeçalho", "", "Um | A | X", "  Dois|B|Y  ", "Três")
+
+    def test_escolhe_pelo_dia_e_volta_ao_inicio(self):
+        frase = sys.modules["morg_config_arranque"]._frase_do_dia
+        self.assertEqual(frase(self.LINHAS, 1), {"texto": "Um", "personagem": "A", "anime": "X"})
+        self.assertEqual(frase(self.LINHAS, 2), {"texto": "Dois", "personagem": "B", "anime": "Y"})
+        self.assertEqual(frase(self.LINHAS, 3), {"texto": "Três", "personagem": "", "anime": ""})
+        self.assertEqual(frase(self.LINHAS, 4), frase(self.LINHAS, 1))  # 3 frases: o dia 4 volta à 1.ª
+        self.assertIsNone(frase(["# só comentários", " "], 7))
+
+    def test_de_hoje_le_o_ficheiro_e_sem_ficheiro_nada(self):
+        with SistemaFalso() as s, tempfile.TemporaryDirectory() as pasta:
+            ficheiro = Path(pasta) / "frases.txt"
+            s.trocar("FRASES_FILE", ficheiro)
+            self.assertIsNone(s.bh._frase_de_hoje())
+            ficheiro.write_bytes("﻿Só uma | Eu | Vida\n".encode())  # com BOM (Bloco de Notas)
+            self.assertEqual(s.bh._frase_de_hoje(), {"texto": "Só uma", "personagem": "Eu", "anime": "Vida"})
+
+    def test_o_frases_txt_do_pack_tem_31_frases_completas(self):
+        pack = Path(sys.modules["morg_config_arranque"].__file__).parent
+        linhas = (pack / "guia" / "frases.txt").read_text(encoding="utf-8").splitlines()
+        frases = [linha for linha in linhas if linha.strip() and not linha.startswith("#")]
+        self.assertEqual(len(frases), 31)
+        for linha in frases:
+            with self.subTest(linha=linha):
+                self.assertEqual(len(linha.split("|")), 3)
+                self.assertTrue(all(p.strip() for p in linha.split("|")))
 
 
 class Portas(unittest.TestCase):
@@ -120,15 +138,6 @@ class CasosDoBoot(unittest.TestCase):
             s.trocar("_glaze", lambda *a: comandos.append(a) or {"data": {"focused": {"type": "window", "id": "j3"}}})
             s.bh._refocus_after_boot(None)
             self.assertEqual(comandos[-1], ("command", "focus", "--container-id", "j3"))
-
-    def test_sem_ecra_preto_do_windows_nao_regista_nada(self):
-        # Ex.: tarefa "Morg Keys (ecrã preto)" em falta, ou o utilizador mexeu no rato e o protetor fechou.
-        with ArranqueFalso() as s:
-            s.ecra_preto = 0
-            s.bh.boot()
-            self.assertNotIn("ecrã preto do Windows fechado", s.registo_do_arranque())
-            self.assertEqual(s.eventos.count("ecrã preto fechado"), 3)  # procurou à cortina, antes de sair e no fim
-            self.assertTrue(s.progresso()["fim"])
 
     def test_medicao_que_rebenta_nao_estraga_o_arranque(self):
         def rebenta(*a):

@@ -92,9 +92,10 @@ MUTANTES = [
     ('return value.strip().lower() not in ESCONDER', 'return True'),
     ("if (u.mostrar === false) return", 'if (false) return'),
     ('if (!five && !week) {', 'if (!five) {'),
-    # arranque: café da cortina ao DPI do ecrã e o ecrã preto do Windows (A38)
-    ('w, h = round(img_w * dpi / 96), round(img_h * dpi / 96)', 'w, h = img_w, img_h'),
-    ('    if _fechar_ecra_preto():', '    if True:'),
+    # ecrã de boas-vindas: a cortina que escurece, a frase do dia e o nome da saudação
+    ('return round(255 * (1 - (1 - p) ** 3))', 'return round(255 * p)'),
+    ('frases[(dia - 1) % len(frases)]', 'frases[dia % len(frases)]'),
+    ('elif key == "nome":', 'elif key == "nomes":'),
 ]
 FICHEIROS = [*PACK.glob("*.py"), *PACK.glob("comum/*.mjs"), *PACK.glob("painel/*.mjs"), *PACK.glob("guia/*.mjs")]
 TESTES_PY = ["py", "-I", "-m", "unittest", "discover", "-s", "tests"]

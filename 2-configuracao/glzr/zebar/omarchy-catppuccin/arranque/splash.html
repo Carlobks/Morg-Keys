@@ -28,8 +28,26 @@
       .anim { display: none; position: fixed; overflow: visible; }
       body.a-cafe #cafe { display: block; }
 
-      /* --- Café: igual ao cafe.bmp (280×280, centro a 38 % da altura) --- */
-      #cafe { width: 280px; height: 280px; left: calc(50% - 140px); top: calc(38% - 140px); }
+      /* --- Boas-vindas: a chávena entra (cresce e aparece), depois a saudação, a hora e a frase do dia;
+             por baixo, a lista do que está a carregar. --- */
+      #cafe { width: 220px; height: 220px; left: calc(50% - 110px); top: calc(30% - 150px); }
+      body.shown #cafe { animation: entrar 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+      @keyframes entrar { from { opacity: 0; transform: translateY(14px) scale(0.85); } to { opacity: 1; transform: none; } }
+      #painel { position: fixed; top: calc(30% + 80px); left: 50%; transform: translateX(-50%);
+                width: min(680px, 90vw); display: flex; flex-direction: column; align-items: center; gap: 10px;
+                text-align: center; }
+      #painel > .in { opacity: 0; }
+      body.shown #painel > .in { animation: surgir 600ms ease-out both; }
+      body.shown #saudacao { animation-delay: 450ms; }
+      body.shown #hora { animation-delay: 700ms; }
+      body.shown #frase { animation-delay: 950ms; }
+      @keyframes surgir { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+      #saudacao { font-size: 30px; font-weight: 600; color: #cdd6f4; }
+      #hora { font-size: 17px; color: #a6adc8; font-variant-numeric: tabular-nums; }
+      #frase { max-width: 600px; margin: 6px 0 12px; font-size: 16px; line-height: 1.45; color: #bac2de; }
+      #frase:empty { display: none; }
+      #frase q { font-style: italic; }
+      #frase .autor { display: block; margin-top: 4px; font-size: 13px; color: #7f849c; }
       #cafe .st { opacity: 0; stroke-dasharray: 100; stroke-dashoffset: 100; }
       body.run #cafe .st { animation: steam 2.7s ease-in-out infinite; }
       body.run #cafe .st:nth-child(2) { animation-delay: 0.9s; }
@@ -46,12 +64,10 @@
          cartão escuro, ícone em caixinha com a cor da animação e, à direita,
          o estado numa "tecla" escura (a rodar enquanto carrega, ✓ no fim). */
       body { --c: #fab387; }                 /* Café: peach do Catppuccin (cor por omissão) */
-      #list { position: fixed; top: calc(38% + 150px); left: 50%; transform: translateX(-50%);
-              width: 380px; font-size: 14px; color: #a6adc8;
+      #list { width: 380px; font-size: 14px; color: #a6adc8; text-align: left;
               background: #181825; border-radius: 14px; padding: 8px;
               transition: opacity 300ms; }
       #list:empty { opacity: 0; }
-      body.a-cafe #list { top: calc(38% + 165px); }
       .it { display: flex; align-items: center; gap: 12px; padding: 4px 6px; border-radius: 8px;
             opacity: 0; transform: translateY(5px); transition: opacity 300ms, transform 300ms, color 300ms; }
       .it.on { opacity: 1; transform: none; }
@@ -80,9 +96,7 @@
   <body>
     <div id="bg"></div>
     <div id="content">
-      <!-- Animação "cafe": chávena (cores Catppuccin) com vapor a subir.
-           A geometria é a MESMA do scripts\gerar-cafe-bmp.ps1 (que desenha o
-           cafe.bmp sem vapor): se mudar uma, mude a outra. -->
+      <!-- Animação "cafe": chávena (cores Catppuccin) que entra e deita vapor. -->
       <svg id="cafe" class="anim" data-anim="cafe" viewBox="0 0 400 400" role="img" aria-label="Café">
         <defs>
           <clipPath id="cupclip">
@@ -103,13 +117,19 @@
         </g>
       </svg>
 
-      <div id="list"></div>
+      <div id="painel">
+        <div id="saudacao" class="in"></div>
+        <div id="hora" class="in"></div>
+        <div id="frase" class="in"></div>
+        <div id="list"></div>
+      </div>
     </div>
 
     <script type="module">
       // O progresso vem de progress.json, escrito pelo orquestrador
       // (bar_helper.py boot, ou "animacao preview"):
-      // {boot_id, started, animacao, preview, steps:[{id,label,state}], fim}.
+      // {boot_id, started, animacao, preview, nome, frase:{texto,personagem,anime}|null,
+      //  steps:[{id,label,state}], fim}.
       const MAX_MS = 70000;       // rede de segurança (o orquestrador sai aos 60 s no máximo)
       const MIN_ITEM_MS = 250;    // cada linha fica visível pelo menos isto
       const CYCLE_MS = 4500;      // período dos ciclos das animações
@@ -118,7 +138,16 @@
       let widget = null;
       let leaving = false;
 
+      // No navegador (file: ou ?preview, servidor pack-preview) usa dados de exemplo em vez do Zebar.
+      const PREVIEW = location.protocol === 'file:' || new URLSearchParams(location.search).has('preview');
+      const EXEMPLO = {
+        boot_id: 'exemplo', started: Date.now() / 1000, animacao: 'cafe', preview: true, nome: 'Carlos', fim: false,
+        frase: { texto: 'Uma pessoa só morre quando é esquecida.', personagem: 'Dr. Hiriluk', anime: 'One Piece' },
+        steps: [{ id: 'barra', label: 'Barra', state: 'feito' }, { id: 'glazewm', label: 'Gestor de janelas', state: 'a_carregar' }],
+      };
+
       async function readProgress() {
+        if (PREVIEW) return EXEMPLO;
         try {
           const res = await fetch(`./progress.json?t=${Date.now()}`, { cache: 'no-store' });
           return res.ok ? await res.json() : null;
@@ -137,9 +166,28 @@
         setTimeout(() => (el.style.opacity = 0), ms - 100);
       }
 
+      // --- Saudação: "Muito bem-vindo, <nome>", a hora (pt-PT, como o relógio da barra) e a frase do dia ---
+      const fmtHora = new Intl.DateTimeFormat('pt-PT', { hour: '2-digit', minute: '2-digit' });
+      const fmtDia = new Intl.DateTimeFormat('pt-PT', { weekday: 'long', day: 'numeric', month: 'long' });
+      function renderSaudacao(p) {
+        $('saudacao').textContent = p.nome ? `Muito bem-vindo, ${p.nome}` : 'Muito bem-vindo';
+        const hora = () => { const d = new Date(); $('hora').textContent = `${fmtHora.format(d)} · ${fmtDia.format(d)}`; };
+        hora();
+        setInterval(hora, 1000);
+        const f = p.frase;
+        if (f?.texto) {
+          const citacao = document.createElement('q');
+          citacao.textContent = f.texto;
+          const autor = document.createElement('span');
+          autor.className = 'autor';
+          autor.textContent = `— ${[f.personagem, f.anime].filter(Boolean).join(', ')}`;
+          $('frase').replaceChildren(citacao, ...(f.personagem || f.anime ? [autor] : []));
+        }
+      }
+
       // --- Animação "cafe" ---------------------------------------------------------
-      // Começa igual ao cafe.bmp (chávena sem vapor); o vapor sobe em ciclo (CSS)
-      // e um brilho passa pela chávena a cada CYCLE_MS.
+      // A chávena entra (CSS, body.shown); o vapor sobe em ciclo (CSS) e um brilho passa pela chávena a
+      // cada CYCLE_MS.
 
       // Registo das animações: nome (= arranque.txt / ANIMACOES no bar_helper.py)
       // -> como mostrar o 1.º quadro e como correr o ciclo.
@@ -256,7 +304,7 @@
       }
 
       async function main() {
-        if (location.protocol !== 'file:') {
+        if (!PREVIEW) {
           zebar = await import('../vendor/zebar-3.3.1.mjs');
           widget = zebar.currentWidget();
         }
@@ -270,7 +318,8 @@
         const name = ANIMS[first.animacao] ? first.animacao : 'cafe';
         const anim = ANIMS[name];
         document.body.classList.add(`a-${name}`);
-        anim.first();                            // = imagem da cortina, mesmo sítio
+        renderSaudacao(first);
+        anim.first();
         document.body.classList.add('shown');    // preto + desenho por cima da cortina
         quandoPintado(signalReady);              // só depois de o WebView2 pintar mesmo: a cortina pode sair
         setTimeout(() => { loop = anim.start(); }, 250);

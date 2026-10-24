@@ -48,20 +48,21 @@ Describe 'Modelos copiados para o perfil' {
     TextoDoModelo 'glazewm\config.yaml' '{{HOME}}/x {{HOME_RE}} {{ANIMACAO}}' 'lua' @() |
       Should -Be 'C:/Users/a.b/x C:/Users/a\\.b {{ANIMACAO}}'
   }
-  It 'no arranque.txt põe a animação (cafe por omissão) e acrescenta os .bat' {
+  It 'no arranque.txt põe a animação (cafe por omissão), o nome da saudação e acrescenta os .bat' {
     $rel = "$Pack\guia\arranque.txt"
-    TextoDoModelo $rel "animacao = {{ANIMACAO}}`n`n" 'lua' @('bat = a', 'bat = b') | Should -Be "animacao = lua`nbat = a`nbat = b`n"
-    TextoDoModelo $rel "animacao = {{ANIMACAO}}`n" $null @() | Should -Be "animacao = cafe`n"
+    TextoDoModelo $rel "animacao = {{ANIMACAO}}`nnome = {{NOME}}`n`n" 'lua' @('bat = a', 'bat = b') 'Ana' |
+      Should -Be "animacao = lua`nnome = Ana`nbat = a`nbat = b`n"
+    TextoDoModelo $rel "animacao = {{ANIMACAO}}`nnome = {{NOME}}`n" $null @() $null | Should -Be "animacao = cafe`nnome = `n"
   }
   It 'copia os modelos: texto com os marcadores trocados, binários tal como estão' {
     $modelos = Join-Path $Pacote '2-configuracao\glzr'
     Escrever (Join-Path $modelos 'glazewm\config.yaml') 'casa: {{HOME}}'
     Escrever (Join-Path $modelos "$Pack\guia\arranque.txt") 'animacao = {{ANIMACAO}}'
-    Escrever (Join-Path $modelos "$Pack\arranque\cafe.bmp") 'BM {{HOME}}'
-    CopiarModelos 'cafe' @('bat = x')
+    Escrever (Join-Path $modelos "$Pack\arranque\imagem.bmp") 'BM {{HOME}}'
+    CopiarModelos 'cafe' @('bat = x') 'Ana'
     Ler (Join-Path $Glzr 'glazewm\config.yaml') | Should -Be "casa: $($Casa -replace '\\', '/')"
     Ler (Join-Path $Glzr "$Pack\guia\arranque.txt") | Should -Be "animacao = cafe`nbat = x`n"
-    Ler (Join-Path $Glzr "$Pack\arranque\cafe.bmp") | Should -Be 'BM {{HOME}}'
+    Ler (Join-Path $Glzr "$Pack\arranque\imagem.bmp") | Should -Be 'BM {{HOME}}'
   }
   It 'VerificarMarcadores para se ficou algum {{ (menos nos registos de arranque\)' {
     Escrever (Join-Path $Glzr 'arranque\servidor.txt') 'log com {{ legítimo'
@@ -89,20 +90,31 @@ Describe 'Personalizações da instalação anterior' {
     Escrever (Join-Path $copia 'layout.json') '{"windows": []}'
     Escrever (Join-Path $copia 'zebar\guia-atalhos\apps.txt') 'Alt+B = Brave'
     Escrever (Join-Path $copia "$Pack\guia\arranque.txt") "# x`nanimação = lua`nbat = y`n"
-    ManterPersonalizacoes $copia $true
+    Escrever (Join-Path $copia "$Pack\guia\frases.txt") 'A minha frase | Eu | Vida'
+    ManterPersonalizacoes $copia $true $null
     Ler (Join-Path $Glzr 'arranque\servidor.log') | Should -Be 'registo'
     Ler (Join-Path $Glzr 'layout.json') | Should -Be '{"windows": []}'
     Ler (Join-Path $Glzr "$Pack\guia\apps.txt") | Should -Be 'Alt+B = Brave'
+    Ler (Join-Path $Glzr "$Pack\guia\frases.txt") | Should -Be 'A minha frase | Eu | Vida'
     Ler (Join-Path $Glzr "$Pack\guia\arranque.txt") | Should -Be "# x`nanimação = cafe`nbat = y`n"
     Registado | Should -Match 'arranque.txt: animação antiga trocada por cafe\.'
+  }
+  It 'arranque.txt mantido de antes da saudação: acrescenta o nome escolhido (uma só vez)' {
+    Escrever (Join-Path $copia "$Pack\guia\arranque.txt") "animacao = cafe`nbat = y`n"
+    ManterPersonalizacoes $copia $true 'Ana'
+    Ler (Join-Path $Glzr "$Pack\guia\arranque.txt") | Should -Be "animacao = cafe`nbat = y`nnome = Ana`n"
+    Registado | Should -Match 'arranque.txt: nome = Ana'
+    Escrever (Join-Path $copia "$Pack\guia\arranque.txt") "animacao = cafe`nnome = Zé`n"
+    ManterPersonalizacoes $copia $true 'Ana'
+    Ler (Join-Path $Glzr "$Pack\guia\arranque.txt") | Should -Be "animacao = cafe`nnome = Zé`n"
   }
   It 'sem manter o arranque, com a animação certa ou sem arranque.txt não troca nada' {
     Escrever (Join-Path $copia "$Pack\guia\arranque.txt") 'animacao = lua'
     Escrever (Join-Path $Glzr "$Pack\guia\arranque.txt") 'animacao = cafe'
-    ManterPersonalizacoes $copia $false
+    ManterPersonalizacoes $copia $false $null
     Ler (Join-Path $Glzr "$Pack\guia\arranque.txt") | Should -Be 'animacao = cafe'
     Remove-Item (Join-Path $Glzr "$Pack\guia\arranque.txt")
-    ManterPersonalizacoes $copia $false
+    ManterPersonalizacoes $copia $false $null
     Registado | Should -Not -Match 'trocada|mantido'
   }
 }
@@ -224,6 +236,7 @@ Describe 'Tarefa agendada e fim' {
     Limpar
     New-Item -ItemType Directory -Force $Glzr | Out-Null
     $argumentos = "-I `"$(Join-Path $Glzr "$Pack\bar_helper.py")`" boot"
+    Mock Unregister-ScheduledTask {}
   }
   It 'regista a tarefa do boot' {
     Mock Register-ScheduledTask {}
@@ -232,6 +245,8 @@ Describe 'Tarefa agendada e fim' {
       $Action.Execute -eq $pyw -and $Action.Arguments -eq $argumentos -and $Settings.Priority -eq 4 -and
       $Principal.RunLevel -eq 'Limited' -and $Trigger.UserId -eq "$env:USERDOMAIN\$env:USERNAME" }
     Registado | Should -Match "Tarefa 'GlazeWM \(arranque\)' registada"
+    # A tarefa do ecrã preto de uma versão anterior (não resolveu o fundo à vista, A38) sai.
+    Should -Invoke Unregister-ScheduledTask -ParameterFilter { $TaskName -eq 'Morg Keys (ecrã preto)' -and -not $Confirm }
   }
   It 'sem poder substituir: serve a antiga se fizer o mesmo; senão para' {
     Mock Register-ScheduledTask { throw 'Acesso negado' }
@@ -243,18 +258,6 @@ Describe 'Tarefa agendada e fim' {
     Mock Get-ScheduledTask {}
     { RegistarTarefa } | Should -Throw 'Sair'
     Registado | Should -Match 'Não consegui criar a tarefa de arranque \(Acesso negado\)'
-  }
-  It 'regista a tarefa do ecrã preto (protetor "Em branco" ao entrar, no máximo 2 min); se falhar só avisa' {
-    Mock Register-ScheduledTask {}
-    RegistarEcraPreto
-    Should -Invoke Register-ScheduledTask -ParameterFilter { $TaskName -eq 'Morg Keys (ecrã preto)' -and $Force -and
-      $Action.Execute -eq (Join-Path $env:windir 'System32\scrnsave.scr') -and $Action.Arguments -eq '/s' -and
-      $Settings.ExecutionTimeLimit -eq 'PT2M' -and $Settings.Priority -eq 4 -and $Principal.RunLevel -eq 'Limited' -and
-      $Trigger.UserId -eq "$env:USERDOMAIN\$env:USERNAME" }
-    Registado | Should -Match "Tarefa 'Morg Keys \(ecrã preto\)' registada"
-    Mock Register-ScheduledTask { throw 'Acesso negado' }
-    RegistarEcraPreto
-    Registado | Should -Match "! Não consegui criar a tarefa 'Morg Keys \(ecrã preto\)' \(Acesso negado\)"
   }
   It 'Concluir guarda o registo e arranca já (ou não, com -NaoIniciar)' {
     Escrever $Registo "Instalação`n"
@@ -275,18 +278,18 @@ Describe 'Instalar (a ordem dos passos)' {
     $ordem = [System.Collections.Generic.List[string]]::new()
     foreach ($f in 'Verificar', 'InstalarProgramas', 'InstalarFontes', 'FecharAmbienteAntigo', 'CopiarModelos',
                    'ManterPersonalizacoes', 'VerificarMarcadores', 'CriarAtalhoNosDocumentos', 'AplicarApps',
-                   'AjustarAmbienteDeTrabalho', 'RegistarTarefa', 'RegistarEcraPreto', 'Concluir') {
+                   'AjustarAmbienteDeTrabalho', 'RegistarTarefa', 'Concluir') {
       Mock $f ([scriptblock]::Create("`$ordem.Add('$f')"))
     }
-    Mock EscolherArranque { $ordem.Add('EscolherArranque'); @{ Manter = $true; Animacao = 'lua'; Linhas = @('bat = x') } }
+    Mock EscolherArranque { $ordem.Add('EscolherArranque'); @{ Manter = $true; Animacao = 'lua'; Linhas = @('bat = x'); Nome = 'Ana' } }
     Mock GuardarCopiaAnterior { $ordem.Add('GuardarCopiaAnterior'); 'C:\copia' }
     Mock ConfigurarStatusLine { $ordem.Add('ConfigurarStatusLine'); $true }
     Instalar
     $ordem | Should -Be @('Verificar', 'InstalarProgramas', 'InstalarFontes', 'EscolherArranque', 'FecharAmbienteAntigo',
       'GuardarCopiaAnterior', 'CopiarModelos', 'ManterPersonalizacoes', 'VerificarMarcadores', 'CriarAtalhoNosDocumentos',
-      'AplicarApps', 'ConfigurarStatusLine', 'AjustarAmbienteDeTrabalho', 'RegistarTarefa', 'RegistarEcraPreto', 'Concluir')
-    Should -Invoke CopiarModelos -ParameterFilter { $animacao -eq 'lua' -and $linhasBat -contains 'bat = x' }
-    Should -Invoke ManterPersonalizacoes -ParameterFilter { $copia -eq 'C:\copia' -and $manterArranque }
+      'AplicarApps', 'ConfigurarStatusLine', 'AjustarAmbienteDeTrabalho', 'RegistarTarefa', 'Concluir')
+    Should -Invoke CopiarModelos -ParameterFilter { $animacao -eq 'lua' -and $linhasBat -contains 'bat = x' -and $saudacao -eq 'Ana' }
+    Should -Invoke ManterPersonalizacoes -ParameterFilter { $copia -eq 'C:\copia' -and $manterArranque -and $saudacao -eq 'Ana' }
     Should -Invoke AjustarAmbienteDeTrabalho -ParameterFilter { $copia -eq 'C:\copia' -and $statusAplicado }
     (Get-Content $Registo -Encoding UTF8)[0] | Should -Match '^Instalação \d{4}-\d\d-\d\dT'
     Registado | Should -Match '==> Arranque automático \(tarefa agendada\)'

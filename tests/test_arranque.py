@@ -48,7 +48,7 @@ class ArranqueFalso(SistemaFalso):
         self.arranque_txt = self.pasta / "arranque.txt"
         self.bat = self.pasta / "servidor.bat"
         self.bat.write_text("@echo off\n")
-        self.arranque_txt.write_text(f"animacao = cafe\nbat = {self.bat} | http://localhost:3000 | Servidor\n"
+        self.arranque_txt.write_text(f"animacao = cafe\nnome = Carlos\nbat = {self.bat} | http://localhost:3000 | Servidor\n"
                                      "bat = C:\\nao\\existe.bat\n", encoding="utf-8")
         self.janelas = {bh.BAR_TITLE: 11, TITULO_SISTEMA: 12, "Shell_TrayWnd": 13, bh.SPLASH_TITLE: 14}
         k32 = {
@@ -70,8 +70,10 @@ class ArranqueFalso(SistemaFalso):
         self.trocar("user32", Bomba("user32", u32))
         self.trocar("dwmapi", Bomba("dwmapi", {"DwmFlush": lambda: self.eventos.append("DwmFlush") or 0}))
         self.trocar("_BlackCover", CortinaFalsa)
-        self.ecra_preto = 1  # janelas do protetor "Em branco" que o _fechar_ecra_preto encontra
-        self.trocar("_fechar_ecra_preto", lambda: self.eventos.append("ecrã preto fechado") or self.ecra_preto)
+        self.frases_txt = self.pasta / "frases.txt"
+        self.frases_txt.write_text("# frase | personagem | anime\nDia ímpar | Ana | Vida\nDia par | Rui | Vida\n",
+                                   encoding="utf-8")
+        self.trocar("FRASES_FILE", self.frases_txt)
         self.trocar("ZEBAR", self.zebar)
         self.trocar("ARRANQUE_FILE", self.arranque_txt)
         self.trocar("PROGRESS_FILE", self.pasta / "progress.json")
@@ -132,14 +134,17 @@ class Arranque(unittest.TestCase):
             self.assertEqual(s.chamadas_k32, ["SetPriorityClass", "CreateMutexW", "ReleaseMutex"])
             self.assertEqual(len(s.medicoes), 1)
             self.assertEqual(s.mensagens, [])  # o splash fechou-se sozinho
-            # O ecrã preto do Windows (protetor "Em branco") fecha-se logo que a cortina está por cima.
             # A cortina sai quando a animação avisa (logo a seguir ao splash), antes da barra: antes disso a
             # animação vai para cima da cortina e o DWM compõe 2 vezes com ela à vista (sem piscar).
-            self.assertEqual(s.eventos[:9], ["ecrã preto fechado", "lançou start-widget-preset --pack",
-                                             "splash ao topo", "splash ao topo", "DwmFlush", "DwmFlush",
-                                             "ecrã preto fechado", "cortina fechada", "lançou startup"])
+            self.assertEqual(s.eventos[:7], ["lançou start-widget-preset --pack", "splash ao topo", "splash ao topo",
+                                             "DwmFlush", "DwmFlush", "cortina fechada", "lançou startup"])
+            # A saudação do ecrã de boas-vindas: o nome do arranque.txt e a frase do dia do frases.txt.
+            self.assertEqual(progresso["nome"], "Carlos")
+            dia_impar = s.relogio.localtime().tm_mday % 2 == 1
+            self.assertEqual(progresso["frase"], {"texto": "Dia ímpar" if dia_impar else "Dia par",
+                                                  "personagem": "Ana" if dia_impar else "Rui", "anime": "Vida"})
             registo = s.registo_do_arranque()
-            for frase in ["cortina preta:", "ecrã preto do Windows fechado:", "animação visível:", "GlazeWM e barra:", "não existe: C:\\nao\\existe.bat",
+            for frase in ["cortina preta:", "animação visível:", "GlazeWM e barra:", "não existe: C:\\nao\\existe.bat",
                           "Servidor a responder na porta 3000:", "janelas arrumadas:", "tudo assente, ecrã a sair:",
                           "fim:"]:
                 self.assertIn(frase, registo)
@@ -180,7 +185,7 @@ class ConfiguracaoDoArranque(unittest.TestCase):
     def test_le_animacao_e_bats(self):
         cfg = self.ler("# comentário\nAnimação = Café\nbat = \"C:\\a b\\x.bat\" | http://localhost:8080 | X\n"
                        "bat = C:\\y.bat\nbat =\noutra = coisa\n")
-        self.assertEqual(cfg, {"animacao": "cafe", "bats": [
+        self.assertEqual(cfg, {"animacao": "cafe", "nome": "", "bats": [
             {"path": "C:\\a b\\x.bat", "url": "http://localhost:8080", "name": "X"},
             {"path": "C:\\y.bat", "url": "", "name": "y"}]})
 
@@ -189,12 +194,17 @@ class ConfiguracaoDoArranque(unittest.TestCase):
             ficheiro = Path(pasta) / "arranque.txt"
             ficheiro.write_text("animacao = Pé\n", encoding="utf-8")
             s.trocar("ARRANQUE_FILE", ficheiro)
-            s.trocar("ANIMACOES", {"cafe": ("Café", "cafe.bmp", 1, 1), "pe": ("Pé", "pe.bmp", 1, 1)})
+            s.trocar("ANIMACOES", {"cafe": "Café", "pe": "Pé"})
             self.assertEqual(s.bh._arranque_cfg()["animacao"], "pe")
 
     def test_animacao_desconhecida_ou_ficheiro_em_falta(self):
         self.assertEqual(self.ler("animacao = nenhuma\n")["animacao"], "cafe")
-        self.assertEqual(self.ler(None), {"animacao": "cafe", "bats": []})
+        self.assertEqual(self.ler(None), {"animacao": "cafe", "nome": "", "bats": []})
+
+    def test_nome_da_saudacao(self):
+        self.assertEqual(self.ler("nome = Carlos Silva\n")["nome"], "Carlos Silva")
+        self.assertEqual(self.ler("Nome =\n")["nome"], "")
+        self.assertEqual(self.ler("# nome = Zé\n")["nome"], "")
 
     def test_set_animacao_troca_so_essa_linha(self):
         with SistemaFalso() as s, tempfile.TemporaryDirectory() as pasta:

@@ -1,0 +1,38 @@
+# FRASES DO DIA no ecrã de arranque (uma por dia do mês: a 1.ª no dia 1, a 31.ª no dia 31).
+# Para abrir este ficheiro: Documentos\Guia de Atalhos\frases.txt — pode trocá-las à vontade.
+#
+#   frase | personagem | obra
+#
+# Com menos de 31 linhas, volta ao início. Linhas começadas por # são ignoradas.
+# Citações curtas, traduzidas; fontes (Wikiquote e outras) em docs/pesquisa/arranque-windows.md.
+Todo o esforço é inútil sem acreditar em si mesmo. | Might Guy | Naruto
+É por conhecer a dor que a bondade para com os outros se torna natural. | Jiraiya | Naruto Shippuden
+Uma pessoa só morre quando é esquecida. | Dr. Hiriluk | One Piece
+Digam o que quiserem de mim: nunca fiz nada de que me arrependa. | Roronoa Zoro | One Piece
+A humanidade não pode ganhar nada sem antes dar algo em troca. | Alphonse Elric | Fullmetal Alchemist
+Levante-se e caminhe. Siga em frente. | Edward Elric | Fullmetal Alchemist: Brotherhood
+O que tiver de acontecer, acontece. | Spike Spiegel | Cowboy Bebop
+O que importa mais do que aquilo que se procura pode estar logo à beira do caminho. | Ging Freecss | Hunter x Hunter
+Quem esquece por completo o próprio nome nunca mais encontra o caminho de casa. | Haku | A Viagem de Chihiro
+Qualquer lugar pode ser o paraíso, desde que haja vontade de viver. | Yui Ikari | Neon Genesis Evangelion
+Há tantas verdades quantas pessoas existem. | Ryoji Kaji | Neon Genesis Evangelion
+Quem não consegue sacrificar nada nunca consegue mudar nada. | Armin Arlert | Attack on Titan
+Lágrimas falsas só ferem os outros; sorrisos falsos só ferem quem os dá. | C.C. | Code Geass
+Não se pode mudar o destino, mas pode-se escolher erguer-se para enfrentá-lo. | Hii-sama | Princesa Mononoke
+Ver com olhos não turvados pelo ódio. | Ashitaka | Princesa Mononoke
+Os aviões são sonhos belos; os engenheiros tornam os sonhos realidade. | Caproni | As Asas do Vento
+Se queremos ver algo que ninguém viu antes, temos de criá-lo nós mesmos. | Kisuke Urahara | Bleach
+A admiração é a emoção mais distante da compreensão. | Sosuke Aizen | Bleach
+Um samurai não precisa de motivo para fazer o que é certo. | Gintoki Sakata | Gintama
+Com a visão clara, encontra-se sempre o futuro. | Rem Saverem | Trigun
+O bilhete para o futuro está sempre em branco. | Vash the Stampede | Trigun
+A liberdade não se compra nem se vende. | Zuikō | Samurai Champloo
+Você não tem inimigos. Ninguém tem inimigos. | Thors | Vinland Saga
+Todos nascemos fracos. Ninguém sobrevive sem a ajuda de alguém. | Tanjiro Kamado | Demon Slayer
+Os fortes amparam e protegem os fracos, e os fracos crescem e tornam-se fortes. | Tanjiro Kamado | Demon Slayer
+Às vezes, o ato mais corajoso é viver. | Kenshin Himura | Rurouni Kenshin
+Ter talento não serve de nada se não for posto em prática. | Yoshitaka Waya | Hikaru no Go
+Talvez só haja um caminho escuro pela frente, mas é preciso acreditar e seguir em frente. | Kaori Miyazono | Your Lie in April
+É o que o herói Himmel teria feito. | Frieren | Frieren
+Precisa de motivo para não querer perder? | Shoyo Hinata | Haikyuu!!
+Os humanos são mesmo interessantes. | Ryuk | Death Note

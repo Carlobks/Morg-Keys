@@ -8,7 +8,7 @@ import unittest
 
 from sistema_falso import Bomba, SistemaFalso
 
-TRES_ANIMACOES = {"cafe": ("Café", "cafe.bmp", 1, 1), "lua": ("Lua", "lua.bmp", 1, 1), "sol": ("Sol", "sol.bmp", 1, 1)}
+TRES_ANIMACOES = {"cafe": "Café", "lua": "Lua", "sol": "Sol"}
 
 
 class MutexFalso:

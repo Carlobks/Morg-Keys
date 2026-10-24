@@ -12,8 +12,8 @@ $FuncoesExcluidas = @{
   'CorrerPython'             = 'corre o py.exe real (tira a statusLine do settings.json do Claude Code)'
 }
 . (Join-Path $PSScriptRoot '..\scripts\desinstalar.ps1')
-foreach ($nome in $FuncoesExcluidas.Keys) {
-  Mock $nome ([scriptblock]::Create("throw 'o teste tocou no Windows: $nome'"))
+foreach ($funcao in $FuncoesExcluidas.Keys) {
+  Mock $funcao ([scriptblock]::Create("throw 'o teste tocou no Windows: $funcao'"))
 }
 foreach ($cmdlet in 'Unregister-ScheduledTask', 'Get-ScheduledTask', 'Stop-Process', 'Start-Process', 'Set-ItemProperty',
                     'Get-ItemProperty', 'Get-CimInstance') {

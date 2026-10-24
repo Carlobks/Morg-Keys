@@ -20,17 +20,19 @@ $FuncoesExcluidas = @{
   'GlazeSair'              = 'corre o glazewm.exe real (wm-exit)'
   'MatarArvore'            = 'taskkill real de um processo e dos filhos'
   'PastaDocumentos'        = '.NET GetFolderPath: a pasta Documentos real'
+  'NomeDaConta'            = '.NET UserPrincipal.Current: o nome da conta real do Windows'
   'RemoverJuncao'          = 'cmd /c rmdir real da junction (A10)'
   'CorrerAppsApply'        = 'corre o py.exe real com o bar_helper.py apps-apply'
   'CorrerPython'           = 'corre o py.exe real (junta a statusLine ao settings.json do Claude Code)'
 }
 . (Join-Path $PSScriptRoot '..\scripts\instalar.ps1')
-foreach ($nome in $FuncoesExcluidas.Keys) {
-  if ($nome -ne 'Sair') { Mock $nome ([scriptblock]::Create("throw 'o teste tocou no Windows: $nome'")) }
+# $funcao e não $nome: o instalar.ps1 tem o parâmetro -Nome e as variáveis não distinguem maiúsculas (A37).
+foreach ($funcao in $FuncoesExcluidas.Keys) {
+  if ($funcao -ne 'Sair') { Mock $funcao ([scriptblock]::Create("throw 'o teste tocou no Windows: $funcao'")) }
 }
 Mock Sair { throw 'Sair' }
 foreach ($cmdlet in 'Read-Host', 'Start-Process', 'Stop-Process', 'Set-ItemProperty', 'New-ItemProperty', 'Get-ItemProperty',
-                    'Register-ScheduledTask', 'Start-ScheduledTask', 'Get-ScheduledTask', 'Invoke-WebRequest', 'Unblock-File',
+                    'Register-ScheduledTask', 'Unregister-ScheduledTask', 'Start-ScheduledTask', 'Get-ScheduledTask', 'Invoke-WebRequest', 'Unblock-File',
                     'Get-CimInstance', 'Get-AuthenticodeSignature') {
   Mock $cmdlet ([scriptblock]::Create("throw 'o teste tocou no Windows: $cmdlet'"))
 }

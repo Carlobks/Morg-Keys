@@ -6,11 +6,10 @@
 
 ```
 Início de sessão
-  ├─ Tarefa agendada "Morg Keys (ecrã preto)"  (scrnsave.scr /s: preto em milissegundos; o boot fecha-o — A38)
   └─ Tarefa agendada "GlazeWM (arranque)"  (pyw.exe -I bar_helper.py boot)
        └─ bar_helper.py boot  ── o "orquestrador"
-            ├─ lê arranque.txt (animação + programas .bat)
-            ├─ janela nativa preta com o 1.º quadro da animação (arranque/cafe.bmp) — cobre tudo no 1.º instante
+            ├─ lê arranque.txt (animação, nome da saudação, programas .bat) e a frase do dia (frases.txt)
+            ├─ cortina nativa que escurece o ambiente de trabalho até ao preto (1,2 s) — cobre tudo até ao ecrã de boas-vindas
             ├─ zebar.exe start-widget-preset omarchy-catppuccin/splash  (animação + lista de progresso)
             ├─ zebar.exe startup     → barra (bar), guia (guia) e painel (sistema), todos do pack omarchy-catppuccin
             ├─ ShellExecute glazewm.exe  (gestor de janelas; lê ~/.glzr/glazewm/config.yaml)
@@ -64,7 +63,7 @@ Tudo vive em `%USERPROFILE%\.glzr\`. O pacote guarda os modelos em `2-configurac
 | ↳ `arranque\` | **Ecrã de arranque** (widget `splash`). |
 | ↳ `splash.html` | As animações (SVG, em ciclo) e, por baixo, a lista de etapas lida de `progress.json` a cada 250 ms. Fecha-se sozinho com `fim`. A lista segue o estilo do guia e do painel: cartão escuro, ícone por etapa em caixinha (`iconFor(id)`: `barra`, `glazewm`, `app:<processo>`, `bat:<n>`, `fim`), e à direita o estado numa "tecla" escura (a rodar / ✓ / !). A cor (`--c` no `<body>`) é a da animação: pêssego (peach) no Café. |
 | (estilo comum) | Barra, guia, painel e splash partilham o mesmo kit visual: cores Catppuccin Mocha; ícones Nerd Font em caixinhas com fundo `color-mix(cor 16%)`; teclas e estados numa caixa `#11111b` com contorno `color-mix(cor 55-60%)` e sombra de 2 px. **Os ícones são desenhados num `<canvas>`, centrados pelo desenho real** (`measureText` → `actualBoundingBox*`), em `drawIcons`/`paintIcon` (nas páginas dos painéis desenhados em SVG, ver A26). Na fonte "JetBrainsMono NF" cada ícone é mais largo do que a célula e fica desviado, e o CSS sozinho não os centra. |
-| ↳ `cafe.bmp` | 1.º quadro de cada animação (Café: 280×280 px CSS, guardado a 2×, 560×560), desenhado pela cortina nativa (GDI, `StretchBlt` HALFTONE ao tamanho físico) antes de o WebView2 estar pronto. Tem de ser **igual** ao 1.º quadro do SVG, no mesmo sítio (ver A21). |
+| ↳ `guia\frases.txt` | Frases do dia do ecrã de boas-vindas: 31 linhas `frase \| personagem \| obra`, uma por dia do mês (`_frase_do_dia` em `morg_config_arranque.py`). Está na pasta `Documentos\Guia de Atalhos` e mantém-se nas reinstalações. Fontes em `docs/pesquisa/arranque-windows.md`. |
 | ↳ `progress.json` | Gerado em cada arranque: `{boot_id, started, animacao, preview, steps:[{id,label,state}], fim}`. **Não** vai no pacote. |
 | `zebar\omarchy-catppuccin\guia\arranque.txt` | **Escolhas do arranque, editáveis pelo utilizador** (visível em `Documentos\Guia de Atalhos`). `animacao = cafe` e uma linha `bat = CAMINHO \| ENDEREÇO \| NOME` por programa; endereço e nome opcionais. Lido por `_arranque_cfg()` em cada arranque. No pacote vai o modelo `scripts\arranque-modelo.txt` (com `{{ANIMACAO}}` e sem `.bat`). |
 | `zebar\omarchy-catppuccin\bat_tray.py` | Corre um `.bat` escondido (`cmd /c`, na pasta do `.bat`, sem consola, saída em `~\.glzr\arranque\<nome>.log`), com ícone na bandeja. Um processo por `.bat` (mutex `Local\MorgBatTray_<sha1 do caminho>`). |
@@ -76,7 +75,7 @@ Tudo vive em `%USERPROFILE%\.glzr\`. O pacote guarda os modelos em `2-configurac
 ## 4. O arranque (`bar_helper.py boot`) em detalhe
 
 1. **Prioridade normal.** A tarefa agendada corre com `Priority 4`; além disso, `SetPriorityClass(NORMAL)`. Com a prioridade por omissão das tarefas (7), o arranque era lento.
-2. **Cortina preta nativa** (`_BlackCover`). É uma janela Win32 `top_most`, com o título `Morg Keys arranque`, que pinta a imagem da animação escolhida em `arranque.txt` (tabela `ANIMACOES` em `morg_config_arranque.py`) ao centro (x 50%, y `ANIM_CY` = 38%) e esconde o cursor. Aparece em menos de 1 s, antes de haver WebView2. O GlazeWM ignora-a por uma regra de título. Sabe o DPI (thread por monitor, v2): desenha o `cafe.bmp` (560×560) reduzido ao tamanho físico do SVG (`_rect_cortina`: 350 px a 125 %), nítido. Logo que está visível, fecha o ecrã preto do Windows (`_fechar_ecra_preto`; A38).
+2. **Cortina nativa que escurece** (`_BlackCover`). Janela Win32 em camadas (`WS_EX_LAYERED`), `top_most`, com o título `Morg Keys arranque`; esconde o cursor. Nasce transparente e escurece até ao preto em 1,2 s (`SetLayeredWindowAttributes`, curva em `_alfa`), por isso o ambiente de trabalho escurece aos poucos em vez de ficar preto de repente. Aparece logo que o Python arranca, antes de haver WebView2. O GlazeWM ignora-a por uma regra de título. Thread com DPI por monitor: cobre o ecrã físico exato.
 3. **Mutex `Local\MorgBootRunning`.** O `layout-restore` dos `startup_commands` do GlazeWM vê o mutex e cede a vez ao `boot`.
 4. **Splash.** O `boot` corre `zebar start-widget-preset --pack omarchy-catppuccin --widget-name splash --preset default`. A página desenha-se transparente por cima da cortina, igual ao BMP e no mesmo sítio. Só depois de pintar de facto (fim da transição e 2 quadros `requestAnimationFrame`; no máximo 4 s) chama `splash-ready`, que faz `SetEvent Local\MorgSplashReady`. Enquanto espera, o `boot` põe o splash por cima da cortina a cada 100 ms (tapado, o WebView2 não pinta); com o aviso, splash ao topo, 2 `DwmFlush` e só então a cortina fecha: preto sobre preto, sem piscar. Se o evento não chegar em 20 s, segue na mesma.
 5. **`zebar startup`.** Abre os `startupConfigs` no mesmo Zebar: barra, guia escondido e painel escondido.

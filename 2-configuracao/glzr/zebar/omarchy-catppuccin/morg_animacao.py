@@ -3,7 +3,7 @@
 import time
 
 from morg_arranjo import BOOT_MUTEX
-from morg_config_arranque import ANIMACOES, _arranque_cfg, _set_animacao
+from morg_config_arranque import ANIMACOES, _arranque_cfg, _frase_de_hoje, _set_animacao
 from morg_ecra_arranque import SPLASH_TITLE, _Progress
 from morg_glaze import _glaze
 from morg_janelas_zebar import layer_hide
@@ -12,19 +12,20 @@ from morg_win32 import SYNCHRONIZE, _NamedMutex, kernel32, user32
 
 
 def animacao_preview(name=None):
-    """Mostra o ecrã de arranque uns segundos, com etapas de exemplo."""
-    name = name if name in ANIMACOES else _arranque_cfg()["animacao"]
+    """Mostra o ecrã de arranque uns segundos, com a saudação de hoje e etapas de exemplo."""
+    cfg = _arranque_cfg()
+    name = name if name in ANIMACOES else cfg["animacao"]
     handle = kernel32.OpenMutexW(SYNCHRONIZE, False, BOOT_MUTEX)
     if handle:  # arranque a decorrer: não mexe no ecrã dele
         kernel32.CloseHandle(handle)
         return
     if user32.FindWindowW(None, SPLASH_TITLE) or not ZEBAR.exists():
         return
-    progress = _Progress(name, preview=True)
+    progress = _Progress(name, preview=True, nome=cfg["nome"], frase=_frase_de_hoje())
     _popen_detached([str(ZEBAR), "start-widget-preset", "--pack", "omarchy-catppuccin",
                      "--widget-name", "splash", "--preset", "default"])
     time.sleep(0.8)
-    for sid, label in (("anim", f"Animação: {ANIMACOES[name][0]}"), ("barra", "Barra"),
+    for sid, label in (("anim", f"Animação: {ANIMACOES[name]}"), ("barra", "Barra"),
                        ("glazewm", "Gestor de janelas"), ("apps", "Apps")):
         progress.step(sid, label)
         time.sleep(0.9)

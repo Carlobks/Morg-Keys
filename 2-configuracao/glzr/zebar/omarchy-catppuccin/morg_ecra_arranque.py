@@ -15,9 +15,10 @@ SPLASH_READY = "Local\\MorgSplashReady"
 class _Progress:
     """progress.json escrito de forma atómica (tmp + replace, com novas tentativas)."""
 
-    def __init__(self, animacao="cafe", preview=False):
+    def __init__(self, animacao="cafe", preview=False, nome="", frase=None):
+        # nome e frase: a saudação do ecrã de boas-vindas ("Muito bem-vindo, nome" e a frase do dia).
         self.data = {"boot_id": str(time.time_ns()), "started": time.time(), "animacao": animacao,
-                     "preview": preview, "steps": [], "fim": False}
+                     "preview": preview, "nome": nome, "frase": frase, "steps": [], "fim": False}
         self.save()
 
     def save(self):

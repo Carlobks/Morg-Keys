@@ -15,7 +15,7 @@ Duplo clique em `INSTALAR.cmd`, com a sessão iniciada **na conta do utilizador 
    - se está elevado, avisa e pede confirmação.
 
    No fim desta etapa faz `Unblock-File` a tudo.
-1b. **Pergunta** (feita depois dos passos 2 e 3, logo antes da configuração; só se não houver já um `arranque.txt` de uma instalação anterior, e sem `-SemPerguntas`/`-Animacao`/`-Bat`): em ciclo, o caminho de cada `.bat`, o endereço e o nome (Enter vazio = terminar). A animação fica `cafe` (a única, por agora).
+1b. **Pergunta** (feita depois dos passos 2 e 3, logo antes da configuração; só se não houver já um `arranque.txt` de uma instalação anterior, e sem `-SemPerguntas`/`-Animacao`/`-Bat`): em ciclo, o caminho de cada `.bat`, o endereço e o nome (Enter vazio = terminar). A animação fica `cafe` (a única, por agora). Depois, **"Como quer ser chamado no ecrã de arranque?"** (Enter = 1.º nome da conta do Windows, se houver; senão fica sem nome). Também com `-Nome`; com `-SemPerguntas` usa o da conta. Numa reinstalação que mantém o `arranque.txt`, só pergunta se ele ainda não tiver a linha `nome =`.
 
    Cada `.bat` é validado: tem de existir e ser `.bat` ou `.cmd`, e o endereço tem de começar por `http(s)://`. Se o `.bat` usa npm/node e o Node.js não está instalado, só avisa. Sem perguntas: `-Animacao cafe` e `-Bat "caminho|endereço|nome"` (vários separados por `;`).
 2. **Programas em falta.** Os instaladores **não vêm no repositório**. Para cada programa em falta, usa o ficheiro de `1-instaladores\` se lá estiver e passar na verificação; senão **descarrega-o do site oficial** para lá e verifica-o. Um ficheiro que não passe **nunca** é executado (o `.part` é apagado e a instalação para).
@@ -42,7 +42,7 @@ Duplo clique em `INSTALAR.cmd`, com a sessão iniciada **na conta do utilizador 
    2b. Fecha os ajudantes Python ainda a correr (`pythonw` com `.glzr` na linha de comandos: café, ícones dos `.bat`) com os seus filhos (`taskkill /T`). Senão a tarefa lançaria uma segunda cópia de cada `.bat`, e a pasta podia não se deixar renomear.
    3. Copia `2-configuracao\glzr` para `~\.glzr`, trocando os marcadores (ver a tabela abaixo). Escreve UTF-8 sem BOM.
    4. O `arranque.txt` recebe a animação e as linhas `bat =` respondidas (ver o passo 1b).
-   5. Numa reinstalação, recupera da cópia `apps.txt`, `layout.json`, `arranque.txt` (se não houve perguntas) e a pasta `arranque\`. Aceita também a estrutura antiga (pack `guia-atalhos` separado): os ficheiros vão para `omarchy-catppuccin\guia\`. Se o `arranque.txt` recuperado tiver uma animação que já não existe, passa a `cafe`.
+   5. Numa reinstalação, recupera da cópia `apps.txt`, `frases.txt`, `layout.json`, `arranque.txt` (se não houve perguntas; acrescenta-lhe `nome =` se faltar) e a pasta `arranque\`. Aceita também a estrutura antiga (pack `guia-atalhos` separado): os ficheiros vão para `omarchy-catppuccin\guia\`. Se o `arranque.txt` recuperado tiver uma animação que já não existe, passa a `cafe`.
    6. Falha se ficar algum `{{` por substituir.
    7. Cria a junction `Documentos\Guia de Atalhos` → `~\.glzr\zebar\omarchy-catppuccin\guia`.
 
@@ -51,6 +51,7 @@ Duplo clique em `INSTALAR.cmd`, com a sessão iniciada **na conta do utilizador 
    | `{{HOME}}` | `%USERPROFILE%` com `/` | `C:/Users/joao` |
    | `{{HOME_RE}}` | o mesmo, escapado para regex dentro de JSON | — |
    | `{{ANIMACAO}}` | nome da animação (só em `arranque.txt`) | `cafe` |
+   | `{{NOME}}` | nome da saudação (só em `arranque.txt`) | `Carlos` |
 5. **Apps.** Corre `py -I bar_helper.py apps-apply --skip-missing`.
 6. **Claude Code**, se existir `~\.claude` ou `~\.local\bin\claude.exe`. Copia `statusline.py`; se havia um diferente, guarda-o como `.bak`. Junta `statusLine` ao `settings.json` com um script Python, **sem mexer** numa statusLine alheia.
 7. **Windows.** `HideIcons=1` (exceto com `-ManterIcones`) e barra de tarefas a esconder-se (`StuckRects3`, byte 8 = 3; exceto com `-ManterBarraWindows`). Reinicia o Explorador. Guarda os valores anteriores em `instalacao.json`.
@@ -59,7 +60,7 @@ Duplo clique em `INSTALAR.cmd`, com a sessão iniciada **na conta do utilizador 
    - gatilho: AtLogOn do utilizador;
    - principal: o próprio utilizador, Interactive, RunLevel Limited;
    - definições: sem limite de tempo, `IgnoreNew`, `Priority 4`, a correr também com bateria.
-   - Segunda tarefa, `Morg Keys (ecrã preto)`: o mesmo gatilho, ação `C:\Windows\System32\scrnsave.scr /s` (o protetor de ecrã "Em branco" do Windows), limite de 2 min. Tapa o papel de parede nos segundos em que, ao entrar, o Python ainda não arrancou; o `boot` fecha-a quando a cortina aparece (A38). Se não se conseguir criar, só avisa.
+   - Remove a tarefa `Morg Keys (ecrã preto)` de uma versão anterior, se existir (A38).
 9. Arranca a tarefa, exceto com `-NaoIniciar`.
 
 ### 6.2 À mão (se o script não puder correr)
@@ -94,7 +95,6 @@ Os três `.exe` **não estão no repositório** (estão no `.gitignore`): o inst
 | `VisualC++-Redistribuivel-x64.exe` | Microsoft (VC++ 2015-2022 x64, `aka.ms/vs/17/release/vc_redist.x64.exe`). Muda de versão no mesmo endereço. | verificado pela assinatura da Microsoft |
 | `JetBrainsMonoNerdFont-{Regular,Medium,SemiBold,Bold}.ttf` (no repositório, com `OFL.txt`) | Nerd Fonts, release `JetBrainsMono.zip` | Regular `C8AF9DFD…6925F`, Medium `F7523DBC…1C76A`, SemiBold `387FD979…A40E1`, Bold `546D7F5E…0B8DA` |
 | `vendor\zebar-3.3.1.mjs` | `npm i zebar@3.3.1` + `esbuild --bundle --format=esm`, num só ficheiro, para não depender de CDN. A versão tem de bater com o `zebar.exe` (3.0 não tinha `tauriWindow`). **Uma só cópia**: o Zebar só serve a cada página ficheiros de dentro da pasta do seu pack que batam com o `includeFiles` (código do Zebar 3.3.1: `asset_server.rs`, `widget_factory.rs`); por isso todas as páginas estão no mesmo pack. | `E160BB83…1929FA` |
-| `cafe.bmp` | `scripts\gerar-cafe-bmp.ps1`: desenha com System.Drawing (GDI+) a mesma geometria do `<svg id="cafe">`, sem vapor, a 560×560 (2× o tamanho no ecrã; a cortina reduz ao DPI do ecrã), em BMP 24-bit, em fundo preto. Não precisa de navegador. | — |
 | `2-configuracao\` | `scripts\gerar-modelos.ps1` no PC onde se mantém a configuração (ver abaixo). | — |
 
 **Atualizar o pacote depois de mudar a configuração ativa (`~\.glzr`):** correr `scripts\gerar-modelos.ps1`. Ele:

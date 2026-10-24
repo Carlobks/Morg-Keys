@@ -195,15 +195,21 @@ class AcoesDoWindows(unittest.TestCase):
 
 class CortinaPreta(unittest.TestCase):
 
-    def test_cria_com_a_imagem_da_animacao_e_espera_a_janela(self):
+    def test_cria_e_espera_a_janela(self):
         def run_falso(self):
             self.hwnd = 77
             self._ready.set()
         with SistemaFalso() as s, mock.patch.object(CORTINA._BlackCover, "_run", run_falso):
-            s.trocar("ANIMACOES", {"cafe": ("Café", "cafe.bmp", 280, 280), "lua": ("Lua", "lua.bmp", 10, 20)})
-            cortina = s.bh._BlackCover("lua")
-            self.assertEqual((cortina.image, cortina.img_w, cortina.img_h, cortina.hwnd), ("lua.bmp", 10, 20, 77))
-            self.assertEqual(s.bh._BlackCover("nenhuma").image, "cafe.bmp")
+            self.assertEqual(s.bh._BlackCover().hwnd, 77)
+
+    def test_escurece_do_transparente_ao_preto_e_abranda_no_fim(self):
+        alfa = CORTINA._alfa
+        self.assertEqual((alfa(-5), alfa(0), alfa(CORTINA.ESCURECER_MS), alfa(10 ** 6)), (0, 0, 255, 255))
+        meio = alfa(CORTINA.ESCURECER_MS / 2)
+        self.assertEqual(meio, round(255 * (1 - 0.5 ** 3)))  # ease-out: a meio já vai em 7/8
+        passos = [alfa(t) for t in range(0, CORTINA.ESCURECER_MS + 1, 100)]
+        self.assertEqual(passos, sorted(passos))  # nunca volta atrás
+        self.assertEqual(alfa(600, duracao=600), 255)
 
     def test_close_mostra_o_cursor_e_fecha_uma_vez(self):
         with SistemaFalso() as s:

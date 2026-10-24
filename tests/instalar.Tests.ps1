@@ -199,6 +199,7 @@ Describe 'Escolhas do arranque' {
     $ficheiroBat = Join-Path $TestDrive 'pacote\servidor.bat'
     Escrever $ficheiroBat "@echo off`r`nnpm run dev`r`n"
     Mock Get-Command {}
+    Mock EscolherNome { 'Ana' }  # a pergunta do nome tem o seu próprio Describe
   }
   It 'PessoalAntigo: estrutura atual, antiga ou nenhuma' {
     PessoalAntigo $Glzr 'apps.txt' | Should -BeNullOrEmpty
@@ -230,6 +231,8 @@ Describe 'Escolhas do arranque' {
     $r.Manter | Should -BeTrue
     $r.Animacao | Should -BeNullOrEmpty
     @($r.Linhas).Count | Should -Be 0
+    $r.Nome | Should -Be 'Ana'
+    Should -Invoke EscolherNome -ParameterFilter { $manter -and $arranqueAntigo -like '*arranque.txt' }
   }
   It '-Bat: vários separados por ; e os que não existem ficam de fora' {
     Escrever (Join-Path $Glzr "$Pack\guia\arranque.txt") 'animacao = cafe'
@@ -253,5 +256,44 @@ Describe 'Escolhas do arranque' {
     $r = EscolherArranque
     $r.Manter | Should -BeFalse
     Registado | Should -Match 'Sem programas \.bat ao iniciar\.'
+  }
+}
+
+Describe 'Nome da saudação do ecrã de arranque' {
+  BeforeEach {
+    Limpar
+    $antigo = Join-Path $Glzr "$Pack\guia\arranque.txt"
+    Mock NomeDaConta { 'Carlos' }
+  }
+  It 'o arranque.txt mantido que já tem nome fica como está ($null)' {
+    Escrever $antigo "animacao = cafe`nnome = Zé`n"
+    EscolherNome $antigo $true | Should -BeNullOrEmpty
+    Should -Invoke NomeDaConta -Times 0 -Exactly
+  }
+  It 'pergunta; com Enter usa o nome da conta (também quando o arranque.txt mantido não tem nome)' {
+    Escrever $antigo "animacao = cafe`n"
+    Mock Read-Host { '  ' }
+    EscolherNome $antigo $true | Should -Be 'Carlos'
+    Should -Invoke Read-Host -ParameterFilter { $Prompt -match 'Como quer ser chamado.*\(Enter = Carlos\)' }
+    Registado | Should -Match 'Saudação: Muito bem-vindo, Carlos!'
+    Mock Read-Host { ' Ana ' }
+    EscolherNome $null $false | Should -Be 'Ana'
+  }
+  It '-Nome e -SemPerguntas não perguntam; sem nome da conta fica sem nome' {
+    Mock Read-Host { throw 'não devia perguntar' }
+    $Nome = 'Rita'
+    EscolherNome $null $false | Should -Be 'Rita'
+    $Nome = ''
+    $SemPerguntas = $true
+    EscolherNome $null $false | Should -Be 'Carlos'
+    Mock NomeDaConta { '' }
+    EscolherNome $null $false | Should -Be ''
+    Registado | Should -Match 'Saudação: Muito bem-vindo!'
+  }
+  It 'sem nome da conta, a pergunta diz "sem nome"' {
+    Mock NomeDaConta { '' }
+    Mock Read-Host { '' }
+    EscolherNome $null $false | Should -Be ''
+    Should -Invoke Read-Host -ParameterFilter { $Prompt -match '\(Enter = sem nome\)' }
   }
 }
