@@ -1,7 +1,8 @@
 """Bateria de estragos (testes de mutação feitos à mão): prova que os testes falham quando o código está errado.
 
-Cada estrago troca um texto num .py do pack, corre os testes e repõe o ficheiro (também se rebentar).
-Procura o texto em todos os .py do pack (o código pode ter mudado de ficheiro numa refatoração).
+Cada estrago troca um texto num .py ou .mjs do pack, corre os testes (unittest ou node --test) e repõe
+o ficheiro (também se rebentar). Procura o texto em todos esses ficheiros (o código pode ter mudado de
+ficheiro numa refatoração).
 Antes de estragar, confirma que os testes passam com o código certo (senão todos dariam "apanhado").
 Estrago novo: acrescentar (texto certo, texto estragado) a MUTANTES, depois de cada bug ou função nova.
 
@@ -59,17 +60,31 @@ MUTANTES = [
     ('prev = before if before in ANIMACOES else prev', 'prev = prev'),
     ('if kernel32.GetTickCount64() - last > 250:', 'if True:'),
     ('f"{now} {current} tap {prev}"', 'f"{now} {current} tap -"'),
+    # painel e guia em .mjs (fase 2c): apanhados pelo node --test
+    ("hostname.replace(/^www\\./, '')", 'hostname'),
+    ("/[&<>\"']/g", "/[<>\"']/g"),
+    ('const fixed = state.fixed.includes(id);', 'const fixed = false;'),
+    ('.filter(k => !drawn.has(k.key))', '.filter(() => false)'),
+    (".replace(/\\//g, '_').replace(/=+$/, '');", ".replace(/\\//g, '_');"),
+    ('.map((w, i) => ({ ...w, index: i }))', ''),
+    (".replace(/\\+\\+/g, '+\\u0000')", ''),
+    ("l && !l.startsWith('#') && l.includes('=')", "l && l.includes('=')"),
+    ('rows: [...appRows, ...s.rows]', 'rows: [...s.rows, ...appRows]'),
 ]
+FICHEIROS = [*PACK.glob("*.py"), *PACK.glob("comum/*.mjs"), *PACK.glob("painel/*.mjs"), *PACK.glob("guia/*.mjs")]
+TESTES_PY = ["py", "-I", "-m", "unittest", "discover", "-s", "tests"]
+TESTES_JS = ["node", "--test", *map(str, pathlib.Path("tests").glob("*.test.mjs"))]
 
 
 def onde_esta(texto):
-    achados = [p for p in PACK.glob("*.py") if p.read_text(encoding="utf-8").count(texto) == 1]
+    achados = [p for p in FICHEIROS if p.read_text(encoding="utf-8").count(texto) == 1]
     return achados[0] if len(achados) == 1 else None
 
 
-base = subprocess.run(["py", "-I", "-m", "unittest", "discover", "-s", "tests"], capture_output=True, timeout=180)
-if base.returncode != 0:  # com testes já vermelhos, todos os estragos seriam "apanhados" (falso 100 %)
-    raise SystemExit("Os testes falham com o código certo: corrija antes de correr os estragos.")
+for testes in (TESTES_PY, TESTES_JS):
+    base = subprocess.run(testes, capture_output=True, timeout=180)
+    if base.returncode != 0:  # com testes já vermelhos, todos os estragos seriam "apanhados" (falso 100 %)
+        raise SystemExit("Os testes falham com o código certo: corrija antes de correr os estragos.")
 
 apanhados = 0
 for antes, depois in MUTANTES:
@@ -80,7 +95,7 @@ for antes, depois in MUTANTES:
     original = ficheiro.read_bytes()
     ficheiro.write_bytes(original.decode("utf-8").replace(antes, depois).encode("utf-8"))
     try:
-        r = subprocess.run(["py", "-I", "-m", "unittest", "discover", "-s", "tests"], capture_output=True, timeout=180)
+        r = subprocess.run(TESTES_JS if ficheiro.suffix == ".mjs" else TESTES_PY, capture_output=True, timeout=180)
         apanhado = r.returncode != 0
     except subprocess.TimeoutExpired:
         apanhado = True

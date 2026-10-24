@@ -55,7 +55,7 @@
       "focused": false,
       "resizable": false,
       "transparent": true,
-      "includeFiles": ["guia/*.html", "guia/*.txt", "vendor/*.mjs"],
+      "includeFiles": ["guia/*.html", "guia/*.txt", "guia/*.css", "guia/*.mjs", "comum/*.mjs", "vendor/*.mjs"],
       "caching": {
         "defaultDuration": 604800,
         "rules": [{ "urlRegex": "apps\\.txt", "duration": 0 }]
@@ -123,7 +123,7 @@
       "focused": false,
       "resizable": false,
       "transparent": true,
-      "includeFiles": ["painel/*.html", "vendor/*.mjs"],
+      "includeFiles": ["painel/*.html", "painel/*.css", "painel/*.mjs", "comum/*.mjs", "vendor/*.mjs"],
       "caching": {
         "defaultDuration": 604800,
         "rules": []

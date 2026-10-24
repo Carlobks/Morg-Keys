@@ -20,11 +20,9 @@ LIMITE_DE_LINHAS = 500  # regra do CLAUDE.md: ficheiros pequenos, uma responsabi
 # Textos de terceiros que não se dividem.
 SEM_LIMITE_DE_LINHAS = ("LICENSE",)
 # Ficheiros antigos acima do limite, com o tamanho que tinham em 2026-10-23: só podem encolher.
-# A fase 2 da experiência 0001 divide-os; quando um descer das 500 linhas, sai desta lista.
-GRANDES_POR_DIVIDIR = {
-    "2-configuracao/glzr/zebar/omarchy-catppuccin/painel/apps.html": 830,
-    "2-configuracao/glzr/zebar/omarchy-catppuccin/guia/guia.html": 622,
-}
+# Quando um descer das 500 linhas, sai desta lista. A fase 2c da experiência 0001 dividiu os
+# últimos (painel/apps.html, 830, e guia/guia.html, 622) em .html + .css + .mjs.
+GRANDES_POR_DIVIDIR = {}
 
 
 def ficheiros_de_texto_rastreados():

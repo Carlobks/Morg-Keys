@@ -1,0 +1,295 @@
+/* Painel "Apps e arranque" (Alt+Esc, C). Mesmo kit visual do guia (Alt+K)
+   e do painel do sistema: Catppuccin Mocha, secções --mantle com título
+   colorido, ícones Nerd Font em caixinha, teclas kbd escuras com contorno.
+   Só fontes instaladas no Windows e o cliente do Zebar em ../vendor/. */
+:root {
+  --mauve: #cba6f7;
+  --red: #f38ba8;
+  --peach: #fab387;
+  --green: #a6e3a1;
+  --blue: #89b4fa;
+  --teal: #94e2d5;
+  --yellow: #f9e2af;
+  --pink: #f5c2e7;
+  --lavender: #b4befe;
+  --sky: #89dceb;
+  --text: #cdd6f4;
+  --subtext0: #a6adc8;
+  --overlay0: #6c7086;
+  --surface0: #313244;
+  --surface1: #45475a;
+  --base: #1e1e2e;
+  --mantle: #181825;
+  --crust: #11111b;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: transparent;
+  font-family: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+  color: var(--text);
+  overflow: hidden;
+  user-select: none;
+}
+
+/* Aberto no navegador (fora do Zebar): fundo, centrado e com dados de exemplo. */
+body.standalone { background: var(--crust); display: grid; place-items: center; }
+body.busy, body.busy * { cursor: progress !important; }
+
+.card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--base);
+  border: 1px solid var(--surface1);
+  border-radius: 14px;
+  overflow: hidden;
+  will-change: transform, opacity, filter;
+  /* Fechado = recolhido na chávena da barra (como o guia). */
+  transform-origin: var(--ox, 0) var(--oy, 0);
+  transform: scale(0.03);
+  opacity: 0;
+  filter: blur(3px);
+  transition:
+    transform 260ms cubic-bezier(0.5, 0, 0.75, 0),
+    opacity 120ms ease-in 140ms,
+    filter 260ms ease-in;
+}
+
+body.open .card {
+  transform: none;
+  opacity: 1;
+  filter: none;
+  transition:
+    transform 480ms cubic-bezier(0.34, 1.15, 0.5, 1),
+    opacity 90ms linear,
+    filter 380ms ease-out;
+}
+
+body.standalone .card { width: min(1240px, 96vw); height: min(820px, 94vh); transform: none; opacity: 1; filter: none; }
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 22px 14px;
+  background: var(--mantle);
+  border-bottom: 1px solid var(--surface0);
+}
+
+header h1 { margin: 0; font-size: 17px; font-weight: 600; color: var(--mauve); letter-spacing: 0.2px; }
+header .hint { font-size: 12px; color: var(--subtext0); }
+header .spacer { margin-left: auto; }
+
+.btn {
+  --k: var(--subtext0);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 30px;
+  padding: 0 11px;
+  border-radius: 8px;
+  border: 1.5px solid color-mix(in srgb, var(--k) 45%, transparent);
+  background: var(--crust);
+  color: var(--k);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--k) 25%, transparent);
+  cursor: pointer;
+}
+.btn:hover:not(:disabled) { --k: var(--text); }
+.btn:disabled { opacity: 0.35; cursor: default; }
+.btn .ico { width: 18px; height: 18px; font-size: 13px; border-radius: 5px; background: none; }
+
+.close {
+  width: 30px; height: 30px; border: 0; border-radius: 8px;
+  background: transparent; color: var(--subtext0); font-size: 14px; cursor: pointer;
+}
+.close:hover { background: var(--surface0); color: var(--text); }
+body.standalone .close { display: none; }
+
+main {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(250px, 300px) 1fr;
+  gap: 14px;
+  padding: 16px 22px 18px;
+}
+
+section {
+  --c: var(--accent, var(--lavender));
+  padding: 10px 10px 8px;
+  background: var(--mantle);
+  border-radius: 12px;
+  min-height: 0;
+}
+
+section h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px 2px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--c);
+}
+section h2 small { margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--overlay0); font-size: 11px; }
+
+.ico {
+  width: 24px; height: 24px; flex: none; border-radius: 7px;
+  display: grid; place-items: center;
+  font-family: 'JetBrainsMono NF', monospace; font-size: 13px;
+  color: var(--ic, var(--c));
+  background: color-mix(in srgb, var(--ic, var(--c)) 16%, transparent);
+}
+
+kbd {
+  --k: var(--c, var(--subtext0));
+  font-family: 'JetBrainsMono NF', 'Cascadia Mono', Consolas, monospace;
+  font-size: 11.5px; font-weight: 700; line-height: 1;
+  display: inline-grid; place-items: center;
+  min-width: 22px; height: 22px; padding: 0 6px; border-radius: 6px;
+  color: var(--k); background: var(--crust);
+  border: 1.5px solid color-mix(in srgb, var(--k) 55%, transparent);
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--k) 30%, transparent);
+  white-space: nowrap;
+}
+header kbd { --k: var(--subtext0); height: 20px; font-size: 11px; }
+
+/* --- Coluna das apps --- */
+#apps { --accent: var(--green); display: flex; flex-direction: column; }
+#apps input {
+  width: 100%; padding: 7px 11px; margin-bottom: 8px;
+  border-radius: 8px; border: 1px solid var(--surface1);
+  background: var(--surface0); color: var(--text);
+  font: inherit; font-size: 13px; outline: none;
+}
+#apps input:focus { border-color: var(--green); }
+#apps input::placeholder { color: var(--overlay0); }
+#list { flex: 1; min-height: 0; overflow-y: auto; margin: 0 -4px; padding: 0 4px; border-radius: 8px; }
+#list::-webkit-scrollbar, .right::-webkit-scrollbar { width: 8px; }
+#list::-webkit-scrollbar-thumb, .right::-webkit-scrollbar-thumb { background: var(--surface1); border-radius: 4px; }
+#list .group { margin: 8px 4px 4px; font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--overlay0); }
+#list .group:first-child { margin-top: 0; }
+/* Seleção (rato ou teclado): cursor = linha onde as setas estão; sel = escolhida para enviar. */
+.app {
+  display: flex; align-items: center; gap: 10px;
+  padding: 4px 6px; border-radius: 7px; font-size: 13px;
+  cursor: pointer;
+}
+.app:hover, .app.cursor { background: var(--surface0); }
+.app.cursor { box-shadow: inset 2px 0 0 var(--green); }
+.app.sel { background: color-mix(in srgb, var(--green) 18%, var(--surface0)); box-shadow: inset 2px 0 0 var(--green); }
+.app .ico { width: 22px; height: 22px; font-size: 12px; border-radius: 6px; }
+.app .lb { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.app .used { font-size: 10.5px; color: var(--overlay0); }
+.empty { padding: 10px 6px; font-size: 12px; color: var(--overlay0); }
+#site { display: flex; gap: 6px; margin-top: 8px; }
+#site input { margin: 0; flex: 1; }
+#site .btn { --k: var(--green); height: 32px; }
+
+/* --- Coluna da direita --- */
+.right { display: flex; flex-direction: column; gap: 14px; min-height: 0; overflow-y: auto; overflow-x: hidden; }
+.right > section { flex: none; }  /* não encolhem: a coluna desliza se faltar altura */
+
+#keys { --accent: var(--blue); }
+.kb { display: flex; flex-direction: column; gap: 6px; }
+/* Teclas proporcionais à largura (10 por linha, como um teclado), para
+   caber também num portátil; a 2.ª e a 3.ª linha desviam meia/uma tecla. */
+.kb .krow { display: flex; gap: 6px; --kw: calc((100% - 54px) / 10); }
+.kb .krow:nth-child(2) .key:first-child { margin-left: calc((100% - 54px) / 20); }
+.kb .krow:nth-child(3) .key:first-child { margin-left: calc((100% - 54px) / 10); }
+.kb .krow.special { margin-top: 4px; }
+.key {
+  --k: var(--blue);
+  position: relative;
+  width: var(--kw); max-width: 96px; height: 66px; flex: none;
+  padding: 6px 6px 5px;
+  border-radius: 9px;
+  background: var(--crust);
+  border: 1.5px solid color-mix(in srgb, var(--k) 30%, transparent);
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--k) 20%, transparent);
+  display: flex; flex-direction: column; gap: 3px;
+}
+.key.wide { width: calc(var(--kw) * 2 + 6px); min-width: 130px; max-width: 198px; }
+.key .cap { font-family: 'JetBrainsMono NF', Consolas, monospace; font-size: 11.5px; font-weight: 700; color: var(--k);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.key .what { display: flex; align-items: center; gap: 5px; min-width: 0; font-size: 11px; }
+.key .what .ico { width: 18px; height: 18px; font-size: 11px; border-radius: 5px; }
+.key .what span:last-child { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.key.free .what { color: var(--overlay0); }
+.key.has { border-color: color-mix(in srgb, var(--k) 60%, transparent); cursor: pointer; }
+.key.fixed { --k: var(--overlay0); opacity: 0.45; }
+.key.fixed .what { color: var(--overlay0); }
+/* A enviar: os destinos possíveis acendem (teclas livres ou ocupadas, workspaces). */
+body.sending .key:not(.fixed), body.sending .box { cursor: pointer; }
+body.sending .key:not(.fixed):not(.sel) { --k: var(--green); border-style: dashed; border-color: color-mix(in srgb, var(--green) 60%, transparent); }
+body.sending .key:not(.fixed):hover, body.sending .box:hover { background: color-mix(in srgb, var(--green) 14%, var(--crust)); }
+.key.sel, .chip.sel { outline: 2px solid var(--green); outline-offset: 1px; }
+
+.x {
+  position: absolute; top: 3px; right: 3px;
+  width: 18px; height: 18px; border: 0; border-radius: 5px;
+  display: none; place-items: center;
+  background: var(--surface0); color: var(--subtext0);
+  font-size: 10px; cursor: pointer;
+}
+.x:hover { background: var(--red); color: var(--crust); }
+.key.has:hover .x, .chip:hover .x { display: grid; }
+
+#ws { --accent: var(--mauve); }
+/* 5 por linha num ecrã grande (1–5 e 6–10); menos colunas se faltar espaço. */
+.wsgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(max(150px, calc((100% - 32px) / 5)), 1fr)); gap: 8px; }
+.box {
+  --k: var(--mauve);
+  min-height: 92px;
+  padding: 7px;
+  border-radius: 10px;
+  background: var(--crust);
+  border: 1.5px dashed color-mix(in srgb, var(--k) 30%, transparent);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.box.has { border-style: solid; }
+body.sending .box { --k: var(--green); border-color: color-mix(in srgb, var(--green) 60%, transparent); }
+.box .head { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--overlay0); margin-bottom: 2px; }
+.box .head kbd { --k: var(--mauve); }
+.box .hint { font-size: 11px; color: var(--overlay0); padding: 4px 2px; }
+.chip {
+  position: relative;
+  display: flex; align-items: center; gap: 6px;
+  padding: 3px 24px 3px 4px; border-radius: 7px;
+  background: var(--mantle); font-size: 12px; cursor: pointer;
+}
+.chip .ico { width: 18px; height: 18px; font-size: 11px; border-radius: 5px; }
+.chip span:nth-child(2) { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chip .x { top: 3px; right: 3px; }
+
+body.busy main { pointer-events: none; }  /* um pedido de cada vez: nada muda por baixo dele */
+
+/* Barra 'Enviar … para': aparece no lugar da dica quando há uma app escolhida. */
+#send { display: none; align-items: center; gap: 7px; font-size: 12.5px; color: var(--text); }
+#send .ico { width: 20px; height: 20px; font-size: 12px; border-radius: 6px; }
+#send b { color: var(--green); font-weight: 600; max-width: 240px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#send .opts { color: var(--subtext0); font-size: 12px; }
+#send kbd { --k: var(--green); height: 20px; font-size: 11px; }
+body.sending #send { display: flex; }
+body.sending header .hint { display: none; }
+#cancel { --k: var(--red); height: 26px; }
+
+footer {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 22px; font-size: 11.5px; color: var(--overlay0);
+  background: var(--mantle); border-top: 1px solid var(--surface0);
+}
+footer b { color: var(--subtext0); font-weight: 600; }
+#status { margin-left: auto; text-align: right; }
+#status.ok { color: var(--green); }
+#status.err { color: var(--red); }
+.hidden { display: none !important; }

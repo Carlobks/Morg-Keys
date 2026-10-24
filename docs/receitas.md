@@ -4,8 +4,8 @@
 
 ## 9. Receitas de alteração
 
-1. **Novo atalho fixo.** Acrescentar ao `keybindings:` do `config.yaml`, **fora** do bloco das apps. Testar com `glazewm command wm-reload-config` (ou `Alt+Shift+R`) e ver `glazewm\errors.log`. Acrescentar a linha ao `guia.html`.
-2. **Nova letra na camada `Alt+Esc`.** No modo `sistema`, copiar uma entrada e mudar a ação, sem esquecer `wm-disable-binding-mode --name sistema` e `layer-hide`. Acrescentar a letra a `sistema.html` e ao `guia.html`.
+1. **Novo atalho fixo.** Acrescentar ao `keybindings:` do `config.yaml`, **fora** do bloco das apps. Testar com `glazewm command wm-reload-config` (ou `Alt+Shift+R`) e ver `glazewm\errors.log`. Acrescentar a linha à tabela `SECTIONS` de `guia/guia-logica.mjs`.
+2. **Nova letra na camada `Alt+Esc`.** No modo `sistema`, copiar uma entrada e mudar a ação, sem esquecer `wm-disable-binding-mode --name sistema` e `layer-hide`. Acrescentar a letra a `sistema.html` e à tabela `SECTIONS` de `guia/guia-logica.mjs`.
 3. **Novo comando chamado por uma página do Zebar.** Implementar a função no módulo `morg_*.py` da responsabilidade (ou num novo, < 500 linhas) e acrescentar o ramo no `main` do `bar_helper.py`, com teste. Alargar o `argsRegex` do `zpack.json` do widget e reiniciar o Zebar (A7, A8).
 4. **Mudar a barra.** `bar.html`, `styles.css` e `icons.css`; as cores Catppuccin Mocha estão em variáveis CSS. Recarregar: fechar o Zebar e correr `zebar.exe startup`.
 5. **Mudar o desenho de uma animação.** Trocar o SVG em `splash.html` e gerar de novo o BMP com o mesmo tamanho e posição (`cafe.bmp`: `scripts\gerar-cafe-bmp.ps1`). Os tamanhos estão em `ANIMACOES` e `ANIM_CY` no `morg_config_arranque.py`. Sem isso, a passagem cortina→animação dá um salto (A21).
