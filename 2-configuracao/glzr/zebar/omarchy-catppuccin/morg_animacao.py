@@ -51,20 +51,34 @@ def animacao_tap():
     with _NamedMutex("Local\\MorgAnimTap", 1000) as owned:
         if not owned:
             return
-        try:
-            last, prev, state, before = ANIM_TAP_FILE.read_text(encoding="utf-8").split()
-            last = int(last)
-        except (OSError, ValueError):
-            last, prev, state, before = 0, "-", "tap", "-"
+        last, prev, state, before = _anim_ler_toque()
         if now - last >= ANIM_REPEAT_MS:  # toque novo (ou 1.ª repetição)
-            names = list(ANIMACOES)
-            current = _arranque_cfg()["animacao"]
-            _set_animacao(names[(names.index(current) + 1) % len(names)])
-            ANIM_TAP_FILE.write_text(f"{now} {current} tap {prev}", encoding="utf-8")
+            _anim_seguinte(now, prev)
             return
         ANIM_TAP_FILE.write_text(f"{now} {prev} hold {before}", encoding="utf-8")
         if state == "hold":  # esta pressão já tem quem trate dela
             return
+    _anim_segurar(prev, before)
+
+
+def _anim_ler_toque():
+    """(tick, antes deste toque, tap|hold, antes do toque anterior) do .anim-tap; sem ficheiro = nada antes."""
+    try:
+        last, prev, state, before = ANIM_TAP_FILE.read_text(encoding="utf-8").split()
+        return int(last), prev, state, before
+    except (OSError, ValueError):
+        return 0, "-", "tap", "-"
+
+
+def _anim_seguinte(now, prev):
+    """Toque: grava a animação seguinte e lembra a de antes (para o caso de ser o início de um segurar)."""
+    names = list(ANIMACOES)
+    current = _arranque_cfg()["animacao"]
+    _set_animacao(names[(names.index(current) + 1) % len(names)])
+    ANIM_TAP_FILE.write_text(f"{now} {current} tap {prev}", encoding="utf-8")
+
+
+def _anim_segurar(prev, before):
     # Segurar detetado: repõe a animação de antes da pressão e espera que a
     # tecla seja largada (as repetições deixam de atualizar o ficheiro). Só
     # então sai da camada: com a camada ativa as repetições não chegam à app.
