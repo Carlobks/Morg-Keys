@@ -17,10 +17,13 @@ function Write-Titulo([string]$Texto) { Write-Output ''; Write-Output "== $Texto
 Push-Location $Raiz
 try {
     # 1. Python: unittest com cobertura de linhas e ramos. Sem -I: o coverage está nos pacotes do utilizador.
+    #    Só conta a lógica do pack (os testes não); abaixo de 100 % falha. A cola com o Windows que não se
+    #    testa tem "# pragma: no cover" com o motivo (lista em docs/validacao-manual.md).
     Write-Titulo 'Python (unittest + coverage)'
-    & $Py -m coverage run --branch "--source=$Pack,tests" -m unittest discover -s tests
+    & $Py -m coverage run --branch "--source=$Pack" -m unittest discover -s tests
     if ($LASTEXITCODE -ne 0) { $Falhas.Add('Python') }
-    & $Py -m coverage report --skip-empty
+    & $Py -m coverage report --skip-empty --show-missing --fail-under=100
+    if ($LASTEXITCODE -ne 0) { $Falhas.Add('Cobertura Python') }
 
     # 2. JavaScript: node --test, se houver testes.
     $TestesJs = @(Get-ChildItem -Path (Join-Path $Raiz 'tests') -Recurse -Filter '*.test.mjs' -ErrorAction SilentlyContinue)
