@@ -17,6 +17,15 @@ GLAZE_CLI = PROGRAM_FILES / "glzr.io" / "GlazeWM" / "cli" / "glazewm.exe"
 CREATE_NO_WINDOW = 0x08000000
 
 
+def _claude_code():
+    """Onde está o Claude Code neste PC: o instalador oficial põe ~/.local/bin/claude.exe; o npm
+    (npm install -g) põe %APPDATA%/npm/claude.cmd. Devolve o primeiro que existir, ou None."""
+    candidatos = [Path.home() / ".local" / "bin" / "claude.exe"]
+    if os.environ.get("APPDATA"):
+        candidatos.append(Path(os.environ["APPDATA"]) / "npm" / "claude.cmd")
+    return next((p for p in candidatos if p.exists()), None)
+
+
 def _shell_open(launch, log=None):
     """Abre {"file", "args"} por ShellExecute (como o os.startfile, mas com argumentos).
     ShellExecute: o GlazeWM e apps com uiAccess só arrancam assim (armadilha A1)."""

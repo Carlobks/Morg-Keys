@@ -102,6 +102,15 @@ class ListaDeComandos(unittest.TestCase):
                     self.assertEqual(self.bh.main(["bar_helper.py", *argv]), 2)
                 self.assertIn("layout-restore", saida.getvalue())
 
+    def test_ajuda_num_terminal_cp1252_nao_rebenta(self):
+        # Regressão: o "✕" da ajuda não existe em cp1252 (consola do Windows) e o print rebentava.
+        bruto = io.BytesIO()
+        consola = io.TextIOWrapper(bruto, encoding="cp1252")
+        with SistemaFalso(), contextlib.redirect_stdout(consola):
+            self.assertEqual(self.bh.main(["bar_helper.py", "xyz"]), 2)
+        consola.flush()
+        self.assertIn(b"Esc, ?, clicar fora", bruto.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()

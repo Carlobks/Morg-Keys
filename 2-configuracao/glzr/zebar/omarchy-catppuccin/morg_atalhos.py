@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 
 from morg_glaze import _glaze
-from morg_processos import CREATE_NO_WINDOW, HERE
+from morg_processos import CREATE_NO_WINDOW, HERE, _claude_code
 from morg_win32 import user32
 
 # --- Atalhos das apps (apps.txt) ---------------------------------------------------
@@ -83,6 +83,8 @@ def _resolve_app(value, start_apps):
     """Texto da direita de apps.txt -> comando do GlazeWM (ou None)."""
     v = value.strip()
     low = v.lower()
+    if low == "claude-code":
+        return _comando_claude_code()
     if low in SPECIAL_APPS:
         return SPECIAL_APPS[low]
     if low.startswith("web:"):
@@ -98,11 +100,20 @@ def _resolve_app(value, start_apps):
     return f'shell-exec explorer "shell:AppsFolder\\{app_id}"' if app_id else None
 
 
+def _comando_claude_code():
+    """Claude Code num terminal novo: o caminho do instalador oficial (SPECIAL_APPS) ou, se o deste PC
+    for o do npm (claude.cmd), esse."""
+    p = _claude_code()
+    if p is None or p.suffix.lower() == ".exe":
+        return SPECIAL_APPS["claude-code"]
+    return f"shell-exec {WT} -w new -d %USERPROFILE% {p.as_posix()}"
+
+
 def _special_available(value):
     """Para as palavras especiais e web:, confirma que o programa existe neste PC."""
     low = value.strip().lower()
     if low == "claude-code":
-        return (Path.home() / ".local" / "bin" / "claude.exe").exists()
+        return _claude_code() is not None
     if low.startswith("web:"):
         import winreg
         try:

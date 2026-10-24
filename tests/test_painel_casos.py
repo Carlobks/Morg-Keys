@@ -4,8 +4,10 @@ que test_bar_helper_painel.py não fixava.
 
 import json
 import os
+import sys
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from test_bar_helper_painel import painel
 from test_janelas_zebar import Ecra, JanelasFalsas
@@ -85,8 +87,10 @@ class EstadoEComoAbrir(unittest.TestCase):
         bh = self.s.bh
         wt = str(Path(os.environ.get("LOCALAPPDATA", "")) / "Microsoft" / "WindowsApps" / "wt.exe")
         casa = str(Path.home())
-        self.assertEqual(bh._launch_for("claude-code"), ("WindowsTerminal", {
-            "file": wt, "args": f'-w new -d "{casa}" "{casa}\\.local\\bin\\claude.exe"'}))
+        # Sem Claude Code neste PC: o caminho do instalador oficial (o do npm está em test_atalhos_casos).
+        with mock.patch.object(sys.modules["morg_painel"], "_claude_code", return_value=None):
+            self.assertEqual(bh._launch_for("claude-code"), ("WindowsTerminal", {
+                "file": wt, "args": f'-w new -d "{casa}" "{casa}\\.local\\bin\\claude.exe"'}))
         self.assertEqual(bh._launch_for("Explorador"), ("explorer", {"file": "explorer"}))
         self.assertEqual(bh._launch_for(r"C:\Apps\Notas.exe"), ("Notas", {"file": r"C:\Apps\Notas.exe"}))
 

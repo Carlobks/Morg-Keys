@@ -79,6 +79,10 @@ MUTANTES = [
     ("items.length === 1 ? 'app' : 'apps'", "'apps'"),
     ('if pid.isdigit() and int(pid) > 4:', 'if pid.isdigit():'),
     ('return 0 <= now - last < delay_ms + 200', 'return 0 <= now - last < delay_ms'),
+    # melhorias antes da fase 4: Claude Code do npm e ajuda numa consola cp1252
+    ('candidatos.append(Path(os.environ["APPDATA"]) / "npm" / "claude.cmd")', 'pass'),
+    ('if p is None or p.suffix.lower() == ".exe":', 'if p is None:'),
+    ('__doc__.encode(codificacao, "replace")', '__doc__.encode(codificacao, "strict")'),
 ]
 FICHEIROS = [*PACK.glob("*.py"), *PACK.glob("comum/*.mjs"), *PACK.glob("painel/*.mjs"), *PACK.glob("guia/*.mjs")]
 TESTES_PY = ["py", "-I", "-m", "unittest", "discover", "-s", "tests"]

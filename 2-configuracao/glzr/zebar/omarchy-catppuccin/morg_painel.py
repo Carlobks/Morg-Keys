@@ -19,7 +19,7 @@ from morg_atalhos import (
     _start_items,
 )
 from morg_janelas_zebar import BAR_TITLE
-from morg_processos import HERE, _start_widget
+from morg_processos import HERE, _claude_code, _start_widget
 from morg_win32 import (
     _bring_to_front,
     _focus_webview,
@@ -142,7 +142,8 @@ def _launch_for(value):
         return "WindowsTerminal", {"file": wt}
     if low == "claude-code":
         home = str(Path.home())
-        return "WindowsTerminal", {"file": wt, "args": f'-w new -d "{home}" "{home}\\.local\\bin\\claude.exe"'}
+        exe = _claude_code() or Path(home) / ".local" / "bin" / "claude.exe"  # oficial ou npm (claude.cmd)
+        return "WindowsTerminal", {"file": wt, "args": f'-w new -d "{home}" "{exe}"'}
     if low in ("explorador", "explorer"):
         return "explorer", {"file": "explorer"}
     if low.startswith("web:"):

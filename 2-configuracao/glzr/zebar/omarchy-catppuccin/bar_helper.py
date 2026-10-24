@@ -105,9 +105,15 @@ def main(argv):
     elif len(cmd) == 2 and cmd[0] == "power" and cmd[1] in ("reboot", "shutdown"):
         power(cmd[1])
     else:
-        print(__doc__)
+        _ajuda()
         return 2
     return 0
+
+
+def _ajuda():
+    """Imprime a ajuda. Numa consola cp1252 os caracteres que lá não existem (o "✕") saem como "?"."""
+    codificacao = getattr(sys.stdout, "encoding", None) or "utf-8"
+    print(__doc__.encode(codificacao, "replace").decode(codificacao))
 
 
 def _animacao(cmd):

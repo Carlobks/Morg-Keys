@@ -39,6 +39,7 @@ Mock Start-Sleep {}
 Mock Get-Process {}
 
 $Casa = Join-Path $TestDrive 'casa'
+$AppData = Join-Path $Casa 'AppData\Roaming'
 $Glzr = Join-Path $Casa '.glzr'
 $Registo = Join-Path $TestDrive 'instalacao.log'
 $Pacote = Join-Path $TestDrive 'pacote'

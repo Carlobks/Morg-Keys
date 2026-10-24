@@ -86,6 +86,50 @@ class MenuIniciar(unittest.TestCase):
             self.assertEqual((pedidos, menu.use_cache), ([True, False], False))
 
 
+class ClaudeCode(unittest.TestCase):
+    """O Claude Code pode vir do instalador oficial (~/.local/bin/claude.exe) ou do npm
+    (%APPDATA%/npm/claude.cmd): o atalho, o "existe?" e o arranque usam o deste PC."""
+
+    def casa(self, s, *ficheiros, appdata=True):
+        for rel in ficheiros:
+            (s.pasta / rel).parent.mkdir(parents=True, exist_ok=True)
+            (s.pasta / rel).write_text("")
+        env = {"APPDATA": str(s.pasta / "AppData")} if appdata else {}
+        return mock.patch.object(ATALHOS.Path, "home", return_value=s.pasta), \
+            mock.patch.dict("os.environ", env, clear=not appdata)
+
+    def test_onde_esta(self):
+        procura = sys.modules["morg_processos"]._claude_code
+        oficial, npm = ".local/bin/claude.exe", "AppData/npm/claude.cmd"
+        for ficheiros, appdata, esperado in [((), True, None), ((npm,), True, npm), ((npm,), False, None),
+                                             ((oficial, npm), True, oficial)]:
+            with self.subTest(ficheiros=ficheiros, appdata=appdata), SistemaFalso() as s:
+                casa, env = self.casa(s, *ficheiros, appdata=appdata)
+                with casa, env:
+                    self.assertEqual(procura(), esperado and s.pasta / esperado)
+                    self.assertEqual(s.bh._special_available("claude-code"), esperado is not None)
+
+    def test_atalho_usa_o_do_npm_e_senao_o_oficial(self):
+        with SistemaFalso() as s:
+            casa, env = self.casa(s, "AppData/npm/claude.cmd")
+            with casa, env:
+                self.assertEqual(s.bh._resolve_app("claude-code", {}),
+                                 f"shell-exec {ATALHOS.WT} -w new -d %USERPROFILE% "
+                                 f"{(s.pasta / 'AppData/npm/claude.cmd').as_posix()}")
+        for ficheiros in [(), (".local/bin/claude.exe",)]:
+            with self.subTest(ficheiros=ficheiros), SistemaFalso() as s:
+                casa, env = self.casa(s, *ficheiros)
+                with casa, env:
+                    self.assertEqual(s.bh._resolve_app("claude-code", {}), ATALHOS.SPECIAL_APPS["claude-code"])
+
+    def test_arranque_abre_o_do_npm(self):
+        with SistemaFalso() as s:
+            casa, env = self.casa(s, "AppData/npm/claude.cmd")
+            with casa, env:
+                _, launch = sys.modules["morg_painel"]._launch_for("claude-code")
+                self.assertEqual(launch["args"], f'-w new -d "{s.pasta}" "{s.pasta / "AppData/npm/claude.cmd"}"')
+
+
 class AppsNesteComputador(unittest.TestCase):
 
     def test_exe_que_existe_vira_caminho_com_barras(self):
@@ -95,7 +139,8 @@ class AppsNesteComputador(unittest.TestCase):
             self.assertEqual(s.bh._resolve_app(str(exe), {}), "shell-exec " + str(exe).replace("\\", "/"))
 
     def test_special_available(self):
-        with SistemaFalso() as s, mock.patch.object(ATALHOS.Path, "home", return_value=s.pasta):
+        with SistemaFalso() as s, mock.patch.object(ATALHOS.Path, "home", return_value=s.pasta), \
+                mock.patch.dict("os.environ", {"APPDATA": str(s.pasta / "AppData")}):
             self.assertFalse(s.bh._special_available("claude-code"))
             (s.pasta / ".local" / "bin").mkdir(parents=True)
             (s.pasta / ".local" / "bin" / "claude.exe").write_text("")

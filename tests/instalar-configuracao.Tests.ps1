@@ -165,6 +165,11 @@ Describe 'Apps e statusLine do Claude Code' {
     $esperado = "C:/Windows/py.exe -I `"$($Casa -replace '\\', '/')/.claude/statusline.py`""
     Should -Invoke CorrerPython -ParameterFilter { $argumentos[0] -eq (Join-Path $Casa '.claude\settings.json') -and $argumentos[1] -eq $esperado }
   }
+  It 'só com o Claude Code do npm (claude.cmd) também configura' {
+    Escrever (Join-Path $AppData 'npm\claude.cmd') ''
+    Mock CorrerPython { 'ok' }
+    ConfigurarStatusLine | Should -BeTrue
+  }
   It 'só com o claude.exe; outra statusLine ou erro não se tocam' {
     Escrever (Join-Path $Casa '.local\bin\claude.exe') ''
     Mock CorrerPython { 'mantido' }

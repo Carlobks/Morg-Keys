@@ -35,6 +35,7 @@ param(
 )
 $Pacote = Split-Path $PSScriptRoot -Parent
 $Casa = $env:USERPROFILE
+$AppData = $env:APPDATA   # o Claude Code instalado pelo npm fica em $AppData\npm\claude.cmd
 $Glzr = Join-Path $Casa '.glzr'
 $Registo = Join-Path $env:TEMP 'morg-keys-instalacao.log'
 $Pack = 'zebar\omarchy-catppuccin'   # o único pack do Zebar (barra, guia\, arranque\)
@@ -343,7 +344,10 @@ function AplicarApps {
 # Devolve $true se a statusLine do Claude Code ficou configurada.
 function ConfigurarStatusLine {
   $claudeDir = Join-Path $Casa '.claude'
-  if (-not ((Test-Path $claudeDir) -or (Test-Path (Join-Path $Casa '.local\bin\claude.exe')))) {
+  # Instalador oficial (~\.local\bin\claude.exe) ou npm (claude.cmd); ou já usado (~\.claude).
+  $temClaude = (Test-Path $claudeDir) -or (Test-Path (Join-Path $Casa '.local\bin\claude.exe')) -or
+    (Test-Path (Join-Path $AppData 'npm\claude.cmd'))
+  if (-not $temClaude) {
     Info 'Claude Code não instalado: a barra mostra o uso quando o instalar e voltar a correr o instalador.'
     return $false
   }

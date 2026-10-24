@@ -4,7 +4,9 @@ Testes de caracterização (fase 1 da experiência 0001): fixam o comportamento 
 refatoração. Se um falhar depois de refatorar, o comportamento mudou — confirmar se foi de propósito.
 """
 
+import sys
 import unittest
+from unittest import mock
 
 from sistema_falso import carregar_bar_helper, config_minimo
 
@@ -40,7 +42,9 @@ class ResolverApps(unittest.TestCase):
 
     def test_palavras_especiais(self):
         self.assertEqual(bh._resolve_app("Terminal", {}), bh.SPECIAL_APPS["terminal"])
-        self.assertEqual(bh._resolve_app("claude-code", {}), bh.SPECIAL_APPS["claude-code"])
+        # Sem Claude Code neste PC (o caso do npm está em test_atalhos_casos.py).
+        with mock.patch.object(sys.modules["morg_atalhos"], "_claude_code", return_value=None):
+            self.assertEqual(bh._resolve_app("claude-code", {}), bh.SPECIAL_APPS["claude-code"])
         self.assertEqual(bh._resolve_app("Explorador", {}), "shell-exec explorer")
 
     def test_web_so_com_http(self):
