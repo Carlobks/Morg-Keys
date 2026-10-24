@@ -62,12 +62,13 @@ class ArranqueFalso(SistemaFalso):
         }
         u32 = {
             "FindWindowW": self._encontrar_janela,
-            "SetWindowPos": lambda *a: 1,
+            "SetWindowPos": lambda h, *a: (self.eventos.append("splash ao topo") if h == 14 else None) or 1,
             "PostMessageW": lambda hwnd, msg, wp, lp: self.mensagens.append((hwnd, msg)) or 1,
             "MessageBeep": self.bipes.append,
         }
         self.trocar("kernel32", Bomba("kernel32", k32))
         self.trocar("user32", Bomba("user32", u32))
+        self.trocar("dwmapi", Bomba("dwmapi", {"DwmFlush": lambda: self.eventos.append("DwmFlush") or 0}))
         self.trocar("_BlackCover", CortinaFalsa)
         self.trocar("ZEBAR", self.zebar)
         self.trocar("ARRANQUE_FILE", self.arranque_txt)
@@ -129,8 +130,10 @@ class Arranque(unittest.TestCase):
             self.assertEqual(s.chamadas_k32, ["SetPriorityClass", "CreateMutexW", "ReleaseMutex"])
             self.assertEqual(len(s.medicoes), 1)
             self.assertEqual(s.mensagens, [])  # o splash fechou-se sozinho
-            # A cortina sai quando a animação avisa (logo a seguir ao splash), antes da barra.
-            self.assertEqual(s.eventos[:3], ["lançou start-widget-preset --pack", "cortina fechada", "lançou startup"])
+            # A cortina sai quando a animação avisa (logo a seguir ao splash), antes da barra: antes disso a
+            # animação vai para cima da cortina e o DWM compõe 2 vezes com ela à vista (sem piscar).
+            self.assertEqual(s.eventos[:7], ["lançou start-widget-preset --pack", "splash ao topo", "splash ao topo",
+                                             "DwmFlush", "DwmFlush", "cortina fechada", "lançou startup"])
             registo = s.registo_do_arranque()
             for frase in ["cortina preta:", "animação visível:", "GlazeWM e barra:", "não existe: C:\\nao\\existe.bat",
                           "Servidor a responder na porta 3000:", "janelas arrumadas:", "tudo assente, ecrã a sair:",

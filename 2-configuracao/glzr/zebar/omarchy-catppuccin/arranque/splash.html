@@ -236,6 +236,25 @@
         ['-I', '{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py', 'splash-ready'])
         .catch(console.error);
 
+      // Avisar por relógio (um setTimeout) fazia a cortina sair antes de o WebView2 pôr um quadro no ecrã
+      // (a frio demora): via-se o ambiente de trabalho num piscar. Espera-se o fim da transição de
+      // opacidade (ou 300 ms) e depois 2 quadros reais (requestAnimationFrame só corre quando a página
+      // está mesmo a ser desenhada) e 50 ms de margem para o DWM. Se a página nunca chegar a ser desenhada,
+      // avisa ao fim de 4 s para o arranque não ficar parado na cortina.
+      function quandoPintado(avisar) {
+        let feito = false;
+        const uma = () => { if (!feito) { feito = true; avisar(); } };
+        let seguiu = false;
+        const seguir = () => {
+          if (seguiu) return;
+          seguiu = true;
+          requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(uma, 50)));
+        };
+        document.body.addEventListener('transitionend', e => { if (e.propertyName === 'opacity') seguir(); });
+        setTimeout(seguir, 300);
+        setTimeout(uma, 4000);
+      }
+
       async function main() {
         if (location.protocol !== 'file:') {
           zebar = await import('../vendor/zebar-3.3.1.mjs');
@@ -253,7 +272,7 @@
         document.body.classList.add(`a-${name}`);
         anim.first();                            // = imagem da cortina, mesmo sítio
         document.body.classList.add('shown');    // preto + desenho por cima da cortina
-        setTimeout(signalReady, 200);            // já desenhado: a cortina pode sair
+        quandoPintado(signalReady);              // só depois de o WebView2 pintar mesmo: a cortina pode sair
         setTimeout(() => { loop = anim.start(); }, 250);
 
         const t0 = performance.now();

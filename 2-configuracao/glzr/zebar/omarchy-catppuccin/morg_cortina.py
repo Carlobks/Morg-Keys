@@ -9,6 +9,14 @@ from morg_win32 import HWND, kernel32, user32
 COVER_TITLE = "Morg Keys arranque"
 
 
+def _rect_cortina(sw, sh, dpi, img_w, img_h):
+    """Onde e com que tamanho (px físicos) a cortina desenha o 1.º quadro: o mesmo sítio e tamanho do
+    splash.html (centro horizontal, centro a ANIM_CY da altura; img_w×img_h em px CSS, escalados pelo DPI).
+    Devolve (x, y, largura, altura). A 125 % num ecrã 1920×1080: (785, 235, 350, 350), como o SVG (A21)."""
+    w, h = round(img_w * dpi / 96), round(img_h * dpi / 96)
+    return (sw - w) // 2, round(sh * ANIM_CY) - h // 2, w, h
+
+
 
 class _BlackCover:
     """Cortina preta nativa (Win32, sem navegador) por cima de tudo, desde o
@@ -38,8 +46,24 @@ class _BlackCover:
         gdi32.CreateCompatibleDC.argtypes = [wintypes.HDC]
         gdi32.SelectObject.restype = wintypes.HGDIOBJ
         gdi32.SelectObject.argtypes = [wintypes.HDC, wintypes.HGDIOBJ]
-        gdi32.BitBlt.argtypes = [wintypes.HDC, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int,
-                                 wintypes.HDC, ctypes.c_int, ctypes.c_int, wintypes.DWORD]
+        gdi32.StretchBlt.argtypes = [wintypes.HDC, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int,
+                                     wintypes.HDC, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int,
+                                     wintypes.DWORD]
+        gdi32.SetStretchBltMode.argtypes = [wintypes.HDC, ctypes.c_int]
+        gdi32.SetBrushOrgEx.argtypes = [wintypes.HDC, ctypes.c_int, ctypes.c_int, ctypes.c_void_p]
+        gdi32.GetObjectW.argtypes = [wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p]
+        user32.GetDpiForWindow.argtypes = [HWND]
+
+        class BITMAP(ctypes.Structure):
+            _fields_ = [("bmType", wintypes.LONG), ("bmWidth", wintypes.LONG), ("bmHeight", wintypes.LONG),
+                        ("bmWidthBytes", wintypes.LONG), ("bmPlanes", wintypes.WORD),
+                        ("bmBitsPixel", wintypes.WORD), ("bmBits", ctypes.c_void_p)]
+
+        # Esta thread em px físicos (perceção de DPI por monitor, v2): sem isto o Windows esticava a janela
+        # a 125 % e o café saía desfocado, e na passagem para o SVG nítido via-se um salto.
+        user32.SetThreadDpiAwarenessContext.restype = ctypes.c_void_p
+        user32.SetThreadDpiAwarenessContext.argtypes = [ctypes.c_void_p]
+        user32.SetThreadDpiAwarenessContext(ctypes.c_void_p(-4))  # DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2
         gdi32.DeleteDC.argtypes = [wintypes.HDC]
         user32.BeginPaint.restype = wintypes.HDC
         user32.BeginPaint.argtypes = [HWND, ctypes.c_void_p]
@@ -51,7 +75,10 @@ class _BlackCover:
         # splash.html o desenha (centro horizontal, centro a ANIM_CY da altura):
         # quando a animação assume o lugar, não há salto.
         logo = user32.LoadImageW(None, str(SPLASH_DIR / self.image), 0, 0, 0, 0x10)  # IMAGE_BITMAP, LR_LOADFROMFILE
-        img_w, img_h = self.img_w, self.img_h
+        img_w, img_h = self.img_w, self.img_h  # tamanho no ecrã em px CSS (o BMP é maior: 2×, reduz-se)
+        fonte = BITMAP()
+        if logo:
+            gdi32.GetObjectW(logo, ctypes.sizeof(BITMAP), ctypes.byref(fonte))
 
         def proc(hwnd, msg, wp, lp):
             if msg == 0x000F and logo:  # WM_PAINT
@@ -59,9 +86,11 @@ class _BlackCover:
                 hdc = user32.BeginPaint(hwnd, ctypes.byref(ps))
                 mem = gdi32.CreateCompatibleDC(hdc)
                 old = gdi32.SelectObject(mem, logo)
-                sw, sh = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
-                gdi32.BitBlt(hdc, (sw - img_w) // 2, round(sh * ANIM_CY) - img_h // 2,
-                             img_w, img_h, mem, 0, 0, 0x00CC0020)  # SRCCOPY
+                x, y, w, h = _rect_cortina(user32.GetSystemMetrics(0), user32.GetSystemMetrics(1),
+                                           user32.GetDpiForWindow(hwnd) or 96, img_w, img_h)
+                gdi32.SetStretchBltMode(hdc, 4)  # HALFTONE: reduzir sem serrilhado
+                gdi32.SetBrushOrgEx(hdc, 0, 0, None)
+                gdi32.StretchBlt(hdc, x, y, w, h, mem, 0, 0, fonte.bmWidth, fonte.bmHeight, 0x00CC0020)  # SRCCOPY
                 gdi32.SelectObject(mem, old)
                 gdi32.DeleteDC(mem)
                 user32.EndPaint(hwnd, ctypes.byref(ps))

@@ -28,7 +28,7 @@ from morg_processos import (
     _popen_detached,
     _wait_for,
 )
-from morg_win32 import WAIT_OBJECT_0, kernel32, user32
+from morg_win32 import WAIT_OBJECT_0, dwmapi, kernel32, user32
 
 # --- Arranque do PC (orquestrador do ecrã de arranque) -----------------------
 # Corre pela tarefa agendada "GlazeWM (arranque)" ao iniciar sessão. Mostra o
@@ -182,7 +182,12 @@ def _boot_ecra_e_barra(a, ready):
         return
     _popen_detached([str(ZEBAR), "start-widget-preset", "--pack", "omarchy-catppuccin",
                      "--widget-name", "splash", "--preset", "default"])
-    if kernel32.WaitForSingleObject(ready, 20000) == WAIT_OBJECT_0:
+    if _esperar_splash(ready):
+        # A animação já pintou (a página só avisa depois de 2 quadros reais): por cima da cortina e
+        # 2 composições do DWM com ela à vista; só então a cortina sai — sem piscar o que está por baixo.
+        _splash_to_top()
+        for _ in range(2):
+            dwmapi.DwmFlush()
         a.cover.close()
         a.log(f"animação visível: {a.decorrido():.1f} s")
     else:
@@ -190,6 +195,17 @@ def _boot_ecra_e_barra(a, ready):
     # 2. Barra, guia e painel (startupConfigs) — "startup" funciona com o Zebar já a correr.
     a.progress.step("barra", "Barra")
     _popen_detached([str(ZEBAR), "startup"])
+
+
+def _esperar_splash(ready, fatias=200):
+    """Espera o aviso da animação (splash-ready), até 20 s em fatias de 100 ms. Em cada fatia põe a janela
+    da animação (se já existir) por cima da cortina: tapado pela cortina, o WebView2 não pinta, e o aviso,
+    que só vem depois de pintar, não chegaria."""
+    for _ in range(fatias):
+        _splash_to_top()
+        if kernel32.WaitForSingleObject(ready, 100) == WAIT_OBJECT_0:
+            return True
+    return False
 
 
 def _boot_glazewm(a):

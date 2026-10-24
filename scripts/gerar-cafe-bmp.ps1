@@ -2,9 +2,11 @@
 # cortina nativa do arranque mostra antes de o WebView2 estar pronto.
 # A geometria é a MESMA do <svg id="cafe"> do splash.html (viewBox 400x400,
 # mostrado a 280x280 px): se mudar uma, mude a outra e volte a correr isto.
+# Desenhado a 2x (560x560): a cortina sabe o DPI e reduz para o tamanho físico do ecrã (350 px a 125 %),
+# nítido como o SVG; desenhado a 280 e esticado pelo Windows ficava desfocado (o "salto" na passagem).
 param([string]$Destino = (Join-Path $env:USERPROFILE '.glzr\zebar\omarchy-catppuccin\arranque\cafe.bmp'))
 Add-Type -AssemblyName System.Drawing
-$tam = 280; $escala = $tam / 400.0
+$tam = 560; $escala = $tam / 400.0
 $bmp = New-Object Drawing.Bitmap $tam, $tam, ([Drawing.Imaging.PixelFormat]::Format24bppRgb)
 $g = [Drawing.Graphics]::FromImage($bmp)
 $g.SmoothingMode = [Drawing.Drawing2D.SmoothingMode]::AntiAlias

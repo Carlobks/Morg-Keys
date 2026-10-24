@@ -82,6 +82,22 @@ class MedicaoDoArranque(unittest.TestCase):
             self.assertIn("(arranque do pythonw nan s)", registo[2])
 
 
+class GeometriaDaCortina(unittest.TestCase):
+    """O café da cortina tem de cair em cima do 1.º quadro do SVG do splash.html (A21): CSS
+    left = 50% - 140px, top = 38% - 140px, 280×280 px CSS, × o DPR do ecrã."""
+
+    def test_igual_ao_svg_em_varias_escalas(self):
+        rect = sys.modules["morg_cortina"]._rect_cortina
+        for sw, sh, dpi in [(1920, 1080, 96), (1920, 1080, 120), (2560, 1440, 144), (1366, 768, 96)]:
+            with self.subTest(ecra=(sw, sh), dpi=dpi):
+                dpr = dpi / 96
+                x, y, w, h = rect(sw, sh, dpi, 280, 280)
+                self.assertEqual((w, h), (round(280 * dpr), round(280 * dpr)))
+                self.assertLessEqual(abs(x - (sw / 2 - 140 * dpr)), 1)
+                self.assertLessEqual(abs(y - (sh * 0.38 - 140 * dpr)), 1)
+        self.assertEqual(rect(1920, 1080, 120, 280, 280), (785, 235, 350, 350))
+
+
 class Portas(unittest.TestCase):
 
     def test_url_port_invalido(self):
