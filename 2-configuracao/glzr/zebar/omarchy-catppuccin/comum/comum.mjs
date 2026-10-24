@@ -21,6 +21,20 @@ export function appLabel(value) {
   return v.split(/[\\/]/).pop().replace(/\.exe$/i, '');
 }
 
+// No navegador (file: ou ?preview) as páginas são normais (pré-visualização); no Zebar ligam-se a ele.
+export const ePreVisualizacao = loc => loc.protocol === 'file:' || new URLSearchParams(loc.search).has('preview');
+
+// Origem da animação de abrir/fechar: o centro da chávena da barra (à esquerda do relógio, 72 px antes
+// do meio, 14 px abaixo do topo) relativo a esta janela. A posição da janela vem em px físicos; a
+// chávena e o CSS estão em px lógicos (escala 0 ou em falta = 1).
+export function origemDaChavena(larguraDoEcra, pos, escala) {
+  const s = escala || 1;
+  return { ox: `${Math.round(larguraDoEcra / 2) - 72 - pos.x / s}px`, oy: `${14 - pos.y / s}px` };
+}
+
+// Escrever em qualquer lado começa a procurar: uma tecla de texto, sem Ctrl/Alt, fora do filtro.
+export const comecaAProcurar = (e, noFiltro) => e.key.length === 1 && !noFiltro && !e.ctrlKey && !e.altKey;
+
 // Ícones centrados a sério: na fonte "JetBrainsMono NF" cada ícone é mais largo do que a
 // célula e fica desviado, por isso mede-se o desenho real. Desenha-se em SVG e não em canvas:
 // o canvas do WebView2 do Zebar saía às vezes com ícones estragados ou vazios; texto vetorial

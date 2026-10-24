@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import {
-  columnsHtml, keysHtml, parseApps, SECTIONS, sectionHtml,
+  bateNoFiltro, columnsHtml, consultaDoFiltro, keysHtml, parseApps, SECTIONS, sectionHtml,
 } from '../2-configuracao/glzr/zebar/omarchy-catppuccin/guia/guia-logica.mjs';
 
 test('keysHtml: "+" separa teclas, "|" separa alternativas, "Alt++" é a tecla +', () => {
@@ -40,4 +40,11 @@ test('columnsHtml: 4 colunas, cada secção na sua, apps do apps.txt no topo de 
 test('SECTIONS: colunas de 1 a 4 e só uma secção recebe as apps', () => {
   assert.ok(SECTIONS.every(s => [1, 2, 3, 4].includes(s.col)));
   assert.equal(SECTIONS.filter(s => s.apps).length, 1);
+});
+
+test('filtro: texto sem espaços nas pontas e em minúsculas; vazio mostra tudo', () => {
+  assert.equal(consultaDoFiltro('  Alt+K '), 'alt+k');
+  assert.equal(bateNoFiltro('', 'janelas fechar alt+w'), true);
+  assert.equal(bateNoFiltro('fechar', 'janelas fechar alt+w'), true);
+  assert.equal(bateNoFiltro('abrir', 'janelas fechar alt+w'), false);
 });

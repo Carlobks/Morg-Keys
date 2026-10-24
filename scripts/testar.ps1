@@ -25,12 +25,17 @@ try {
     & $Py -m coverage report --skip-empty --show-missing --fail-under=100
     if ($LASTEXITCODE -ne 0) { $Falhas.Add('Cobertura Python') }
 
-    # 2. JavaScript: node --test, se houver testes.
+    # 2. JavaScript: node --test, se houver testes, com cobertura de linhas e ramos dos .mjs do pack (fora
+    #    do vendor/): abaixo de 100 % falha. A cola com o DOM e o Zebar fica entre
+    #    /* node:coverage disable */ e /* node:coverage enable */, com o motivo (docs/validacao-manual.md).
+    #    Uma falha de teste e uma cobertura abaixo do limite dão as duas um código de saída diferente de 0.
     $TestesJs = @(Get-ChildItem -Path (Join-Path $Raiz 'tests') -Recurse -Filter '*.test.mjs' -ErrorAction SilentlyContinue)
     if ($TestesJs.Count -gt 0) {
-        Write-Titulo 'JavaScript (node --test)'
-        & node --test ($TestesJs | ForEach-Object { $_.FullName })
-        if ($LASTEXITCODE -ne 0) { $Falhas.Add('JavaScript') }
+        Write-Titulo 'JavaScript (node --test + cobertura)'
+        & node --test --experimental-test-coverage '--test-coverage-include=2-configuracao/**/*.mjs' `
+            '--test-coverage-exclude=**/vendor/**' --test-coverage-lines=100 --test-coverage-branches=100 `
+            ($TestesJs | ForEach-Object { $_.FullName })
+        if ($LASTEXITCODE -ne 0) { $Falhas.Add('JavaScript (testes ou cobertura)') }
     }
 
     # 3. PowerShell: Pester 6, se houver testes.

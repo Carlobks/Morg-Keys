@@ -78,3 +78,125 @@ export function keyboardHtml(state, sel) {
 export const b64 = s => btoa(String.fromCharCode(...new TextEncoder().encode(s)))
   .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 export const unb64 = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)));
+
+// --- Desenho da lista e dos workspaces (o apps.mjs só põe o HTML na página) ---
+// Lista da esquerda (Especiais, Sites, Menu Iniciar) filtrada pelo texto do filtro: {html, count}.
+// Todos os elementos escolhíveis têm data-kind (app | key | ws), data-value e data-label.
+export function listaHtml(state, startApps, extraSites, sel, filtro) {
+  const q = String(filtro).trim().toLowerCase();
+  const used = new Map();
+  for (const k of state.keys) used.set(k.value.toLowerCase(), k.key);
+  const hits = it => !q || it.label.toLowerCase().includes(q) || it.value.toLowerCase().includes(q);
+  const sites = [...new Set([...state.keys.map(k => k.value), ...state.workspaces.map(w => w.value || ''), ...extraSites]
+    .filter(v => /^web:/i.test(v)))].map(v => ({ value: v, label: appLabel(v) }));
+  const groups = [
+    ['Especiais', ['terminal', 'claude-code', 'explorador'].map(v => ({ value: v, label: appLabel(v) }))],
+    ['Sites', sites],
+    ['Menu Iniciar', startApps.map(a => ({ value: a.value, label: a.name }))],
+  ];
+  const html = groups.map(([title, items]) => {
+    const shown = items.filter(hits);
+    if (!shown.length) return '';
+    return `<div class="group">${esc(title)}</div>${shown.map(it => {
+      const k = used.get(it.value.toLowerCase());
+      const isSel = sel?.kind === 'app' && sel.value === it.value;
+      return `<div class="app${isSel ? ' sel' : ''}" data-kind="app" data-value="${esc(it.value)}" data-label="${esc(it.label)}">` +
+        `${ico(it.value)}<span class="lb">${esc(it.label)}</span>` +
+        `${k ? `<span class="used">${esc(keyLong(k))}</span>` : ''}</div>`;
+    }).join('')}`;
+  }).join('');
+  return {
+    html: html || `<div class="empty">${startApps.length ? 'Nenhuma app com esse nome.' : 'A carregar as apps do menu Iniciar…'}</div>`,
+    count: startApps.length ? `${startApps.length} no menu Iniciar` : '',
+  };
+}
+
+// As caixas dos workspaces: 1–10 sempre; outros (ex.: o scratchpad S, gravado com Alt+Esc G) só se tiverem apps.
+export function workspacesHtml(state, sel) {
+  const names = [...Array.from({ length: 10 }, (_, i) => String(i + 1)),
+                 ...[...new Set(state.workspaces.map(w => w.workspace))].filter(w => !/^([1-9]|10)$/.test(w))];
+  return names.map(ws => {
+    const items = state.workspaces.filter(w => w.workspace === ws);
+    return `<div class="box${items.length ? ' has' : ''}" data-ws="${esc(ws)}">` +
+      `<div class="head"><kbd>${esc(ws)}</kbd><span>${items.length ? `${items.length} ${items.length === 1 ? 'app' : 'apps'}` : ''}</span></div>` +
+      (items.length ? items.map(w => {
+        const value = w.value || w.process || w.label;
+        const isSel = sel?.kind === 'ws' && sel.index === w.index;
+        return `<div class="chip${isSel ? ' sel' : ''}" data-kind="ws" data-index="${w.index}" data-ws="${esc(ws)}" data-value="${esc(w.value || '')}" data-label="${esc(w.label)}" title="${esc(w.label)}">` +
+          `${ico(value)}<span>${esc(w.label)}</span><button class="x" data-wsdel="${w.index}" title="Não abrir no arranque">✕</button></div>`;
+      }).join('') : '<div class="hint">vazio</div>') +
+      '</div>';
+  }).join('');
+}
+
+// --- Respostas do bar_helper.py e mensagens ---
+export const textoDoErro = err => err?.message ?? err;
+// Resposta de um pedido -> [texto, tipo] para a linha de estado.
+export const estadoDaResposta = (res, okText) =>
+  (res.ok ? [okText ?? '✓ Guardado', 'ok'] : [res.error || 'Erro desconhecido.', 'err']);
+
+// --- Escolher e enviar: o que fazer, sem mexer na página ---
+// Cada função devolve null (nada escolhido) ou {limpar, erro?, op?, ok?}: limpar = largar a escolha;
+// erro = mensagem; op = pedido ao bar_helper.py (com o texto `ok` a mostrar quando correr bem).
+export const escolhaDosDados = d => ({ kind: d.kind, value: d.value, label: d.label, key: d.key, ws: d.ws,
+                                       index: d.index !== undefined ? Number(d.index) : undefined });
+export const mesmaEscolha = (a, b) => !!a && a.kind === b.kind && a.value === b.value && a.key === b.key && a.index === b.index;
+const expect = s => ({ expect_ws: s.ws, expect_label: s.label });
+
+export function enviarParaTecla(s, key, state) {
+  if (!s) return null;
+  if (state.fixed.includes(key)) return { limpar: false, erro: `${keyLong(key)} é usado pelo sistema: escolha outra tecla.` };
+  if (s.kind === 'key' && s.key === key) return { limpar: true };
+  if (!s.value) return { limpar: true, erro: 'Esta app não tem um nome do menu Iniciar: escolha-a na lista.' };
+  const o = { op: 'key', key, value: s.value };
+  if (s.kind === 'key') o.from = s.key;  // vinha de outra tecla: muda-se de lá
+  return { limpar: true, op: o, ok: `✓ ${appLabel(s.value)} em ${keyLong(key)}` };
+}
+
+export function enviarParaWorkspace(s, ws) {
+  if (!s) return null;
+  if (s.kind === 'ws') {
+    if (s.ws === ws) return { limpar: true };
+    return { limpar: true, op: { op: 'ws-move', index: s.index, ws, ...expect(s) }, ok: `✓ Agora abre no workspace ${ws}` };
+  }
+  if (!s.value) return { limpar: true };
+  const label = s.label || appLabel(s.value);
+  return { limpar: true, op: { op: 'ws-add', ws, value: s.value, label }, ok: `✓ ${label} abre no workspace ${ws}` };
+}
+
+export function tirarEscolha(s, state) {
+  if (!s) return null;
+  if (s.kind === 'key') return { limpar: true, op: { op: 'unkey', key: s.key }, ok: '✓ Atalho tirado' };
+  if (s.kind === 'ws') return { limpar: true, op: { op: 'ws-del', index: s.index, ...expect(s) }, ok: '✓ Já não abre no arranque' };
+  const k = state.keys.find(k => k.value.toLowerCase() === s.value.toLowerCase());
+  if (k) return { limpar: true, op: { op: 'unkey', key: k.key }, ok: `✓ ${s.label} já não tem atalho` };
+  return { limpar: true, erro: `${s.label} não tem atalho para tirar.` };
+}
+
+// Botões ✕: tirar a tecla, ou tirar a app de um workspace (com os dados do chip, para o painel desatualizado).
+export const tirarTecla = key => ({ limpar: true, op: { op: 'unkey', key }, ok: '✓ Atalho tirado' });
+export const tirarDoWorkspace = (index, chip) =>
+  ({ limpar: true, op: { op: 'ws-del', index, ...expect(chip) }, ok: '✓ Já não abre no arranque' });
+
+// A escolher o destino: a tecla diz para onde enviar. Devolve [ação, alvo] ou null (tecla sem efeito).
+export function destinoDaTecla(key, shiftKey) {
+  if (key === 'Escape') return ['cancelar'];
+  if (key === 'Delete' || key === 'Backspace') return ['tirar'];
+  if (key === 'Enter') return ['tecla', shiftKey ? 'alt+shift+enter' : 'alt+enter'];
+  if (/^[0-9]$/.test(key)) return ['workspace', key === '0' ? '10' : key];
+  if (/^[a-z]$/i.test(key)) return ['tecla', keyId(key)];
+  return null;
+}
+
+// Setas na lista: a linha seguinte ou a anterior, sem sair da lista.
+export const moverCursor = (cursor, total, key) =>
+  Math.max(0, Math.min(total - 1, cursor + (key === 'ArrowDown' ? 1 : -1)));
+
+// "+ site": o endereço escrito -> valor "web: …" (sem esquema, assume https). null = vazio.
+export function siteDoEndereco(texto) {
+  let url = String(texto).trim();
+  if (!url) return null;
+  if (!/^https?:\/\//i.test(url)) url = `https://${url}`;
+  try { new URL(url); } catch { return { erro: 'Endereço inválido.' }; }
+  return { value: `web: ${url}` };
+}

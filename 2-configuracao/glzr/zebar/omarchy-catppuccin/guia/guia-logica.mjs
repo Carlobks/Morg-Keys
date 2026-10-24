@@ -155,6 +155,10 @@ export const columnsHtml = (sections, appRows) => [1, 2, 3, 4]
     .join('')}</div>`)
   .join('');
 
+// Filtro: o texto escrito (sem espaços nas pontas, minúsculas) e se uma linha (data-q) bate com ele.
+export const consultaDoFiltro = valor => valor.trim().toLowerCase();
+export const bateNoFiltro = (q, textoDaLinha) => !q || textoDaLinha.includes(q);
+
 // Texto do apps.txt ("Alt+Shift+B = Google Chrome") -> linhas do guia [nome, teclas].
 export const parseApps = text => text.split(/\r?\n/)
   .map(l => l.trim())

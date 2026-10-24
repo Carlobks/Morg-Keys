@@ -1,8 +1,12 @@
-// Guia de atalhos (Alt+K): desenho, filtro e a ligação ao Zebar.
-// A tabela dos atalhos e o HTML estão em guia-logica.mjs (testados com node --test).
-import { drawIcons } from '../comum/comum.mjs';
-import { columnsHtml, parseApps, SECTIONS } from './guia-logica.mjs';
+// Guia de atalhos (Alt+K): a ligação à página (DOM) e ao Zebar.
+// A tabela dos atalhos, o HTML e o filtro estão em guia-logica.mjs (testados com node --test); este ficheiro
+// só liga os eventos da página e por isso fica fora da cobertura (verifica-se à mão com ?preview,
+// docs/validacao-manual.md, "Excluído da cobertura").
+import { comecaAProcurar, drawIcons, ePreVisualizacao, origemDaChavena } from '../comum/comum.mjs';
+import { bateNoFiltro, columnsHtml, consultaDoFiltro, parseApps, SECTIONS } from './guia-logica.mjs';
 
+// Cola com o DOM e o Zebar (WebView2), sem página no node --test: fora da cobertura até ao fim.
+/* node:coverage disable */
 const main = document.getElementById('sections');
 let appRows = [];
 
@@ -27,11 +31,11 @@ function render() {
 // Filtro: esconde linhas (e secções vazias) que não batem com o texto.
 const filter = document.getElementById('filter');
 filter.addEventListener('input', () => {
-  const q = filter.value.trim().toLowerCase();
+  const q = consultaDoFiltro(filter.value);
   for (const section of main.querySelectorAll('section')) {
     let visible = 0;
     for (const row of section.querySelectorAll('.row')) {
-      const hit = !q || row.dataset.q.includes(q);
+      const hit = bateNoFiltro(q, row.dataset.q);
       row.classList.toggle('hidden', !hit);
       visible += hit;
     }
@@ -44,12 +48,9 @@ loadApps();
 // Zebar, fica carregado e escondido; o Alt+K (bar_helper.py) mostra-o e
 // a página anima: sai da chávena da barra e volta para ela ao fechar.
 let close = () => window.close();
-if (location.protocol === 'file:' || new URLSearchParams(location.search).has('preview')) {
+if (ePreVisualizacao(location)) {
   document.body.classList.add('standalone');
 } else {
-  // Centro da chávena da barra, em px lógicos do ecrã (a 100% = px reais):
-  // fica à esquerda do relógio, no centro da barra (72 px antes do meio).
-  const CUP = { x: Math.round(screen.width / 2) - 72, y: 14 };
   const OPEN_MS = 480;
   const CLOSE_MS = 260;
   let win = null;
@@ -71,12 +72,10 @@ if (location.protocol === 'file:' || new URLSearchParams(location.search).has('p
     hideWindow = () => zebar.shellExec(PYW, ['-I', HELPER, 'guide-hide']).catch(console.error);
 
     // A animação cresce a partir da chávena: a origem da transformação
-    // é a posição da chávena relativa a esta janela. outerPosition vem
-    // em px físicos; a chávena e o CSS estão em px lógicos.
-    const pos = await win.outerPosition();
-    const scale = (await win.scaleFactor()) || 1;
-    document.documentElement.style.setProperty('--ox', `${CUP.x - pos.x / scale}px`);
-    document.documentElement.style.setProperty('--oy', `${CUP.y - pos.y / scale}px`);
+    // é a posição da chávena relativa a esta janela (origemDaChavena, em comum.mjs).
+    const { ox, oy } = origemDaChavena(screen.width, await win.outerPosition(), await win.scaleFactor());
+    document.documentElement.style.setProperty('--ox', ox);
+    document.documentElement.style.setProperty('--oy', oy);
 
     // Só no arranque o Tauri esconde a janela: fica pré-carregada.
     await win.hide();
@@ -138,8 +137,9 @@ document.addEventListener('keydown', e => {
     } else {
       close();
     }
-  } else if (e.key.length === 1 && document.activeElement !== filter && !e.ctrlKey && !e.altKey) {
+  } else if (comecaAProcurar(e, document.activeElement === filter)) {
     filter.focus(); // escrever em qualquer lado começa a procurar
   }
 });
 filter.focus();
+/* node:coverage enable */
