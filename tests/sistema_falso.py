@@ -91,6 +91,9 @@ class RelogioFalso:
     def strftime(self, formato, *resto):
         return time_real.strftime(formato, *resto)
 
+    def localtime(self, *segundos):
+        return time_real.localtime(*segundos)
+
 
 class GlazeFalso:
     """Faz de CLI do GlazeWM (`_glaze`): responde a query workspaces e executa `move`."""
