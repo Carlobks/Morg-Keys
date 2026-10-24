@@ -87,6 +87,10 @@ MUTANTES = [
     ('const passo = Math.round(pct / 10);', 'const passo = Math.floor(pct / 10);'),
     ("pct < BAIXA ? 'high'", "pct < AVISO ? 'high'"),
     ("const carregar = !!b.isCharging || b.state === 'charging';", 'const carregar = !!b.isCharging;'),
+    # quota do Claude: esconder pelo arranque.txt e o indicador só com o ✻ sem valores
+    ('return value.strip().lower() not in ESCONDER', 'return True'),
+    ("if (u.mostrar === false) return", 'if (false) return'),
+    ('if (!five && !week) {', 'if (!five) {'),
 ]
 FICHEIROS = [*PACK.glob("*.py"), *PACK.glob("comum/*.mjs"), *PACK.glob("painel/*.mjs"), *PACK.glob("guia/*.mjs")]
 TESTES_PY = ["py", "-I", "-m", "unittest", "discover", "-s", "tests"]

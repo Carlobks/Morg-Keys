@@ -21,15 +21,19 @@ _especificacao.loader.exec_module(uso)
 AGORA = 1_800_000_000
 
 
-def correr(conteudo):
-    """Corre o main() com este rate_limits.json (texto, ou None = ficheiro em falta); devolve o JSON."""
+def correr(conteudo, arranque=None):
+    """Corre o main() com este rate_limits.json (texto, ou None = ficheiro em falta) e este arranque.txt
+    (None = em falta); devolve o JSON."""
     with tempfile.TemporaryDirectory() as pasta:
         ficheiro = Path(pasta) / "rate_limits.json"
         if conteudo is not None:
             ficheiro.write_text(conteudo, encoding="utf-8")
+        arranque_txt = Path(pasta) / "arranque.txt"
+        if arranque is not None:
+            arranque_txt.write_text(arranque, encoding="utf-8")
         saida = io.StringIO()
-        with mock.patch.object(uso, "RATE_FILE", ficheiro), mock.patch.object(uso.time, "time", return_value=AGORA), \
-                contextlib.redirect_stdout(saida):
+        with mock.patch.object(uso, "RATE_FILE", ficheiro), mock.patch.object(uso, "ARRANQUE_FILE", arranque_txt), \
+                mock.patch.object(uso.time, "time", return_value=AGORA), contextlib.redirect_stdout(saida):
             uso.main()
     return json.loads(saida.getvalue())
 
@@ -54,7 +58,7 @@ class LimitesParaABarra(unittest.TestCase):
             "five_hour": {"used_percentage": 23.456, "resets_at": AGORA + 3600},
             "seven_day": {"used_percentage": 24, "resets_at": (AGORA + 86400) * 1000}}}
         self.assertEqual(correr(json.dumps(dados)), {
-            "now": AGORA, "captured_at": AGORA - 60,
+            "now": AGORA, "mostrar": True, "captured_at": AGORA - 60,
             "five_hour": {"pct": 23.5, "resets_at": AGORA + 3600},
             "seven_day": {"pct": 24.0, "resets_at": AGORA + 86400}})
 
@@ -63,11 +67,27 @@ class LimitesParaABarra(unittest.TestCase):
         self.assertIsNone(correr(json.dumps(dados))["five_hour"])
 
     def test_ficheiro_em_falta_estragado_ou_estranho(self):
-        vazio = {"now": AGORA, "captured_at": None, "five_hour": None, "seven_day": None}
+        vazio = {"now": AGORA, "mostrar": True, "captured_at": None, "five_hour": None, "seven_day": None}
         for conteudo in [None, "{nao e json", "[1, 2]", '{"rate_limits": "x"}',
                          '{"rate_limits": {"five_hour": "x", "seven_day": {"used_percentage": "50"}}}']:
             with self.subTest(conteudo=conteudo):
                 self.assertEqual(correr(conteudo), vazio)
+
+
+class MostrarOuEsconder(unittest.TestCase):
+
+    def test_claude_esconder_no_arranque_txt(self):
+        for texto, mostrar in [
+            (None, True),                                            # sem arranque.txt
+            ("animacao = cafe\n", True),                             # sem a linha
+            ("claude = mostrar\n", True),
+            ("﻿Claude = Esconder\n", False),                    # BOM e maiúsculas
+            ("# claude = esconder\nclaude = ocultar\n", False),      # comentário não conta
+            ("claude = não\n", False), ("claude=off\n", False),
+            ("claude = esconder\nclaude = mostrar\n", False),        # vale a primeira
+        ]:
+            with self.subTest(texto=texto):
+                self.assertIs(correr(None, texto)["mostrar"], mostrar)
 
 
 if __name__ == "__main__":

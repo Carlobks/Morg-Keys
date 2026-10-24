@@ -47,6 +47,7 @@
       // Gerado com esbuild a partir do pacote npm zebar@3.3.1 (= versão instalada).
       import * as zebar from './vendor/zebar-3.3.1.mjs';
       import { bateria } from './comum/bateria.mjs';
+      import { claudeVista } from './comum/claude.mjs';
 
       // Scripts Python locais (permitidos no zpack.json). py.exe = lançador
       // oficial do Python: o caminho não muda quando o Python é atualizado.
@@ -318,47 +319,15 @@
       });
 
       // --- Claude: % do plano (5h e semanal) e tempo até a janela de 5h repor ---
+      // O que mostrar (e a dica) decide-se em comum/claude.mjs; aqui só se põe na página.
       const USAGE_URL = 'https://claude.ai/settings/usage';
-      const STALE_AFTER_S = 15 * 60; // a partir daqui os valores ficam esbatidos
-
-      function fmtUntil(epoch, now) {
-        const mins = Math.max(0, Math.round((epoch - now) / 60));
-        const h = Math.floor(mins / 60);
-        if (h >= 24) return `${Math.floor(h / 24)}d${h % 24}h`;
-        return h ? `${h}h${String(mins % 60).padStart(2, '0')}` : `${mins}m`;
-      }
-
-      const level = pct => (pct >= 80 ? 'high' : pct >= 50 ? 'warn' : 'ok');
 
       function renderClaude(u) {
-        const five = u.five_hour;
-        const week = u.seven_day;
-        const parts = [];
-        const tips = [];
-
-        parts.push(five
-          ? `<span class="${level(five.pct)}">5h ${Math.round(five.pct)}%</span>`
-          : '<span class="muted">5h —</span>');
-        parts.push(week
-          ? `<span class="${level(week.pct)}">sem ${Math.round(week.pct)}%</span>`
-          : '<span class="muted">sem —</span>');
-        if (five) parts.push(`<span class="muted">↺ ${fmtUntil(five.resets_at, u.now)}</span>`);
-
-        if (five) tips.push(`Sessão (5h): ${five.pct}% — repõe em ${fmtUntil(five.resets_at, u.now)}`);
-        if (week) tips.push(`Semanal: ${week.pct}% — repõe em ${fmtUntil(week.resets_at, u.now)}`);
-
-        const age = u.captured_at ? u.now - u.captured_at : null;
-        const stale = age === null || age > STALE_AFTER_S;
-        if (age === null) {
-          tips.push('Ainda sem valores: aparecem depois de usar o Claude Code no terminal.');
-        } else {
-          tips.push(`Valores de há ${fmtUntil(u.now + age, u.now)} (última sessão no terminal).`);
-        }
-        tips.push('Clique: abre a página de uso com os números exatos.');
-
-        setHTML($('claude-text'), parts.join(' <span class="sep">·</span> '));
-        $('claude-text').classList.toggle('stale', stale);
-        $('claude').title = tips.join('\n');
+        const v = claudeVista(u);
+        $('claude').style.display = v.mostrar ? '' : 'none';
+        setHTML($('claude-text'), v.html);
+        $('claude-text').classList.toggle('stale', v.stale);
+        $('claude').title = v.dica;
       }
 
       async function refreshClaude() {

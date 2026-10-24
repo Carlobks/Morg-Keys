@@ -48,7 +48,7 @@ class ScriptsComoPrograma(unittest.TestCase):
             codigo, saida = correr_como_programa("claude_usage.py", ["claude_usage.py"],
                                                  {"USERPROFILE": casa, "HOME": casa})
         self.assertIsNone(codigo)
-        self.assertEqual(set(json.loads(saida)), {"now", "captured_at", "five_hour", "seven_day"})
+        self.assertEqual(set(json.loads(saida)), {"now", "mostrar", "captured_at", "five_hour", "seven_day"})
 
     def test_bat_tray_sem_bat(self):
         self.assertEqual(correr_como_programa("bat_tray.py", ["bat_tray.py"])[0], 2)

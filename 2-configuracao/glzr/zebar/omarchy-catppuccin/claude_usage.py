@@ -5,6 +5,11 @@ sempre que uma sessão do Claude Code no terminal recebe `rate_limits` (as
 percentagens oficiais de 5 h e semanal). A aplicação de ambiente de trabalho
 não corre a statusLine, por isso os valores podem estar desatualizados: o
 campo `captured_at` diz de quando são, e a barra mostra essa idade.
+Não se lê o token da conta nem se usa o endpoint não documentado do uso
+(regras da Anthropic: docs/pesquisa/quota-claude.md).
+
+`claude = esconder` no arranque.txt (Documentos\\Guia de Atalhos) dá "mostrar": false
+e a barra tira o indicador (vale na leitura seguinte, até 30 s).
 """
 
 import json
@@ -13,6 +18,21 @@ import time
 from pathlib import Path
 
 RATE_FILE = Path.home() / ".claude" / "rate_limits.json"
+ARRANQUE_FILE = Path(__file__).resolve().parent / "guia" / "arranque.txt"
+ESCONDER = {"esconder", "ocultar", "nao", "não", "off"}
+
+
+def _mostrar():
+    """False se o arranque.txt tiver `claude = esconder` (ou ocultar/não/off)."""
+    try:
+        lines = ARRANQUE_FILE.read_text(encoding="utf-8-sig").splitlines()
+    except OSError:
+        return True
+    for raw in lines:
+        key, sep, value = raw.strip().partition("=")
+        if sep and not key.startswith("#") and key.strip().lower() == "claude":
+            return value.strip().lower() not in ESCONDER
+    return True
 
 
 def _epoch(value):
@@ -24,7 +44,7 @@ def _epoch(value):
 
 def main():
     now = int(time.time())
-    result = {"now": now, "captured_at": None, "five_hour": None, "seven_day": None}
+    result = {"now": now, "mostrar": _mostrar(), "captured_at": None, "five_hour": None, "seven_day": None}
     try:
         data = json.loads(RATE_FILE.read_text(encoding="utf-8"))
     except (OSError, ValueError):
