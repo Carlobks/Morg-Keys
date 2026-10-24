@@ -23,4 +23,9 @@ Depois da experiência:
 5. **Bug antigo (encontrado na fase 2a):** `bar_helper.py` sem argumentos (ou com um comando desconhecido)
    imprime a ajuda e rebenta num terminal cp1252 por causa do carácter "✕" (`UnicodeEncodeError`). Corrigir
    com teste de regressão (ex.: escrever em UTF-8 ou trocar o carácter).
-6. **Confirmação do utilizador** do painel `Alt+Esc, C` depois das correções A25 (foco) e A26 (ícones).
+6. **Desinstalar incompleto** (encontrado em 2026-10-24): o `desinstalar.ps1` não tira as pastas do próprio
+   Zebar (`%APPDATA%\zebar` e `%LOCALAPPDATA%\com.glzr.zebar`, com a cache do WebView2). Movê-las para
+   `.removido-<data>`, como faz com a `~\.glzr`, e testar com Pester.
+7. **Aviso "sem a app: claude-code"** em todas as instalações deste PC, com o Claude Code instalado. Ver
+   porque o `apps-apply` não o encontra.
+8. **Confirmação do utilizador** do painel `Alt+Esc, C` depois das correções A25 (foco) e A26 (ícones).
