@@ -37,7 +37,7 @@
                title="Clique: definições rápidas · Roda: volume · Botão direito: silenciar"></div>
           <div class="stat clickable" id="network" style="--c: var(--green)" title="Escolher rede Wi-Fi"></div>
           <!-- Só aparece em PCs com bateria (comum/bateria.mjs). -->
-          <div class="stat" id="battery" style="--c: var(--green); display: none"></div>
+          <div class="stat" id="battery" style="display: none"></div>
         </div>
       </div>
     </div>
@@ -233,7 +233,9 @@
         const bat = bateria(out.battery);
         $('battery').style.display = bat ? '' : 'none';
         if (bat) {
-          setHTML($('battery'), `${ico(bat.icone)}<span class="${bat.nivel}">${bat.texto}</span>`);
+          // A cor vai no HTML (e não só no CSS): o ícone é pintado num canvas e só se repinta se o HTML mudar.
+          setHTML($('battery'), `<span class="ico" data-icon="${bat.icone}" style="--c: ${bat.cor}"></span>` +
+            `<span style="color: ${bat.cor}">${bat.texto}</span>`);
           $('battery').title = bat.dica;
         }
       }

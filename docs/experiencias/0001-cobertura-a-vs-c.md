@@ -176,6 +176,11 @@ Bloco "O quê" da **fase 3 (A)**:
 - **6:** decisão provisória quanto ao Sandbox.
 - **7 (adiada):** testes no Windows Sandbox por cima do ramo vencedor. Já está decidido que é o subagente que abre o Sandbox, com um `.wsb` automático. Falta decidir o limite de tempo; a recomendação é cerca de 2 h.
 
+**Decisão do utilizador (2026-10-24, mais tarde): o Windows Sandbox fica cancelado** ("não vejo a necessidade").
+- A fase 7 não se faz.
+- A versão C é só A mais contratos.
+- Na fase 5, os bugs que só o Windows real apanharia ficam registados como "não apanhados por nenhuma das suítes", sem esperar pela fase 7.
+
 Bloco "O quê" da **fase 4 (C-contratos)**, no ramo `exp/c`, criado a partir do `exp/a`:
 - **Objetivo:** testes de contrato estáticos, que verificam que as partes do projeto concordam umas com as outras sem correr o Windows real:
   - os comandos que as páginas e o `config.yaml` mandam ao Zebar e ao `bar_helper.py` batem com o `argsRegex` e com a lista de comandos do ajudante;

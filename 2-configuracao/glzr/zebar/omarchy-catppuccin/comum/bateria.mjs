@@ -8,9 +8,11 @@ const A_DESCARREGAR = [0xf0083, 0xf007a, 0xf007b, 0xf007c, 0xf007d, 0xf007e, 0xf
 const A_CARREGAR = [0xf089f, 0xf089c, 0xf0086, 0xf0087, 0xf0088, 0xf089d, 0xf0089, 0xf089e, 0xf008a, 0xf008b, 0xf0085];
 export const DESCONHECIDA = 0xf0091;
 
-// Abaixo destes valores (e sem carregar) a percentagem fica amarela e depois vermelha.
-export const AVISO = 30;
-export const BAIXA = 15;
+// Cor do ícone e da percentagem (pedido de 2026-10-24): a carregar azul; sem carregar verde a partir de
+// AVISO, amarela abaixo de AVISO e vermelha abaixo de BAIXA.
+export const AVISO = 50;
+export const BAIXA = 20;
+export const COR = { carregar: 'var(--blue)', ok: 'var(--green)', aviso: 'var(--yellow)', baixa: 'var(--red)' };
 
 // 75 min -> "1h15"; 5 min -> "5 min".
 export function duracao(ms) {
@@ -19,17 +21,17 @@ export function duracao(ms) {
   return h ? `${h}h${String(mins % 60).padStart(2, '0')}` : `${mins} min`;
 }
 
-// Saída do provider -> { icone, texto, nivel, dica } ou null (sem bateria).
+// Saída do provider -> { icone, texto, cor, dica } ou null (sem bateria).
 export function bateria(b) {
   if (!b || typeof b.chargePercent !== 'number') return null;
   const pct = Math.max(0, Math.min(100, Math.round(b.chargePercent)));
   const carregar = !!b.isCharging || b.state === 'charging';
   const passo = Math.round(pct / 10);
   const icone = b.state === 'unknown' ? DESCONHECIDA : (carregar ? A_CARREGAR : A_DESCARREGAR)[passo];
-  const nivel = carregar ? 'ok' : pct < BAIXA ? 'high' : pct < AVISO ? 'warn' : '';
+  const cor = carregar ? COR.carregar : pct < BAIXA ? COR.baixa : pct < AVISO ? COR.aviso : COR.ok;
   const dica = [`Bateria: ${pct}%`];
   if (b.state === 'full') dica.push('cheia');
   else if (carregar) dica.push(b.timeTillFull ? `a carregar · cheia em ${duracao(b.timeTillFull)}` : 'a carregar');
   else if (b.timeTillEmpty) dica.push(`restam ${duracao(b.timeTillEmpty)}`);
-  return { icone, texto: `${pct}%`, nivel, dica: dica.join(' · ') };
+  return { icone, texto: `${pct}%`, cor, dica: dica.join(' · ') };
 }

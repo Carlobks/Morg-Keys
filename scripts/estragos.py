@@ -85,7 +85,8 @@ MUTANTES = [
     ('__doc__.encode(codificacao, "replace")', '__doc__.encode(codificacao, "strict")'),
     # bateria na barra (comum/bateria.mjs)
     ('const passo = Math.round(pct / 10);', 'const passo = Math.floor(pct / 10);'),
-    ("pct < BAIXA ? 'high'", "pct < AVISO ? 'high'"),
+    ('pct < BAIXA ? COR.baixa', 'pct < AVISO ? COR.baixa'),
+    ('const cor = carregar ? COR.carregar', 'const cor = false ? COR.carregar'),
     ("const carregar = !!b.isCharging || b.state === 'charging';", 'const carregar = !!b.isCharging;'),
     # quota do Claude: esconder pelo arranque.txt e o indicador só com o ✻ sem valores
     ('return value.strip().lower() not in ESCONDER', 'return True'),
