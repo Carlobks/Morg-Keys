@@ -70,6 +70,15 @@ MUTANTES = [
     (".replace(/\\+\\+/g, '+\\u0000')", ''),
     ("l && !l.startsWith('#') && l.includes('=')", "l && l.includes('=')"),
     ('rows: [...appRows, ...s.rows]', 'rows: [...s.rows, ...appRows]'),
+    # cobertura a 100 % (experiência 0001, fase 3): lógica tirada da página do painel e cola do Windows
+    ('if (state.fixed.includes(key)) return', 'if (false) return'),
+    ("key === '0' ? '10' : key", 'key'),
+    ('url = `https://${url}`', 'url = `${url}`'),
+    ('const s = escala || 1;', 'const s = 1;'),
+    ('a.key === b.key && a.index === b.index', 'a.key === b.key'),
+    ("items.length === 1 ? 'app' : 'apps'", "'apps'"),
+    ('if pid.isdigit() and int(pid) > 4:', 'if pid.isdigit():'),
+    ('return 0 <= now - last < delay_ms + 200', 'return 0 <= now - last < delay_ms'),
 ]
 FICHEIROS = [*PACK.glob("*.py"), *PACK.glob("comum/*.mjs"), *PACK.glob("painel/*.mjs"), *PACK.glob("guia/*.mjs")]
 TESTES_PY = ["py", "-I", "-m", "unittest", "discover", "-s", "tests"]
