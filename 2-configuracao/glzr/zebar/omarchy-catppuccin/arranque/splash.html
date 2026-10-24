@@ -5,12 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Morg Keys</title>
     <style>
-      /* Ecrã de arranque: preto com a animação escolhida em arranque.txt
-         ("animacao = cafe"; Alt+Esc, E troca, se houver mais). Nasce transparente (sem
-         clarão branco do WebView2) por cima da cortina preta nativa do
-         orquestrador, que já mostra o 1.º quadro da animação (cafe.bmp,
-         mesmo tamanho e sítio); quando está desenhado avisa, e a
-         cortina sai — sem corte. Sai quando tudo assentou (progress.json). */
+      /* Ecrã de boas-vindas do arranque: a animação escolhida em arranque.txt ("animacao = cafe";
+         Alt+Esc, E troca, se houver mais), a saudação com o nome, a hora e a frase do dia, e a lista do que
+         carrega. Nasce transparente (sem clarão branco do WebView2) por cima da cortina nativa do
+         orquestrador, que entretanto escureceu o ambiente de trabalho até ao preto; quando está desenhado
+         avisa, e a cortina sai — preto para preto, sem corte. Sai quando tudo assentou (progress.json). */
       html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; cursor: none; }
       body { opacity: 0; transition: opacity 150ms linear; font-family: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif; }
       body.shown { opacity: 1; }

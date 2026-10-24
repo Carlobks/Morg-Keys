@@ -46,7 +46,7 @@ Windows 11 conduzido pelo teclado ao estilo Omarchy: GlazeWM 3.10.1 + Zebar 3.3.
 ## Commits e publicação
 - Faça commits pequenos, só com os testes verdes, com `Co-Authored-By` do modelo.
 - Peça confirmação antes de `git push`, de publicar ou de mexer em tarefas, registo ou ficheiros do utilizador.
-- Corra `scripts/gerar-modelos.ps1` só depois de comparar com `~\.glzr` (apaga `2-configuracao`).
+- Edite no repositório e reinstale; não copie do `~\.glzr` para o repositório.
 
 ## Arquitetura (detalhe em `docs/arquitetura.md`)
 - `2-configuracao/glzr/` → copiado para `~\.glzr` pelo instalador (marcadores `{{HOME}}`, `{{HOME_RE}}`).

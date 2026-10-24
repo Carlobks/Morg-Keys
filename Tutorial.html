@@ -107,7 +107,7 @@
   </div>
   <div>
     <h3>Ecrã de arranque</h3>
-    <p>Ao ligar o PC aparece o ecrã preto com uma animação (uma chávena de café com vapor) e a lista do que está a arrancar. Só desaparece quando tudo está pronto e cada app está no seu workspace.</p>
+    <p>Ao ligar o PC o ambiente de trabalho escurece aos poucos e aparece o ecrã de boas-vindas: uma chávena de café com vapor, "Muito bem-vindo" com o seu nome, a hora, a frase do dia e a lista do que está a arrancar. Só desaparece quando tudo está pronto e cada app está no seu workspace.</p>
   </div>
 </div>
 
@@ -121,7 +121,7 @@
 ├─ <span class="d">imagens\</span> <span class="c">fotografias dos ecrãs, usadas neste tutorial</span><br>
 ├─ <span class="d">1-instaladores\</span> <span class="c">fonte JetBrainsMono NF; os instaladores (GlazeWM 3.10.1 + Zebar 3.3.1, Python 3.11.9, Visual C++) são descarregados para aqui na instalação</span><br>
 ├─ <span class="d">2-configuracao\</span> <span class="c">modelos da configuração (a pasta do utilizador é preenchida na instalação)</span><br>
-└─ <span class="d">scripts\</span> <span class="c">instalar.ps1, instalar-programas.ps1, desinstalar.ps1, gerar-modelos.ps1, gerar-cafe-bmp.ps1, arranque-modelo.txt</span>
+└─ <span class="d">scripts\</span> <span class="c">instalar.ps1, instalar-programas.ps1, desinstalar.ps1, testar.ps1, estragos.py</span>
 </div>
 
 <h2 id="requisitos">Antes de começar</h2>
@@ -166,7 +166,7 @@
 <p>Para correr de novo (por exemplo, depois de instalar o Claude Code), basta repetir. A configuração anterior fica guardada em <code>%USERPROFILE%\.glzr.copia-&lt;data&gt;</code>. A lista de apps, o <code>arranque.txt</code> e a disposição guardada mantêm-se, e não volta a fazer a pergunta.</p>
 <div class="note warn">
   <strong>Recomendado: reiniciar uma vez</strong>
-  A instalação arranca tudo logo. Mas o teste a sério é reiniciar o PC: deve aparecer só o ecrã preto com a animação até tudo estar pronto.
+  A instalação arranca tudo logo. Mas o teste a sério é reiniciar o PC: o ambiente de trabalho escurece e aparece o ecrã de boas-vindas até tudo estar pronto.
 </div>
 
 <h2 id="primeiros">Primeiros passos</h2>
@@ -336,7 +336,7 @@ bat = C:\Scripts\copias.bat</code></pre>
 <h3>O que acontece ao ligar o PC</h3>
 <p>Por baixo da animação aparece a lista do que está a arrancar. Cada linha tem o seu ícone e, à direita, o estado: a rodar enquanto carrega, <b>✓</b> quando está pronto, <b>!</b> se falhou (por exemplo, um <code>.bat</code> que já não existe).</p>
 <ol>
-  <li>Aparece o ecrã preto com a animação escolhida.</li>
+  <li>O ambiente de trabalho escurece aos poucos e aparece o ecrã de boas-vindas: a animação escolhida, "Muito bem-vindo" com o nome do <code>arranque.txt</code> (<code>nome = …</code>, perguntado na instalação), a hora e a frase do dia (<code>frases.txt</code>, na mesma pasta: uma por dia do mês, pode trocá-las).</li>
   <li>Arrancam a barra e o GlazeWM.</li>
   <li>Arrancam os programas <code>.bat</code>.</li>
   <li>Abrem as apps guardadas, cada uma no seu workspace.</li>
@@ -388,7 +388,7 @@ bat = C:\Scripts\copias.bat</code></pre>
   <li><b>Zebar só lê pacotes novos ao arrancar.</b> Depois de mudar um <code>zpack.json</code>, feche o Zebar e volte a abri-lo (ou saia do GlazeWM e reinicie a tarefa).</li>
   <li><b>Python:</b> os ajudantes usam só a biblioteca padrão e correm sempre por <code>C:\Windows\py.exe</code>/<code>pyw.exe</code> com <code>-I</code> (modo isolado). O instalador põe o Python 3.11 para todos os utilizadores, se não houver Python 3.10 ou mais recente.</li>
   <li><b>Internet:</b> só a instalação vai à rede, para descarregar os instaladores dos sites oficiais (verificados por SHA-256 ou pela assinatura da Microsoft). Em uso nada vai à rede: o cliente do Zebar está incluído em <code>vendor\zebar-3.3.1.mjs</code> e a fonte está no pacote. A única exceção é o uso do Claude, que só lê um ficheiro local escrito pelo Claude Code.</li>
-  <li><b>Atualizar o pacote a partir de um PC já configurado:</b> o <code>2-configuracao</code> foi gerado copiando a configuração ativa e trocando a pasta do utilizador pelos marcadores. Repita esse processo depois de mudar a configuração (<code>scripts\gerar-modelos.ps1</code>).</li>
+  <li><b>Mudar a configuração do pacote:</b> edita-se no repositório (<code>2-configuracao</code>), correm-se os testes (<code>scripts\testar.ps1</code>) e reinstala-se. Só há um sentido: repositório → PC.</li>
 </ul>
 </main>
 </div>

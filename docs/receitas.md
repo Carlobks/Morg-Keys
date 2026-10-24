@@ -16,4 +16,4 @@
    4. **Testar:** `splash.html?preview` no servidor `pack-preview`; depois `Alt+Esc, E` (pré-visualização) e reiniciar a sessão.
 5c. **Trocar as frases do dia:** editar `Documentos\Guia de Atalhos\frases.txt` (`frase | personagem | obra`, uma por linha; a 1.ª é a do dia 1). Para o pacote, o modelo está em `guia\frases.txt`.
 6. **Atualizar GlazeWM ou Zebar.** No `instalar.ps1`, tabela `$Instaladores`: novo `Url` e novo `Sha256` (o GitHub publica-o no campo `digest` de cada ficheiro do release: `gh api repos/glzr-io/glazewm/releases/tags/<versão>`). Mudar o nome do ficheiro também em `instalar-programas.ps1`. Gerar de novo `vendor\zebar-<versão>.mjs` com a versão igual (**um** ficheiro). Atualizar os `import` nas 4 páginas, o `$schema` do `zpack.json` e do `settings.json`. Ler as notas da versão para mudanças no `config.yaml`.
-7. **Depois de qualquer alteração aprovada:** correr `scripts\gerar-modelos.ps1` para o pacote a levar.
+7. **Depois de qualquer alteração aprovada:** `scripts\testar.ps1` verde e reinstalar com o `INSTALAR.cmd` (o repositório é a fonte; não se copia nada do `~\.glzr` de volta).

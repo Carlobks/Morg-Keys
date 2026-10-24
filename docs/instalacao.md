@@ -95,14 +95,8 @@ Os três `.exe` **não estão no repositório** (estão no `.gitignore`): o inst
 | `VisualC++-Redistribuivel-x64.exe` | Microsoft (VC++ 2015-2022 x64, `aka.ms/vs/17/release/vc_redist.x64.exe`). Muda de versão no mesmo endereço. | verificado pela assinatura da Microsoft |
 | `JetBrainsMonoNerdFont-{Regular,Medium,SemiBold,Bold}.ttf` (no repositório, com `OFL.txt`) | Nerd Fonts, release `JetBrainsMono.zip` | Regular `C8AF9DFD…6925F`, Medium `F7523DBC…1C76A`, SemiBold `387FD979…A40E1`, Bold `546D7F5E…0B8DA` |
 | `vendor\zebar-3.3.1.mjs` | `npm i zebar@3.3.1` + `esbuild --bundle --format=esm`, num só ficheiro, para não depender de CDN. A versão tem de bater com o `zebar.exe` (3.0 não tinha `tauriWindow`). **Uma só cópia**: o Zebar só serve a cada página ficheiros de dentro da pasta do seu pack que batam com o `includeFiles` (código do Zebar 3.3.1: `asset_server.rs`, `widget_factory.rs`); por isso todas as páginas estão no mesmo pack. | `E160BB83…1929FA` |
-| `2-configuracao\` | `scripts\gerar-modelos.ps1` no PC onde se mantém a configuração (ver abaixo). | — |
+| `2-configuracao\` | Editado **no repositório** (com testes); o instalador leva-o para `~\.glzr`. | — |
 
-**Atualizar o pacote depois de mudar a configuração ativa (`~\.glzr`):** correr `scripts\gerar-modelos.ps1`. Ele:
-1. confirma que todos os ficheiros da lista existem em `~\.glzr` (senão para **sem apagar nada**) e copia-os. Ficam de fora logs, ficheiros com ponto (estado), `progress.json`, `layout.json` e `__pycache__`;
-2. troca a pasta do utilizador por `{{HOME}}` ou `{{HOME_RE}}` (nos `zpack.json`); o `arranque.txt` pessoal **não** vai, e em seu lugar vai `scripts\arranque-modelo.txt`;
-3. esvazia o bloco das apps;
-4. copia `~\.claude\statusline.py`.
-
-**Ficheiro novo no `.glzr`?** Acrescentá-lo à lista `$files` do `gerar-modelos.ps1`.
+**Mudar a configuração:** editar no repositório (`2-configuracao`), correr `scripts\testar.ps1` e reinstalar com o `INSTALAR.cmd`. Só há um sentido, repositório → PC. O antigo `scripts\gerar-modelos.ps1` fazia o contrário (copiava o `~\.glzr` para o repositório, apagando antes o `2-configuracao`) e foi retirado a 2026-10-24: a lista dele era de antes da fase 2 e, corrido, perdia ficheiros; as mudanças passavam ao lado dos testes.
 
 **Validação usada:** aplicar a substituição do instalador a uma pasta temporária com o próprio utilizador. Os ficheiros saem iguais byte a byte aos ativos; só difere o bloco das apps. Depois correr `apps-apply --skip-missing` nessa cópia (com `USERPROFILE` a apontar para ela e `python.exe` direto, porque o lançador `py.exe` falha com o `USERPROFILE` trocado). O `config.yaml` resultante fica igual ao ativo, exceto as apps em falta, que ficam comentadas.
