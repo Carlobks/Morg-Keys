@@ -515,11 +515,11 @@
       });
       loadApps();
 
-      // No navegador (file:) é uma página normal. No Zebar o guia arranca com o
+      // No navegador (file: ou ?preview) é uma página normal. No Zebar o guia arranca com o
       // Zebar, fica carregado e escondido; o Alt+K (bar_helper.py) mostra-o e
       // a página anima: sai da chávena da barra e volta para ela ao fechar.
       let close = () => window.close();
-      if (location.protocol === 'file:') {
+      if (location.protocol === 'file:' || new URLSearchParams(location.search).has('preview')) {
         document.body.classList.add('standalone');
       } else {
         // Centro da chávena da barra, em px lógicos do ecrã (a 100% = px reais):
