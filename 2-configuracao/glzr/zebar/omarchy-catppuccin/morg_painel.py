@@ -341,6 +341,6 @@ def panel_cli(args):
             out = {"ok": not err, "error": err, "state": _panel_state()}
         else:
             out = {"ok": False, "error": "Pedido desconhecido."}
-    except Exception as err:  # a página mostra a mensagem; nunca fica sem resposta
+    except Exception as err:  # noqa: BLE001 — a página mostra a mensagem; nunca fica sem resposta
         out = {"ok": False, "error": f"{type(err).__name__}: {err}"}
     print(json.dumps(out, ensure_ascii=True))

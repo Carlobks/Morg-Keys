@@ -8,6 +8,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from typing import ClassVar
 
 from sistema_falso import Bomba, SistemaFalso, espaco
 
@@ -15,8 +16,8 @@ TITULO_SISTEMA = "Zebar - omarchy-catppuccin / sistema"
 
 
 class CortinaFalsa:
-    criadas = []
-    eventos = []  # partilhado com o ArranqueFalso: mostra a ordem das coisas
+    criadas: ClassVar[list] = []
+    eventos: ClassVar[list] = []  # partilhado com o ArranqueFalso: mostra a ordem das coisas
 
     def __init__(self, animacao="cafe"):
         self.animacao, self.fechada = animacao, False

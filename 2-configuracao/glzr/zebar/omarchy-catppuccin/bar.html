@@ -103,7 +103,7 @@
         el.replaceChildren(cv);
         el.dataset.drawn = String(code);
       }
-      const paintIcons = root => root.querySelectorAll('.ico[data-icon]').forEach(el => paintIcon(el, el.dataset.icon));
+      const paintIcons = root => root.querySelectorAll('.ico[data-icon]').forEach(el => { paintIcon(el, el.dataset.icon); });
 
       // Só reescreve o HTML se mudou: um clique a meio de uma atualização (a
       // cada 5 s por causa da CPU) não se perde e o hover não pisca.

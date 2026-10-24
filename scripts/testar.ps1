@@ -1,8 +1,9 @@
 ﻿# Comando único de testes do Morg Keys (só lê o repositório; não arranca o GlazeWM nem o Zebar — A2).
 #   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\testar.ps1
 # Sai com 0 se todos os testes passarem e 1 se algum falhar.
-# O lint (ruff, PSScriptAnalyzer, Biome) por agora só informa: passa a bloquear depois da refatoração
-# (fase 2 da experiência 0001), quando o código antigo for reescrito.
+# O lint também bloqueia (fase 2d da experiência 0001): ruff (regras em ruff.toml), Biome com os avisos
+# a contar como erros (regras em biome.jsonc) e PSScriptAnalyzer só nos erros (os avisos informam:
+# o Write-Host do instalador é de propósito).
 
 # Continue: no PowerShell 5.1 o stderr dos programas nativos vira erro e pararia o script; conta o $LASTEXITCODE.
 $ErrorActionPreference = 'Continue'
@@ -38,13 +39,24 @@ try {
         if ($Resultado.FailedCount -gt 0) { $Falhas.Add('PowerShell') }
     }
 
-    # 4. Lint (informativo).
-    Write-Titulo 'Lint (informativo)'
-    & $Py -m ruff check --statistics .
+    # 4. Lint.
+    Write-Titulo 'Lint Python (ruff)'
+    & $Py -m ruff check --output-format concise .
+    if ($LASTEXITCODE -ne 0) { $Falhas.Add('Lint Python') }
+
+    Write-Titulo 'Lint JavaScript, CSS e HTML (Biome)'
+    cmd /c 'npx --no-install biome lint --error-on-warnings 2>&1'
+    if ($LASTEXITCODE -ne 0) { $Falhas.Add('Lint JS/CSS') }
+
+    Write-Titulo 'Lint PowerShell (PSScriptAnalyzer: só os erros bloqueiam)'
     Import-Module PSScriptAnalyzer
-    Invoke-ScriptAnalyzer -Path (Join-Path $Raiz 'scripts') -Recurse |
-        Group-Object Severity, RuleName | Select-Object Count, Name | Format-Table -AutoSize | Out-String -Width 200
-    cmd /c 'npx --no-install biome lint 2>&1' | Select-String -Pattern '^Found '
+    $Achados = @(Get-ChildItem -Path $Raiz -Recurse -Include '*.ps1', '*.psm1' -File |
+        Where-Object { $_.FullName -notmatch '\\node_modules\\' } |
+        ForEach-Object { Invoke-ScriptAnalyzer -Path $_.FullName })
+    $Achados | Group-Object Severity, RuleName | Select-Object Count, Name | Format-Table -AutoSize | Out-String -Width 200
+    $Erros = @($Achados | Where-Object { $_.Severity -in 'Error', 'ParseError' })
+    $Erros | ForEach-Object { Write-Output "$($_.ScriptName):$($_.Line) $($_.RuleName): $($_.Message)" }
+    if ($Erros.Count -gt 0) { $Falhas.Add('Lint PowerShell') }
 }
 finally {
     Pop-Location

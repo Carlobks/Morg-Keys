@@ -84,7 +84,7 @@ def _load_layout():
 def _running_images():
     """Nomes (minúsculas, sem .exe) de todos os processos em execução."""
     out = subprocess.run(["tasklist", "/FO", "CSV", "/NH"], capture_output=True, text=True,
-                         encoding="utf-8", errors="replace", creationflags=CREATE_NO_WINDOW)
+                         encoding="utf-8", errors="replace", creationflags=CREATE_NO_WINDOW, check=False)
     names = set()
     for line in out.stdout.splitlines():
         if line.startswith('"'):

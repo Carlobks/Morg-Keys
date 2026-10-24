@@ -157,7 +157,7 @@ def boot():
     _boot_sair(a)
     try:  # só medição: nunca pode estragar o arranque
         _boot_timing_log(a.log, t_boot, t_cover)
-    except Exception as err:
+    except Exception as err:  # noqa: BLE001 — só medição: nunca pode estragar o arranque
         a.log(f"medição falhou: {err!r}")
     kernel32.ReleaseMutex(boot_mutex)
     kernel32.CloseHandle(boot_mutex)

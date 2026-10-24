@@ -143,7 +143,7 @@ export const sectionHtml = s =>
   `<section style="--accent:${s.accent}"><h2>${icoHtml(s.icon)}${esc(s.title)}</h2>${s.rows
     .map(
       ([what, keys, icon]) =>
-        `<div class="row" data-q="${esc((s.title + ' ' + what + ' ' + keys).toLowerCase())}">` +
+        `<div class="row" data-q="${esc((`${s.title} ${what} ${keys}`).toLowerCase())}">` +
         `${icoHtml(icon)}<span class="what">${esc(what)}</span><span class="keys">${keysHtml(keys)}</span></div>`,
     )
     .join('')}</section>`;

@@ -47,15 +47,15 @@ from pathlib import Path
 # sem isto os módulos morg_*.py não se importam.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from morg_acoes_windows import after_exit, lock, on_exit, power, quick_settings  # noqa: E402
-from morg_acordado import awake_hold, awake_off, awake_status, awake_toggle  # noqa: E402
-from morg_animacao import animacao_preview, animacao_set, animacao_tap  # noqa: E402
-from morg_arranjo import layout_restore, layout_save  # noqa: E402
-from morg_arranque import boot  # noqa: E402
-from morg_atalhos import apps_apply, apps_edit  # noqa: E402
-from morg_ecra_arranque import splash_ready  # noqa: E402
-from morg_glaze import restore_minimized  # noqa: E402
-from morg_janelas_zebar import (  # noqa: E402
+from morg_acoes_windows import after_exit, lock, on_exit, power, quick_settings
+from morg_acordado import awake_hold, awake_off, awake_status, awake_toggle
+from morg_animacao import animacao_preview, animacao_set, animacao_tap
+from morg_arranjo import layout_restore, layout_save
+from morg_arranque import boot
+from morg_atalhos import apps_apply, apps_edit
+from morg_ecra_arranque import splash_ready
+from morg_glaze import restore_minimized
+from morg_janelas_zebar import (
     bar_toggle,
     guide,
     guide_ensure_hidden,
@@ -63,8 +63,7 @@ from morg_janelas_zebar import (  # noqa: E402
     layer_hide,
     layer_show,
 )
-from morg_painel import panel_cli, panel_hide, panel_show  # noqa: E402
-
+from morg_painel import panel_cli, panel_hide, panel_show
 
 # Comandos sem argumentos variáveis: palavras do comando -> função.
 COMANDOS = {

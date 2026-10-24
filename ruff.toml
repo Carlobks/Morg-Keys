@@ -1,0 +1,10 @@
+# Lint do Python. O scripts\testar.ps1 falha se houver avisos (fase 2d da experiência 0001).
+# Regras: as por omissão do ruff 0.17. A versão fica presa porque uma versão nova pode trazer regras novas
+# por omissão; ao atualizar o ruff, ver o que aparece e mudar aqui de propósito.
+required-version = ">=0.17.2,<0.18"
+line-length = 120
+
+[lint]
+# E402 (imports no topo): o ruff já aceita os imports do bar_helper.py depois do sys.path.insert (com
+# `py -I` a pasta do script não entra no sys.path); fora disso, um import fora do sítio é apanhado.
+extend-select = ["E402"]

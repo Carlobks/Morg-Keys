@@ -82,7 +82,7 @@ def onde_esta(texto):
 
 
 for testes in (TESTES_PY, TESTES_JS):
-    base = subprocess.run(testes, capture_output=True, timeout=180)
+    base = subprocess.run(testes, capture_output=True, timeout=180, check=False)
     if base.returncode != 0:  # com testes já vermelhos, todos os estragos seriam "apanhados" (falso 100 %)
         raise SystemExit("Os testes falham com o código certo: corrija antes de correr os estragos.")
 
@@ -95,7 +95,7 @@ for antes, depois in MUTANTES:
     original = ficheiro.read_bytes()
     ficheiro.write_bytes(original.decode("utf-8").replace(antes, depois).encode("utf-8"))
     try:
-        r = subprocess.run(TESTES_JS if ficheiro.suffix == ".mjs" else TESTES_PY, capture_output=True, timeout=180)
+        r = subprocess.run(TESTES_JS if ficheiro.suffix == ".mjs" else TESTES_PY, capture_output=True, timeout=180, check=False)
         apanhado = r.returncode != 0
     except subprocess.TimeoutExpired:
         apanhado = True

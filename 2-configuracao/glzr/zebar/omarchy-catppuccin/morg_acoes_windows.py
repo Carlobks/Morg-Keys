@@ -52,7 +52,7 @@ def on_exit():
 def after_exit():
     def glaze_running():
         out = subprocess.run(["tasklist", "/FI", "IMAGENAME eq glazewm.exe", "/NH"],
-                             capture_output=True, text=True, creationflags=CREATE_NO_WINDOW)
+                             capture_output=True, text=True, creationflags=CREATE_NO_WINDOW, check=False)
         return "glazewm.exe" in out.stdout.lower()
 
     deadline = time.monotonic() + 20
@@ -62,7 +62,7 @@ def after_exit():
     if UNCLOAK_PS1.exists():
         subprocess.run(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass",
                         "-File", str(UNCLOAK_PS1), "-WaitForGlazeExit"],
-                       creationflags=CREATE_NO_WINDOW)
+                       creationflags=CREATE_NO_WINDOW, check=False)
 
 
 
@@ -81,4 +81,4 @@ def power(action):
     answer = user32.MessageBoxW(None, question, "Sistema",
                                 MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2 | MB_SETFOREGROUND | MB_TOPMOST)
     if answer == IDYES:
-        subprocess.run(["shutdown", flag, "/t", "0"], creationflags=CREATE_NO_WINDOW)
+        subprocess.run(["shutdown", flag, "/t", "0"], creationflags=CREATE_NO_WINDOW, check=False)

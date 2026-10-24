@@ -45,7 +45,7 @@ def _start_items(use_cache=False):
         ["powershell", "-NoProfile", "-Command",
          "[Console]::OutputEncoding=[Text.Encoding]::UTF8; Get-StartApps | ConvertTo-Json -Compress"],
         capture_output=True, text=True, encoding="utf-8", errors="replace",
-        timeout=30, creationflags=CREATE_NO_WINDOW)
+        timeout=30, creationflags=CREATE_NO_WINDOW, check=False)
     try:
         items = json.loads(out.stdout or "[]")
     except ValueError:

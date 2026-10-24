@@ -1,0 +1,23 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "files": {
+    "includes": ["2-configuracao/**", "tests/**", "!**/vendor"]
+  },
+  "formatter": { "enabled": false },
+  "linter": {
+    "rules": {
+      // Desligadas de propósito (fase 2d da experiência 0001): corrigi-las muda a cascata do CSS e
+      // portanto o aspeto, que as impressões digitais da fase 2c provaram estar certo.
+      "style": {
+        // Avisa quando uma regra mais específica vem antes de uma menos específica. Nas nossas folhas a
+        // ordem é de propósito (ex.: `body.sending .key` depois de `.key.has`); reordenar muda o que ganha.
+        "noDescendingSpecificity": "off"
+      },
+      "complexity": {
+        // `.hidden { display: none !important }` e `body.busy * { cursor: progress !important }` têm de
+        // ganhar a qualquer outra regra; sem `!important` deixavam de esconder / de mostrar a espera.
+        "noImportantStyles": "off"
+      }
+    }
+  }
+}

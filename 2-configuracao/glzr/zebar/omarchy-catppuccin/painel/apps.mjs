@@ -40,13 +40,13 @@ function renderList() {
   const html = groups.map(([title, items]) => {
     const shown = items.filter(hits);
     if (!shown.length) return '';
-    return `<div class="group">${esc(title)}</div>` + shown.map(it => {
+    return `<div class="group">${esc(title)}</div>${shown.map(it => {
       const k = used.get(it.value.toLowerCase());
       const isSel = sel?.kind === 'app' && sel.value === it.value;
       return `<div class="app${isSel ? ' sel' : ''}" data-kind="app" data-value="${esc(it.value)}" data-label="${esc(it.label)}">` +
         `${ico(it.value)}<span class="lb">${esc(it.label)}</span>` +
         `${k ? `<span class="used">${esc(keyLong(k))}</span>` : ''}</div>`;
-    }).join('');
+    }).join('')}`;
   }).join('');
   $('list').innerHTML = html || `<div class="empty">${startApps.length ? 'Nenhuma app com esse nome.' : 'A carregar as apps do menu Iniciar…'}</div>`;
   $('count').textContent = startApps.length ? `${startApps.length} no menu Iniciar` : '';
@@ -206,7 +206,7 @@ $('undo').addEventListener('click', () => { select(null); request(['undo'], '✓
 // Cursor do teclado na lista (setas): a linha fica marcada; Enter escolhe-a.
 function paintCursor(scroll = true) {
   const items = [...$('list').querySelectorAll('.app')];
-  items.forEach((el, i) => el.classList.toggle('cursor', i === cursor));
+  items.forEach((el, i) => { el.classList.toggle('cursor', i === cursor); });
   if (scroll && items[cursor]) items[cursor].scrollIntoView({ block: 'nearest' });
 }
 

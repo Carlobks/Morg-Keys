@@ -12,6 +12,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from typing import ClassVar
 from unittest import mock
 
 from sistema_falso import PASTA_PACK, SistemaFalso
@@ -30,7 +31,7 @@ class PontoDeEntrada(unittest.TestCase):
 class ListaDeComandos(unittest.TestCase):
     """Cada comando do docstring vai para a função certa (caracterização do `main` de 2026-10-23)."""
 
-    DIRETOS = {
+    DIRETOS: ClassVar[dict] = {
         ("awake-hold",): "awake_hold", ("quick",): "quick_settings", ("guide",): "guide",
         ("guide-hide",): "guide_hide", ("guide-ensure-hidden",): "guide_ensure_hidden", ("bar", "toggle"): "bar_toggle",
         ("restore-min",): "restore_minimized", ("layout-save",): "layout_save", ("layout-restore",): "layout_restore",
@@ -40,7 +41,7 @@ class ListaDeComandos(unittest.TestCase):
         ("after-exit",): "after_exit", ("lock",): "lock",
     }
     # Comandos que passam argumentos ou imprimem: (argv, função, argumentos esperados, imprime o resultado).
-    COM_ARGUMENTOS = [
+    COM_ARGUMENTOS: ClassVar[list] = [
         (["awake", "status"], "awake_status", (), True),
         (["awake", "toggle"], "awake_toggle", (), True),
         (["awake", "off"], "awake_off", (), True),

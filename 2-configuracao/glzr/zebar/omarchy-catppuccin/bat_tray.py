@@ -87,7 +87,7 @@ def _port_open(port):
 
 def _kill_tree(pid):
     subprocess.run(["taskkill", "/T", "/F", "/PID", str(pid)], creationflags=CREATE_NO_WINDOW,
-                   capture_output=True, timeout=30)
+                   capture_output=True, timeout=30, check=False)
 
 
 # --- O programa ------------------------------------------------------------------
@@ -107,7 +107,7 @@ class Program:
         if self.running():
             return
         LOG_DIR.mkdir(parents=True, exist_ok=True)
-        log = open(self.log, "w", encoding="utf-8", errors="replace")
+        log = open(self.log, "w", encoding="utf-8", errors="replace")  # noqa: SIM115 — fica aberto enquanto o .bat corre (é o stdout dele)
         log.write(f"--- {time.strftime('%Y-%m-%d %H:%M:%S')} {self.bat} iniciado ---\n")
         log.flush()
         self.proc = subprocess.Popen(["cmd.exe", "/c", str(self.bat)], cwd=str(self.bat.parent), stdout=log,
@@ -124,7 +124,7 @@ class Program:
             ps = (f"Get-NetTCPConnection -LocalPort {self.port} -State Listen -ErrorAction SilentlyContinue | "
                   "Select-Object -ExpandProperty OwningProcess -Unique")
             out = subprocess.run(["powershell", "-NoProfile", "-Command", ps], capture_output=True, text=True,
-                                 creationflags=CREATE_NO_WINDOW, timeout=30)
+                                 creationflags=CREATE_NO_WINDOW, timeout=30, check=False)
             for pid in out.stdout.split():
                 if pid.isdigit() and int(pid) > 4:
                     _kill_tree(pid)

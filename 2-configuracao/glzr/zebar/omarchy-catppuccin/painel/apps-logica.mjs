@@ -62,7 +62,7 @@ export function keyHtml(id, cap, wide, state, sel) {
   const data = has && !fixed ? ` data-kind="key" data-value="${esc(has.value)}" data-label="${esc(appLabel(has.value))}"` : '';
   return `<div class="${cls}" data-key="${id}"${data} title="${esc(has ? `${cap}: ${appLabel(has.value)}` : fixed ? `${cap}: usado pelo sistema` : `${cap}: livre`)}">` +
     `<span class="cap">${esc(cap)}</span><span class="what">${what}</span>` +
-    `${has && !fixed ? '<button class="x" data-unkey="' + id + '" title="Tirar o atalho">✕</button>' : ''}</div>`;
+    `${has && !fixed ? `<button class="x" data-unkey="${id}" title="Tirar o atalho">✕</button>` : ''}</div>`;
 }
 
 // Teclado inteiro: 3 filas de letras + Alt Enter, Alt Shift Enter e os atalhos do apps.txt que não

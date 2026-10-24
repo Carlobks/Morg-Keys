@@ -12,7 +12,7 @@ def _glaze(*args):
     try:
         out = subprocess.run([str(GLAZE_CLI), *args], capture_output=True, text=True,
                              encoding="utf-8", errors="replace", timeout=10,
-                             creationflags=CREATE_NO_WINDOW)
+                             creationflags=CREATE_NO_WINDOW, check=False)
         return json.loads(out.stdout or "{}")
     except (OSError, ValueError, subprocess.TimeoutExpired):
         return {}
