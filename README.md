@@ -56,6 +56,9 @@ git config --local user.email <id>+<conta>@users.noreply.github.com
 Cada commit corre `scripts/testar.ps1` (testes, 100 % de cobertura e lint), verifica a mensagem
 (`tipo(área): …`, formato em `scripts/portoes/mensagem_commit.py`) e procura dados pessoais. Nunca use
 `--no-verify`. Para a lista negra de nomes, que fica fora do repositório: `git config morg.listaNegra <ficheiro>`.
+Cada push mostra os ficheiros a enviar, procura segredos com o [gitleaks](https://github.com/gitleaks/gitleaks)
+(`winget install Gitleaks.Gitleaks`; sem ele o push não sai) e corre o `npm audit` contra
+`.seguranca/audit-linha-de-base.txt`.
 
 ## Licença
 

@@ -167,12 +167,15 @@ páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
     - Push a seco repetido: o dono **viu a pergunta**.
   - **Limite:** uma escrita pela shell não passa no Write/Edit (o mesmo limite do hook das 500 linhas). O
     `test_permissoes.py` e o `test_hooks.py` apanham uma regra tirada.
-- [ ] **ML5 Push seguro:**
-  - gitleaks (**OK na hora** para instalar);
-  - varrer todo o histórico;
-  - `.githooks/pre-push`;
-  - `.seguranca/audit-linha-de-base.txt`.
-  - *Prova:* um push para um repositório "bare" local com um segredo falso é recusado; sem segredo, passa; saída do varrimento.
+- [x] **ML5 Push seguro** (2026-10-30):
+  - gitleaks 8.30.1 instalado pelo `winget` (com o OK do dono; hash verificado; release oficial do GitHub);
+  - histórico todo varrido: **62 commits, "no leaks found"**. O 63.º, `c9f440b`, só muda o modo e não tem texto;
+  - `scripts/portoes/antes_do_push.py` (15 testes): lista os ficheiros por commit; gitleaks nos commits a enviar
+    (sem ele, recusa); `npm audit` contra a linha de base (só crítico/alto novo trava; relatório ilegível trava);
+  - `.githooks/pre-push`, `.seguranca/audit-linha-de-base.txt` (vazia: 0 avisos) e README.
+  - *Prova:* teste vermelho → verde. Num repositório de teste:
+    - o push limpo para o `bare` passou, mostrando os ficheiros;
+    - o commit com um token do GitHub falso (aleatório) foi recusado: "leaks found: 1", nada enviado.
 - [ ] **ML6 Regras no CLAUDE.md:**
   - `npx skills@1.7.4 add Carlobks/Morg-laws` só com as 7 skills (ver a opção de escolher na `--help`; se não houver, instalar e tirar 3 com o `skills-lock.json` coerente);
   - `CLAUDE.md` ≤ 100 linhas, com a Regra n.º 1, o núcleo, as regras do projeto e o índice "quando ler que skill";

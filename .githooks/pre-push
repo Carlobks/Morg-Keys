@@ -1,0 +1,8 @@
+#!/bin/sh
+# Portão do git (Morg Laws): verifica antes de o código sair da máquina. Nunca saltar com --no-verify.
+# Mostra os ficheiros dos commits a enviar, procura segredos com o gitleaks e falhas novas nas dependências com o
+# npm audit. Lógica e testes: scripts/portoes/antes_do_push.py e tests/test_portoes_push.py.
+# Ativar: git config core.hooksPath .githooks · Precisa do gitleaks (winget install Gitleaks.Gitleaks).
+raiz=$(git rev-parse --show-toplevel) || exit 1
+py=${MORG_PY:-C:/Windows/py.exe}
+exec "$py" -I "$raiz/scripts/portoes/antes_do_push.py"

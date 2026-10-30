@@ -1,0 +1,4 @@
+# Linha de base do npm audit (lida pelo scripts/portoes/antes_do_push.py no pre-push).
+# Um ID por linha (o "source" de cada aviso do npm audit --json), com # e o motivo. A lista só encolhe:
+# quando um aviso some, sai daqui no mesmo commit. Nunca se acrescenta um aviso novo para conseguir passar.
+# 2026-10-30: npm audit com 0 vulnerabilidades, por isso a lista começa vazia.
