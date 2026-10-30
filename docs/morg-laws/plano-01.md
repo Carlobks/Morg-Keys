@@ -159,9 +159,14 @@ páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
     - o `Write` e o `Read` foram recusados pelo deny;
     - o `cat` também foi recusado;
     - a leitura por Python foi recusada pelo modo automático.
-  - **Por validar:**
-    - se o `git push --dry-run` para um repositório local te mostrou a pergunta: correu, e daqui não se vê;
-    - o `ask` do Edit não apanha escritas pela shell (o mesmo limite do hook das 500 linhas).
+  - **Achado:** no modo automático as regras `ask` do settings.json não perguntam. Confirmado pelo dono: o push a
+    seco correu sem pergunta, e a escrita de um hook também.
+    - Correção: o hook `.claude/hooks/perguntar_antes.py` devolve a decisão "ask" para push, instalações e
+      Write/Edit das regras do agente (`.claude/settings*.json`, `.claude/hooks/`, `.githooks/`).
+    - Teste vermelho → verde (7 testes).
+    - Push a seco repetido: o dono **viu a pergunta**.
+  - **Limite:** uma escrita pela shell não passa no Write/Edit (o mesmo limite do hook das 500 linhas). O
+    `test_permissoes.py` e o `test_hooks.py` apanham uma regra tirada.
 - [ ] **ML5 Push seguro:**
   - gitleaks (**OK na hora** para instalar);
   - varrer todo o histórico;

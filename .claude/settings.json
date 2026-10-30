@@ -52,6 +52,13 @@
             "timeout": 15,
             "onFailure": "block",
             "statusMessage": "A verificar os portões do git"
+          },
+          {
+            "type": "command",
+            "command": "r=\"$CLAUDE_PROJECT_DIR\"; [ -f \"$r/.claude/hooks/perguntar_antes.py\" ] || r=\"$(git rev-parse --show-toplevel)\"; \"C:/Windows/py.exe\" -I \"$r/.claude/hooks/perguntar_antes.py\"",
+            "timeout": 15,
+            "onFailure": "block",
+            "statusMessage": "A ver se é preciso o sim do dono"
           }
         ]
       },
@@ -64,6 +71,13 @@
             "timeout": 15,
             "onFailure": "block",
             "statusMessage": "A verificar o limite de 500 linhas"
+          },
+          {
+            "type": "command",
+            "command": "r=\"$CLAUDE_PROJECT_DIR\"; [ -f \"$r/.claude/hooks/perguntar_antes.py\" ] || r=\"$(git rev-parse --show-toplevel)\"; \"C:/Windows/py.exe\" -I \"$r/.claude/hooks/perguntar_antes.py\"",
+            "timeout": 15,
+            "onFailure": "block",
+            "statusMessage": "A ver se é preciso o sim do dono"
           }
         ]
       }
