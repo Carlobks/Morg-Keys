@@ -1,0 +1,202 @@
+# Morg Keys: cumprir o Morg Laws a 100 % (plano 01, 2026-10-30)
+
+> Cópia do plano aprovado (o original vive na aba Plano do Claude). Atualizada no fim de cada fase,
+> no mesmo commit que fecha a fase.
+
+## Contexto
+
+A 1.ª verificação (`docs/morg-laws/verificacao-01-2026-10-30.md`, commit `84a9bb6`) deu 41 regras aplicáveis:
+17 cumpridas, 11 em parte, 9 falhas e 4 por validar. Este plano:
+- dá a cada acerto uma barreira, para continuarmos a acertar;
+- põe as parciais a 100 %;
+- corrige as falhas.
+
+**Decisões do dono do projeto (2026-10-30):**
+- as fases Morg Laws vêm **antes** da F1;
+- commits no formato `tipo(área): …`, obrigados por um hook;
+- changelog com fragmentos em `changelog.d/`;
+- instalar só as 7 skills que servem;
+- **sem `AGENTS.md`**: só usamos o Claude, por isso as regras vivem no `CLAUDE.md`.
+
+**Regras de todas as fases:**
+- primeiro um teste que falha (mostrar a corrida vermelha), depois a correção (corrida verde);
+- `testar.ps1` verde a 100 %;
+- 1 fase = 1 ou mais commits pequenos, por caminho, no `exp/a`;
+- sem push;
+- nada destrutivo sem OK;
+- `get_usage` antes de cada fase: a 90 % não se começa nada grande, a 95 % para-se com uma nota A-RETOMAR;
+- os testes de hooks e de push correm num **clone descartável no scratchpad**, nunca neste repositório.
+
+**Efeito no plano da auditoria (F1–F7):** saem da F4 o `CLAUDE.md`, as 35 linhas, a cobertura do `statusline.py` e
+dos hooks, o `onFailure` e os `noqa`; saem da F5 os fins de linha e os caminhos pessoais; sai da F6 a lógica das
+páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
+
+## A. Os acertos: estão escritos? Há uma barreira que obrigue?
+
+| Acerto | Onde está escrito hoje | Barreira hoje | Barreira nova (fase) |
+|---|---|---|---|
+| Plano antes de mexer | CLAUDE.md global, proposta | nenhuma | Cópia do plano em `docs/planos/` + teste que exige "Fora do escopo" e "Prova" (ML7) |
+| Decisão vai ao dono | CLAUDE.md global | nenhuma | **Só texto** (não há máquina que saiba o que é "decisão do dono") |
+| Push só com o "sim" | proposta | nenhuma | Permissão `ask` para `git push` em `.claude/settings.json` (ML4) |
+| Nunca saltar hooks | não está escrito | nenhuma | Hook do Claude recusa `--no-verify`/`-n` e mexer no `core.hooksPath`; CI apanha quem saltar à mão (ML3, ML14) |
+| Bug traz teste | proposta | nenhuma | `commit-msg`: um `fix` sem ficheiro em `tests/` exige `Sem-teste: <motivo>` (ML2–ML3) |
+| Provar medindo, 100 % | proposta, `testar.ps1` | hook do Claude no commit | Hook `pre-commit` do git (vale também à mão) + CI (ML3, ML14) |
+| Teste de mutação | docstring do `estragos.py` | nenhuma (corre-se à mão) | Catraca: o número de `MUTANTES` não desce; o CI corre os estragos 1×/semana (ML9, ML14) |
+| Texto vira barreira | não está escrito | — | Mapa `docs/regras-e-barreiras.md` + teste: cada regra do CLAUDE.md tem uma linha no mapa e a barreira citada existe (ML6) |
+| Hooks testados | `test_hooks.py` | fora da cobertura | Hooks e portões entram na medida dos 100 % (ML11) |
+| E-mail noreply | não está escrito | nenhuma | `pre-commit` recusa outro e-mail (ML2–ML3) |
+| Mensagem com o porquê | não está escrito | nenhuma | `commit-msg` exige corpo em `fix`/`feat`/`refactor` (ML2) |
+| Mensagem por ficheiro `-F` | memória | hook bloqueia palavras | Hook do Claude recusa `git commit -m` com várias linhas ou heredoc (ML3) |
+| Armadilhas registadas | docs/README | nenhuma | Teste: numeração A1…An seguida e sem repetidos, cada uma com a regra (ML7) |
+| Pesquisa com data | `pesquisa/README.md` | nenhuma | Teste: cada ficheiro de `pesquisa/` está no índice, com data (ML7) |
+| ADR em ficheiro | docs/README | nenhuma | Teste: números únicos e todos na tabela do índice (ML7). Já falhou: a `auditoria-2026-10-24.md` não está no índice |
+| Leitura independente | experiência 0001 | — | **Só texto** (skill `orquestrando-sessoes`); a ML15 usa-a |
+| Dependências sem falhas | — | nenhuma | `pre-push` com `npm audit` e linha de base + CI (ML5, ML14) |
+| Achados de fora são dados | — | — | **Só texto** (skill `auditoria-de-seguranca`) |
+
+## B. As parciais: como chegam a 100 %
+
+| Regra | Como | Fase |
+|---|---|---|
+| Regras no ficheiro lido sempre | `CLAUDE.md` novo (≤ 100 linhas, ≤ 160 caracteres) a partir da `docs/proposta-CLAUDE.md` + núcleo Morg Laws. Teste do tamanho. A proposta vai para `docs/arquivo/` | ML6 |
+| Sem silenciar alarme | Ligar o `RUF100` (`noqa` sem uso); tirar os `noqa` de regras inativas; teste: cada `noqa`/`pragma`/`node:coverage disable` tem motivo depois de `—`, e a contagem não sobe (catraca). As 2 regras do Biome desligadas ficam com uma ADR (mudam a cascata do CSS) | ML9 |
+| Cobertura 100 % real | `statusline.py`, `.claude/hooks/` e `scripts/portoes/` entram no `--source`. A lógica dos `<script>` de `bar`/`splash`/`sistema` passa para `.mjs` testados; nas páginas fica só a cola com o DOM | ML11a, ML11b |
+| Hooks são a rede | `onFailure: block` em todos os hooks do Claude; teste que lê o `settings.json` e o exige | ML3 |
+| Nomes pesquisáveis | `comum/comum.mjs` → nome pela função (ex.: `paginas-texto.mjs`, a decidir ao ler); `tests/*.Comum.ps1` → `*.Preparacao.ps1`; teste: nenhum ficheiro chamado `comum`, `utils`, `helper(s)`, `common`, `data`, `misc`. O `bar_helper.py` fica: é único no grep e mudá-lo parte os PCs instalados e o hook A2 (exceção numa ADR) | ML10 |
+| Catracas | 35 linhas por função: Python por `ast`, PowerShell pelo AST, JS pela regra `noExcessiveLinesPerFunction` do Biome 2.6 (confirmada no schema). As violações de hoje ficam numa linha de base que só desce. PSScriptAnalyzer com um ficheiro de definições e uma linha de base por regra (49 avisos) | ML9 |
+| Fins de linha | `.gitattributes` explícito (`*.ps1`, `*.cmd`, `*.bat` em CRLF; o resto em LF), `git add --renormalize` num commit só disso; teste: o disco bate com o `.gitattributes` | ML8 |
+| Handoff no repositório | `.context/HANDOFF-<assunto>.md` (o A-RETOMAR sai da memória para lá; a memória só aponta). Teste: secções obrigatórias e hashes que existem no git | ML7 |
+| Permissões em 3 colunas | `.claude/settings.json`: `deny` Read de `.env*`, `*.pem`, `*.key`, `~/.ssh`, `~/.claude/.credentials*`; `ask` para `git push`, `npm install`, `npx`, `winget`, `pip install`; `allow` só o que é leitura. Teste do JSON | ML4 |
+| Plano com "fora do escopo" e "prova" | `docs/planos/NNNN-*.md` (cópia aprovada da aba Plano) + teste das secções | ML7 |
+| Telas | `prefers-reduced-motion` no `splash.html` e no `sistema.html` (o sinal fica, a animação sai); `tabular-nums` na hora e na bateria; teste de contraste ≥ 4,5:1 calculado a partir dos tokens Catppuccin usados em texto. `px` → `rem`: ver a secção D | ML12 |
+
+## C. As falhas: análise e solução
+
+| Falha | Análise | Solução | Fase |
+|---|---|---|---|
+| Sem portão do git | Os hooks do Claude só travam o agente | `.githooks/` (sh finos que chamam `py -I scripts/portoes/*.py`, testados a 100 %); `core.hooksPath`; o teste do commit sai do hook do Claude para o `pre-commit` (sem correr duas vezes; a guarda `MORG_A_TESTAR` da A30 mantém-se) | ML2, ML3 |
+| Sem gitleaks no push | Os segredos só foram procurados por leitura | Instalar o gitleaks 8.30.1 por `winget` (Gitleaks LLC; **pede o OK na hora**); varrer todo o histórico 1×; `pre-push` a partir do `modelos/pre-push` (gitleaks + `npm audit` com linha de base + a lista dos ficheiros de cada commit, Akita #78) | ML5 |
+| Sem CI | Nada corre no GitHub | `.github/workflows/`: `testar.ps1` em `windows-latest` (Python, coverage, ruff, Pester 6, PSSA, node, versões fixas) + gitleaks + estragos semanais; actions fixadas por SHA; `permissions: contents: read`. O `testar.ps1` aceita `MORG_PY` em vez do caminho fixo `C:\Windows\py.exe` | ML14 |
+| Nome real em testes e exemplos | O primeiro nome do utilizador aparece em 7 ficheiros | Trocar por um nome fictício; `{{NOME}}` de exemplo fictício. Lista negra **fora** do repositório (`git config morg.listaNegra`), lida no `pre-commit` e no `commit-msg` | ML1, ML2 |
+| Nomes e caminhos nos docs | Auditoria, pendentes, experiência, pesquisa | "o utilizador"/"o dono"; `<pasta do repositório>`. Teste por padrão (`C:\Users\<nome>`, sem dizer nomes) | ML1 |
+| `fix` sem teste nem `Sem-teste:` | `17ce46f` | Daqui para a frente, o `commit-msg` obriga. O antigo fica como exceção registada (não se reescreve o histórico) | ML2 |
+| Formato das mensagens | 37 de 55 títulos > 72 caracteres | `commit-msg`: `^(fix\|feat\|docs\|test\|refactor\|chore\|build\|ci\|perf\|style)(\([a-z0-9-]+\))?: ` e ≤ 72; aceita `Merge …` | ML2 |
+| `.env` legível | Sem `deny` | Ver B, permissões | ML4 |
+| Sem changelog | Produto instalado por outros | `changelog.d/AAAA-MM-DD-assunto.md`; teste do formato; o `commit-msg` exige um fragmento (ou `Sem-changelog: motivo`) num `feat`/`fix` que toque em `2-configuracao/`, `scripts/instalar*` ou `scripts/desinstalar*`; fragmentos do que mudou desde o último envio; `scripts/juntar_changelog.py` testado | ML13 |
+
+## D. O que não dá para seguir a 100 % (fica dito, com o motivo)
+
+1. **Ver o teste a falhar antes da correção:** o git guarda o teste, não a corrida vermelha. A máquina obriga ao
+   teste ou ao `Sem-teste:`; os estragos provam que os testes apanham erros; a corrida vermelha fica no texto.
+2. **Decisões do dono, leitura independente, achados como dados:** só texto (skills).
+3. **Commits por caminho:** o hook trava o agente (`git add -A`, `git add .`, `commit -a`); à mão fica o texto.
+4. **Aparência, alvos de toque, daltonismo:** só uma pessoa, no teu teste real. O contraste dos tokens mede-se.
+5. **`rem` em vez de `px`:** no Zebar ninguém escolhe o tamanho da letra da página e a barra é medida ao pixel. Proposta:
+   uma ADR "não se aplica", a confirmar no teu teste com a escala do Windows a 125 %.
+6. **Backup externo da pasta (Akita #74):** está fora do repositório. Fica como recomendação para ti (Histórico de
+   Ficheiros ou OneDrive).
+7. **Histórico antigo** (o nome nos testes já enviados, o `17ce46f`, os títulos longos): não se reescreve o histórico
+   público; fica como exceção registada.
+8. **Lista negra no CI:** só com um secret do GitHub (opcional); sem ele, o CI só corre o gitleaks.
+9. **O CI só se prova depois de um push** (que pede o teu OK).
+
+## Fases (cada uma termina com uma prova)
+
+- [x] **ML0 Preparação** (2026-10-30):
+  - `get_usage`: semanal 3 %, 5 h 21 %;
+  - plano antigo marcado (itens "→ ML" nas F3–F6);
+  - cópia em `docs/morg-laws/plano-01.md`;
+  - `testar.ps1` em **21,5 s**, verde: Python 258 testes a 100 % (1713 linhas, 554 ramos), JS 45, Pester 72, lint ok.
+    Chega para o `pre-commit` correr tudo em cada commit.
+  - *Prova:* os números acima.
+- [ ] **ML1 Dados pessoais fora:**
+  - nome fictício nos testes e exemplos;
+  - docs sem nomes nem caminhos;
+  - `tests/test_dados_pessoais.py` por padrão.
+  - *Prova:* teste vermelho antes e verde depois; procura pela lista negra = 0.
+- [ ] **ML2 Portões testados:** `scripts/portoes/` com `mensagem_commit.py` (formato, ≤ 72, corpo, `Sem-teste:`,
+  `Sem-changelog:`), `identidade.py` (noreply) e `lista_negra.py`, mais `tests/test_portoes_*.py` a 100 %.
+  - *Prova:* `testar.ps1`.
+- [ ] **ML3 Ligar o git:**
+  - `.githooks/pre-commit` e `commit-msg`;
+  - `core.hooksPath`;
+  - os testes passam do hook do Claude para o `pre-commit`;
+  - o hook do Claude passa a recusar `--no-verify`, `add -A/.`, `commit -a`, `-m` com várias linhas, mudar o `hooksPath` e um commit com o `hooksPath` errado;
+  - `onFailure: block` em todos.
+  - *Prova:* num clone descartável, um título errado, outro e-mail, um `fix` sem teste e um nome da lista são todos recusados; um commit certo passa.
+- [ ] **ML4 Permissões:** `deny` / `ask` / `allow` no `.claude/settings.json`, mais o teste do JSON.
+  - *Prova:* ler um `.env` falso (no scratchpad) é recusado; `git push` pede confirmação.
+- [ ] **ML5 Push seguro:**
+  - gitleaks (**OK na hora** para instalar);
+  - varrer todo o histórico;
+  - `.githooks/pre-push`;
+  - `.seguranca/audit-linha-de-base.txt`.
+  - *Prova:* um push para um repositório "bare" local com um segredo falso é recusado; sem segredo, passa; saída do varrimento.
+- [ ] **ML6 Regras no CLAUDE.md:**
+  - `npx skills@1.7.4 add Carlobks/Morg-laws` só com as 7 skills (ver a opção de escolher na `--help`; se não houver, instalar e tirar 3 com o `skills-lock.json` coerente);
+  - `CLAUDE.md` ≤ 100 linhas, com a Regra n.º 1, o núcleo, as regras do projeto e o índice "quando ler que skill";
+  - `docs/regras-e-barreiras.md`;
+  - `tests/test_regras.py` (tamanho, cada regra no mapa, ficheiros e ferramentas citados existem).
+  - *Prova:* `testar.ps1`; numa sessão nova, as skills aparecem na lista.
+- [ ] **ML7 Docs com barreira:**
+  - testes do índice dos docs, das ADR, das armadilhas, da pesquisa, dos handoffs e dos planos;
+  - corrigir o que falhar (ex.: a auditoria fora do índice);
+  - A-RETOMAR em `.context/`.
+  - *Prova:* vermelho → verde.
+- [ ] **ML8 Fins de linha:** `.gitattributes` explícito, renormalizar (commit só disso) e teste.
+  - *Prova:* `git ls-files --eol` coerente; testes e estragos verdes.
+- [ ] **ML9 Catracas do lint:**
+  - `RUF100`;
+  - `noqa` com motivo;
+  - 35 linhas por função (Python, PowerShell, JS) com linha de base;
+  - definições e linha de base do PSScriptAnalyzer;
+  - catraca dos `MUTANTES`;
+  - ADR das regras do Biome.
+  - *Prova:* uma função nova com 36 linhas faz o `testar.ps1` falhar.
+- [ ] **ML10 Nomes:** renomear `comum.mjs` e `*.Comum.ps1`; teste dos nomes proibidos; ADR do `bar_helper`.
+  - *Prova:* `testar.ps1`; o grep de cada nome novo dá < 5 resultados.
+- [ ] **ML11a Cobertura das ferramentas:** `statusline.py`, hooks e portões dentro dos 100 %.
+  - *Prova:* relatório da cobertura.
+- [ ] **ML11b Cobertura das páginas:** lógica de `bar.html`, `splash.html` e `sistema.html` em `.mjs` testados (uma página por commit); a cola fica em `validacao-manual.md`.
+  - *Prova:* cobertura JS 100 %; o teu teste real das páginas.
+- [ ] **ML12 Telas:** `prefers-reduced-motion`, `tabular-nums`, teste de contraste dos tokens, ADR do `rem`.
+  - *Prova:* teste; o teu teste com "Mostrar animações" desligado no Windows.
+- [ ] **ML13 Changelog:** `changelog.d/`, regra no `commit-msg`, fragmentos atrasados e `juntar_changelog.py`.
+  - *Prova:* testes; um `feat` em `2-configuracao/` sem fragmento é recusado no clone.
+- [ ] **ML14 CI:** workflows e `MORG_PY` no `testar.ps1`.
+  - *Prova local:* `testar.ps1` com `MORG_PY`.
+  - *Prova real:* só depois do teu OK para o push (pode ir para um ramo de teste).
+- [ ] **ML15 2.ª verificação Morg Laws:**
+  - auditoria numa sessão nova, com um pedido neutro (sem as conclusões);
+  - comparar as contagens com a 1.ª;
+  - `docs/morg-laws/verificacao-02-*.md`;
+  - estragos;
+  - o teu teste real;
+  - depois, o pedido do push (`main`, `exp/a`, tag).
+
+## Ficheiros principais
+
+- Novos:
+  - `.githooks/`, `scripts/portoes/`, `.github/workflows/`, `.seguranca/`, `changelog.d/`, `.context/`;
+  - `docs/regras-e-barreiras.md`, `docs/planos/`;
+  - `tests/test_portoes_*.py`, `test_regras.py`, `test_dados_pessoais.py`, `test_docs_indices.py`.
+- Mudam:
+  - `CLAUDE.md`, `.claude/settings.json`, `.claude/hooks/*.py`;
+  - `scripts/testar.ps1`, `ruff.toml`, `biome.jsonc`, `.gitattributes`, `docs/README.md`;
+  - os testes e exemplos com o nome;
+  - `comum/comum.mjs` e quem o importa (`guia/*.mjs`, `painel/*.mjs`, `tests/comum.test.mjs`, `tests/painel.test.mjs`).
+- Reutilizar:
+  - o padrão de `.claude/hooks/*.py` (lê o JSON do stdin em UTF-8, sai com 2 e o motivo);
+  - `tests/test_hooks.py`;
+  - `tests/test_ficheiros_texto.py` (limite de linhas e `GRANDES_POR_DIVIDIR`, modelo para as catracas);
+  - `modelos/pre-push` do Morg Laws;
+  - o leitor de AST de `testar.ps1` (`$FuncoesExcluidas`).
+
+## Verificação final
+
+- `powershell -File scripts/testar.ps1` verde a 100 %;
+- `py -I scripts/estragos.py` sem nenhum estrago a escapar;
+- os testes dos hooks no clone descartável (recusados e aceites);
+- o varrimento do gitleaks ao histórico;
+- a 2.ª verificação (ML15) com as contagens: a meta é 0 falhas e 0 parciais, tirando os itens da secção D;
+- o teu teste real (páginas, animações, instalação).
