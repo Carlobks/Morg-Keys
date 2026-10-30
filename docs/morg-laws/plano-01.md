@@ -214,8 +214,17 @@ páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
   - mapa atualizado: 5 regras de docs passam de "por fazer" a "teste".
   - *Prova:* vermelho com 3 falhas, 2 reais e 1 intervalo de datas válido que o teste passou a aceitar → verde. As
     skills da ML6 já aparecem nesta sessão (validado).
-- [ ] **ML8 Fins de linha:** `.gitattributes` explícito, renormalizar (commit só disso) e teste.
-  - *Prova:* `git ls-files --eol` coerente; testes e estragos verdes.
+- [x] **ML8 Fins de linha** (2026-10-30):
+  - `.gitattributes`: `* text=auto eol=lf`, CRLF em `.ps1`, `.psm1`, `.cmd` e `.bat`, binários como `binary`;
+  - ficheiros convertidos no disco, em bytes (26) e normalizados no índice (17), num commit só disso (`88ca6ef`).
+    Entre eles estão o `INSTALAR.cmd` e o `DESINSTALAR.cmd`, que estavam em LF;
+  - `tests/test_fins_de_linha.py` (4 testes): o índice em LF, o disco conforme a extensão e os atributos certos.
+  - *Prova:*
+    - teste vermelho (todos os ficheiros sem atributos);
+    - `git diff --cached --ignore-cr-at-eol` só mostrou o `.gitattributes`;
+    - `git ls-files --eol`: 165 `lf/lf`, 12 `lf/crlf`, 10 binários;
+    - `testar.ps1` verde (360 testes) e estragos **70/70 apanhados**.
+  - O portão da ML2 recusou-me um título com 77 caracteres: encurtado.
 - [ ] **ML9 Catracas do lint:**
   - `RUF100`;
   - `noqa` com motivo;
