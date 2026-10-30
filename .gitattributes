@@ -1,2 +1,15 @@
-# Guardar os ficheiros exatamente como estão (CRLF nos .cmd/.ps1, LF no resto).
-* -text
+# Fins de linha (regra FINS DE LINHA do CLAUDE.md; armadilhas A27 e A45). O git guarda o texto em LF; no disco
+# fica CRLF só no que o Windows corre (.ps1, .psm1, .cmd, .bat) e LF em todo o resto. Confirma-o o
+# tests/test_fins_de_linha.py. Os binários nunca se convertem.
+* text=auto eol=lf
+*.ps1 text eol=crlf
+*.psm1 text eol=crlf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.png binary
+*.ico binary
+*.bmp binary
+*.jpg binary
+*.ttf binary
+*.woff2 binary
+*.exe binary
