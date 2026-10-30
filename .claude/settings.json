@@ -1,4 +1,39 @@
 {
+  "permissions": {
+    "deny": [
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(~/.ssh/**)",
+      "Read(~/.claude/.credentials.json)",
+      "Read(~/.config/morg-keys/**)"
+    ],
+    "ask": [
+      "Bash(git push)",
+      "Bash(git push *)",
+      "PowerShell(git push)",
+      "PowerShell(git push *)",
+      "Bash(npm install *)",
+      "Bash(npm i *)",
+      "Bash(npm ci*)",
+      "Bash(npx *)",
+      "Bash(pip install *)",
+      "Bash(winget install *)",
+      "PowerShell(winget install *)",
+      "PowerShell(Install-Module *)",
+      "Edit(.claude/settings.json)",
+      "Edit(.claude/hooks/**)",
+      "Edit(.githooks/**)"
+    ],
+    "allow": [
+      "Bash(git status*)",
+      "Bash(git log *)",
+      "Bash(git diff *)",
+      "Bash(git show *)",
+      "PowerShell(powershell -NoProfile -ExecutionPolicy Bypass -File scripts/testar.ps1)"
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {

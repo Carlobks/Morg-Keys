@@ -15,3 +15,9 @@ node_modules/
 
 # Cobertura (gerada pelo scripts/testar.ps1)
 .coverage
+
+# Segredos: nunca no repositório (Morg Laws; as permissões do agente também negam lê-los)
+.env
+.env.*
+*.pem
+*.key

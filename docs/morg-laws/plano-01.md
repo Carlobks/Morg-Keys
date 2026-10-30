@@ -145,8 +145,23 @@ páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
     O commit certo passou.
   - Brecha vista no meu próprio `c9f440b` (commit sem caminhos e com `MORG_A_TESTAR=1`): a guarda passa a recusar
     um commit sem caminhos (fora de um merge) e `MORG_A_TESTAR` num commit; teste vermelho (6 casos) → verde.
-- [ ] **ML4 Permissões:** `deny` / `ask` / `allow` no `.claude/settings.json`, mais o teste do JSON.
-  - *Prova:* ler um `.env` falso (no scratchpad) é recusado; `git push` pede confirmação.
+- [x] **ML4 Permissões** (2026-10-30):
+  - `.claude/settings.json` em três colunas:
+    - `deny`: ler `.env`, chaves, credenciais e a lista negra;
+    - `ask`: push, instalar (npm, npx, pip, winget, Install-Module) e editar `settings.json`, hooks e `.githooks`;
+    - `allow`: leituras do git e o `testar.ps1`;
+  - `.gitignore` com `.env`, `.env.*`, `*.pem` e `*.key`;
+  - `tests/test_permissoes.py` (5 testes);
+  - o `settings.local.json` (desta máquina, fora do git) perdeu dois atalhos largos:
+    - `py -I -` corria qualquer código;
+    - `gh pr *` deixava criar e juntar PRs sem perguntar. Ficaram só `view`, `list`, `diff` e `checks`.
+  - *Prova:* teste vermelho (7 falhas, contando os dois atalhos) → verde. Ao vivo, com um `.env` falso:
+    - o `Write` e o `Read` foram recusados pelo deny;
+    - o `cat` também foi recusado;
+    - a leitura por Python foi recusada pelo modo automático.
+  - **Por validar:**
+    - se o `git push --dry-run` para um repositório local te mostrou a pergunta: correu, e daqui não se vê;
+    - o `ask` do Edit não apanha escritas pela shell (o mesmo limite do hook das 500 linhas).
 - [ ] **ML5 Push seguro:**
   - gitleaks (**OK na hora** para instalar);
   - varrer todo o histórico;
