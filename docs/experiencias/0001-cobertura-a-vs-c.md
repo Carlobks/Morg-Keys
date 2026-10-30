@@ -125,7 +125,7 @@ Execução:
 
 **Modelo de pedido.** Na fase 4, mudam só o ramo e o bloco "O quê".
 
-> **Quem és e onde:** estás no repositório Morg Keys (`C:\Users\Usuario\Documents\Omarchy to windows by bks\Morg-Keys`), no ramo `<RAMO>`. Lê primeiro `CLAUDE.md`, `COMO-FOI-FEITO.md` §1, `docs/arquitetura.md`, `docs/armadilhas.md` e `docs/validacao-manual.md`.
+> **Quem és e onde:** estás no repositório Morg Keys (`<pasta do repositório>`), no ramo `<RAMO>`. Lê primeiro `CLAUDE.md`, `COMO-FOI-FEITO.md` §1, `docs/arquitetura.md`, `docs/armadilhas.md` e `docs/validacao-manual.md`.
 >
 > **O quê:** `<OBJETIVO DA VERSÃO>`
 >

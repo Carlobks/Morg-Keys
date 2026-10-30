@@ -15,7 +15,7 @@
     -Animacao cafe                           animação do ecrã de arranque (por agora só há esta)
     -Bat "C:\x\iniciar.bat|http://localhost:3000|Nome"   .bat ao iniciar (vários: separe por ;);
                                              endereço e nome são opcionais
-    -Nome Carlos                             nome da saudação do ecrã de arranque ("Muito bem-vindo, Carlos")
+    -Nome Ana                                nome da saudação do ecrã de arranque ("Muito bem-vindo, Ana")
     -SemPerguntas                            não pergunta nada (sem .bat, salvo -Bat; nome da conta do Windows)
     -ManterIcones                            não esconde os ícones do ambiente de trabalho
     -ManterBarraWindows                      não põe a barra de tarefas a esconder-se sozinha
@@ -258,7 +258,7 @@ function EscolherArranque {
   $quem = EscolherNome $arranqueAntigo $manterArranque
   return @{ Manter = [bool]$manterArranque; Animacao = $anim; Linhas = $linhasBat; Nome = $quem }
 }
-# Nome da saudação do ecrã de arranque ("Muito bem-vindo, Carlos"). $null = o arranque.txt mantido já o tem.
+# Nome da saudação do ecrã de arranque ("Muito bem-vindo, Ana"). $null = o arranque.txt mantido já o tem.
 function EscolherNome($arranqueAntigo, $manter) {
   if ($manter -and (Select-String -Path $arranqueAntigo -Pattern '^\s*nome\s*=\s*\S' -Quiet)) { return $null }  # "nome =" vazio = pergunta
   $padrao = NomeDaConta

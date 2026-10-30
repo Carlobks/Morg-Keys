@@ -98,7 +98,7 @@ reais. O que for suposição está marcado.
 - O nome e a frase chegam à página no `progress.json`. A pré-visualização é `arranque/splash.html?preview` no
   servidor `pack-preview`.
 - **Nome por omissão:** `UserPrincipal.Current.DisplayName`. Numa conta local sem nome completo vem vazio (é o caso
-  deste PC, com `USERNAME` = "Usuario"). Nesse caso a saudação fica "Muito bem-vindo", sem nome.
+  do PC onde se testou, uma conta local sem nome completo). Nesse caso a saudação fica "Muito bem-vindo", sem nome.
 
 ### Fontes das frases (por ordem de linha do `frases.txt`)
 Traduções curtas, com a atribuição. Quase todas vêm da Wikiquote em inglês (`en.wikiquote.org/wiki/<obra>`).

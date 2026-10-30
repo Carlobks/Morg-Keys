@@ -7,7 +7,7 @@
 #   Alt+Esc e depois E: segurar mostra-a (tocar passa à seguinte, se houver mais).
 animacao = {{ANIMACAO}}
 #
-# NOME na saudação do ecrã de arranque ("Muito bem-vindo, Carlos"). Vazio = "Muito bem-vindo!".
+# NOME na saudação do ecrã de arranque ("Muito bem-vindo, Ana"). Vazio = "Muito bem-vindo!".
 # A frase do dia vem de frases.txt, nesta mesma pasta (uma por dia do mês; pode trocá-las).
 nome = {{NOME}}
 #

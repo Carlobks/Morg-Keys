@@ -11,7 +11,7 @@ SPLASH_DIR = HERE / "arranque"
 
 # Configuração do arranque, editável pelo utilizador (Documentos\Guia de Atalhos\arranque.txt):
 #   animacao = cafe
-#   nome = Carlos                                                   (saudação: "Muito bem-vindo, Carlos")
+#   nome = Ana                                                      (saudação: "Muito bem-vindo, Ana")
 #   bat = C:\caminho\programa.bat | http://localhost:3000 | Nome   (endereço e nome opcionais)
 ARRANQUE_FILE = HERE / "guia" / "arranque.txt"
 # Frases do ecrã de boas-vindas, uma por dia do mês: "frase | personagem | anime" (mesma pasta, editável).

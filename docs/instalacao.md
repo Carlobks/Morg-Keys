@@ -51,7 +51,7 @@ Duplo clique em `INSTALAR.cmd`, com a sessão iniciada **na conta do utilizador 
    | `{{HOME}}` | `%USERPROFILE%` com `/` | `C:/Users/joao` |
    | `{{HOME_RE}}` | o mesmo, escapado para regex dentro de JSON | — |
    | `{{ANIMACAO}}` | nome da animação (só em `arranque.txt`) | `cafe` |
-   | `{{NOME}}` | nome da saudação (só em `arranque.txt`) | `Carlos` |
+   | `{{NOME}}` | nome da saudação (só em `arranque.txt`) | `Ana` |
 5. **Apps.** Corre `py -I bar_helper.py apps-apply --skip-missing`.
 6. **Claude Code**, se existir `~\.claude` ou `~\.local\bin\claude.exe`. Copia `statusline.py`; se havia um diferente, guarda-o como `.bak`. Junta `statusLine` ao `settings.json` com um script Python, **sem mexer** numa statusLine alheia.
 7. **Windows.** `HideIcons=1` (exceto com `-ManterIcones`) e barra de tarefas a esconder-se (`StuckRects3`, byte 8 = 3; exceto com `-ManterBarraWindows`). Reinicia o Explorador. Guarda os valores anteriores em `instalacao.json`.

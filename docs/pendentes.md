@@ -9,7 +9,7 @@ A fazer agora, no `exp/a`, antes da fase 4 da experiência (pedido de 2026-10-24
 pequenas, bateria na barra e quota do Claude (via oficial + `claude = esconder`; pesquisa em
 `pesquisa/quota-claude.md`). Já feito também: o piscar na passagem cortina → animação e o ecrã de boas-vindas (escurecer, saudação, hora, frase do dia).
 
-2. **Jogos em ecrã inteiro não funcionam (relatado pelo Carlos, 2026-10-25).** Ao abrir um jogo em ecrã inteiro,
+2. **Jogos em ecrã inteiro não funcionam (relatado pelo utilizador, 2026-10-25).** Ao abrir um jogo em ecrã inteiro,
    o Morg Keys obriga-o a ficar em janela; o jogo recusa e fica minimizado. Hoje, para jogar em ecrã inteiro, é
    preciso desinstalar o Morg Keys. **Estudar antes de mexer:**
    - que tipo de ecrã inteiro é: exclusivo (DirectX/Vulkan) ou janela sem bordas;

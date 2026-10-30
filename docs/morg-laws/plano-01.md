@@ -109,11 +109,14 @@ páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
   - `testar.ps1` em **21,5 s**, verde: Python 258 testes a 100 % (1713 linhas, 554 ramos), JS 45, Pester 72, lint ok.
     Chega para o `pre-commit` correr tudo em cada commit.
   - *Prova:* os números acima.
-- [ ] **ML1 Dados pessoais fora:**
-  - nome fictício nos testes e exemplos;
-  - docs sem nomes nem caminhos;
-  - `tests/test_dados_pessoais.py` por padrão.
-  - *Prova:* teste vermelho antes e verde depois; procura pela lista negra = 0.
+- [x] **ML1 Dados pessoais fora** (2026-10-30):
+  - nome fictício nos testes e exemplos ("Ana"; "Bruno" na conta simulada do Pester): 7 ficheiros, 14 linhas;
+  - docs sem nomes nem caminhos: 5 ficheiros (auditoria, pendentes, armadilhas, experiência 0001, pesquisa do arranque);
+  - `tests/test_dados_pessoais.py`: caminhos `C:\Users\<conta>` fora das contas de exemplo, e-mails que não sejam
+    noreply/exemplo, e a lista negra de 5 termos, fora do repositório (`git config morg.listaNegra`);
+  - fins de linha mantidos (trocas em bytes, com a contagem certa).
+  - *Prova:* vermelho com 3 falhas (4 caminhos, 9 ficheiros com o nome, 3 com a conta) → verde com 4 testes;
+    `testar.ps1` verde.
 - [ ] **ML2 Portões testados:** `scripts/portoes/` com `mensagem_commit.py` (formato, ≤ 72, corpo, `Sem-teste:`,
   `Sem-changelog:`), `identidade.py` (noreply) e `lista_negra.py`, mais `tests/test_portoes_*.py` a 100 %.
   - *Prova:* `testar.ps1`.

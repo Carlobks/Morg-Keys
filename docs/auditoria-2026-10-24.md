@@ -1,11 +1,11 @@
 # Auditoria de 2026-10-24 (ramo `exp/a`)
 
-Pedido do Carlos antes do envio para o GitHub: auditoria de segurança, código, pastas, regras do projeto e
+Pedido do dono do projeto antes do envio para o GitHub: auditoria de segurança, código, pastas, regras do projeto e
 recomendações das documentações oficiais; depois, corrigir o que se encontrou, com um teste para cada problema.
 
 **Como se fez:** quatro auditores em paralelo, só a ler (Python; páginas do Zebar; instalador e repositório;
 código e regras), sem verem as conclusões uns dos outros. Cada achado foi marcado CONFIRMADO (seguido no código)
-ou PLAUSÍVEL. A seguir, o plano de correções (F0–F7) foi aprovado pelo Carlos.
+ou PLAUSÍVEL. A seguir, o plano de correções (F0–F7) foi aprovado pelo dono do projeto.
 
 **Resultado geral:** nenhum problema crítico ou alto de segurança; nenhum segredo no histórico do git (53
 commits, todos os ramos); nenhum XSS explorável (todos os dados de fora passam por `esc()` ou `textContent`);

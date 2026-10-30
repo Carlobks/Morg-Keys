@@ -48,7 +48,7 @@ class ArranqueFalso(SistemaFalso):
         self.arranque_txt = self.pasta / "arranque.txt"
         self.bat = self.pasta / "servidor.bat"
         self.bat.write_text("@echo off\n")
-        self.arranque_txt.write_text(f"animacao = cafe\nnome = Carlos\nbat = {self.bat} | http://localhost:3000 | Servidor\n"
+        self.arranque_txt.write_text(f"animacao = cafe\nnome = Ana\nbat = {self.bat} | http://localhost:3000 | Servidor\n"
                                      "bat = C:\\nao\\existe.bat\n", encoding="utf-8")
         self.janelas = {bh.BAR_TITLE: 11, TITULO_SISTEMA: 12, "Shell_TrayWnd": 13, bh.SPLASH_TITLE: 14}
         k32 = {
@@ -139,7 +139,7 @@ class Arranque(unittest.TestCase):
             self.assertEqual(s.eventos[:7], ["lançou start-widget-preset --pack", "splash ao topo", "splash ao topo",
                                              "DwmFlush", "DwmFlush", "cortina fechada", "lançou startup"])
             # A saudação do ecrã de boas-vindas: o nome do arranque.txt e a frase do dia do frases.txt.
-            self.assertEqual(progresso["nome"], "Carlos")
+            self.assertEqual(progresso["nome"], "Ana")
             dia_impar = s.relogio.localtime().tm_mday % 2 == 1
             self.assertEqual(progresso["frase"], {"texto": "Dia ímpar" if dia_impar else "Dia par",
                                                   "personagem": "Ana" if dia_impar else "Rui", "anime": "Vida"})
@@ -202,7 +202,7 @@ class ConfiguracaoDoArranque(unittest.TestCase):
         self.assertEqual(self.ler(None), {"animacao": "cafe", "nome": "", "bats": []})
 
     def test_nome_da_saudacao(self):
-        self.assertEqual(self.ler("nome = Carlos Silva\n")["nome"], "Carlos Silva")
+        self.assertEqual(self.ler("nome = Ana Sousa\n")["nome"], "Ana Sousa")
         self.assertEqual(self.ler("Nome =\n")["nome"], "")
         self.assertEqual(self.ler("# nome = Zé\n")["nome"], "")
 

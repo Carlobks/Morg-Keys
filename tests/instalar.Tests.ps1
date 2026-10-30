@@ -263,7 +263,7 @@ Describe 'Nome da saudação do ecrã de arranque' {
   BeforeEach {
     Limpar
     $antigo = Join-Path $Glzr "$Pack\guia\arranque.txt"
-    Mock NomeDaConta { 'Carlos' }
+    Mock NomeDaConta { 'Bruno' }
   }
   It 'o arranque.txt mantido que já tem nome fica como está ($null)' {
     Escrever $antigo "animacao = cafe`nnome = Zé`n"
@@ -273,9 +273,9 @@ Describe 'Nome da saudação do ecrã de arranque' {
   It 'pergunta; com Enter usa o nome da conta (também quando o arranque.txt mantido não tem nome)' {
     Escrever $antigo "animacao = cafe`nnome =  `n"  # linha vazia conta como sem nome
     Mock Read-Host { '  ' }
-    EscolherNome $antigo $true | Should -Be 'Carlos'
-    Should -Invoke Read-Host -ParameterFilter { $Prompt -match 'Como quer ser chamado.*\(Enter = Carlos\)' }
-    Registado | Should -Match 'Saudação: Muito bem-vindo, Carlos!'
+    EscolherNome $antigo $true | Should -Be 'Bruno'
+    Should -Invoke Read-Host -ParameterFilter { $Prompt -match 'Como quer ser chamado.*\(Enter = Bruno\)' }
+    Registado | Should -Match 'Saudação: Muito bem-vindo, Bruno!'
     Mock Read-Host { ' Ana ' }
     EscolherNome $null $false | Should -Be 'Ana'
   }
@@ -285,7 +285,7 @@ Describe 'Nome da saudação do ecrã de arranque' {
     EscolherNome $null $false | Should -Be 'Rita'
     $Nome = ''
     $SemPerguntas = $true
-    EscolherNome $null $false | Should -Be 'Carlos'
+    EscolherNome $null $false | Should -Be 'Bruno'
     Mock NomeDaConta { '' }
     EscolherNome $null $false | Should -Be ''
     Registado | Should -Match 'Saudação: Muito bem-vindo!'
