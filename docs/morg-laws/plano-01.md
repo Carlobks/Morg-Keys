@@ -143,6 +143,8 @@ páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
     - o commit com o `testar.ps1` a falhar.
 
     O commit certo passou.
+  - Brecha vista no meu próprio `c9f440b` (commit sem caminhos e com `MORG_A_TESTAR=1`): a guarda passa a recusar
+    um commit sem caminhos (fora de um merge) e `MORG_A_TESTAR` num commit; teste vermelho (6 casos) → verde.
 - [ ] **ML4 Permissões:** `deny` / `ask` / `allow` no `.claude/settings.json`, mais o teste do JSON.
   - *Prova:* ler um `.env` falso (no scratchpad) é recusado; `git push` pede confirmação.
 - [ ] **ML5 Push seguro:**

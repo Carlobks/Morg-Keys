@@ -5,8 +5,9 @@ Os testes, a identidade, a lista negra e a mensagem verificam-se nos hooks do gi
 - `--no-verify` (ou `-n` num commit), que salta os hooks do git;
 - mudar ou desligar o `core.hooksPath` (só se pode pô-lo em `.githooks`);
 - um commit com o `core.hooksPath` que não é `.githooks` (os portões não correriam);
-- preparar tudo de uma vez (`git add -A` / `.` / `--all`, `git commit -a`, commit do caminho `.`): o commit é por
-  caminho, para não levar o trabalho de outra sessão;
+- preparar tudo de uma vez (`git add -A` / `.` / `--all`, `git commit -a`, commit do caminho `.` ou sem caminhos,
+  fora de um merge): o commit é por caminho, para não levar o trabalho de outra sessão;
+- `MORG_A_TESTAR` num commit: a marca da A30 faria o pre-commit saltar os testes;
 - `git commit -m` com várias linhas ou com heredoc: no Windows estraga os acentos; usar `-F <ficheiro>`.
 Reconhece os comandos pelo texto (limites na A32). Sai com 2 e o motivo no stderr; sai com 0 nos outros casos.
 Substitui o testes_antes_do_commit.py: os testes passaram para o .githooks/pre-commit (guarda A30 lá).
@@ -94,8 +95,8 @@ def motivo_do_commit(args, ler_hooks):
     curtas, longas, mensagens, caminhos = opcoes(args)
     if "n" in curtas or "--no-verify" in longas:
         return "--no-verify salta os portões do git."
-    if "a" in curtas or "--all" in longas or _TUDO & set(caminhos):
-        return "o commit é por caminho (git commit -F msg -- <ficheiros>), nunca de tudo (-a, --all, .)."
+    if "a" in curtas or "--all" in longas or _TUDO & set(caminhos) or not (caminhos or merge_em_curso()):
+        return "o commit é por caminho (git commit -F msg -- <ficheiros>), nunca de tudo (-a, --all, ., sem caminhos)."
     if any("\n" in texto or "<<" in texto for texto in mensagens):
         return "mensagem com várias linhas em -m: escreva-a num ficheiro e use git commit -F <ficheiro>."
     hooks = ler_hooks()
@@ -118,9 +119,17 @@ def motivo_do_hooks_path(globais, subcomando, args):
     return None
 
 
+def merge_em_curso():
+    """True a meio de um merge: o commit que o fecha leva tudo o que o merge preparou, sem caminhos."""
+    return (RAIZ / ".git" / "MERGE_HEAD").exists()
+
+
 def motivo_para_bloquear(comando, ler_hooks):
     """Devolve o motivo (texto) se o comando saltar ou estragar os portões do git; None se for seguro."""
-    for globais, subcomando, args in comandos_git(palavras(comando)):
+    comandos = comandos_git(palavras(comando))
+    if "MORG_A_TESTAR" in comando and any(subcomando == "commit" for _, subcomando, _ in comandos):
+        return "MORG_A_TESTAR é só para dentro dos testes (A30): num commit salta o scripts/testar.ps1."
+    for globais, subcomando, args in comandos:
         motivo = motivo_do_hooks_path(globais, subcomando, args)
         if not motivo and subcomando == "add" and (_TUDO & set(args) or any(re.fullmatch(r"-\w*A\w*", a) for a in args)):
             motivo = "prepare por caminho (git add -- <ficheiros>), nunca tudo (-A, --all, ., :/)."

@@ -49,6 +49,16 @@ class Recusa(unittest.TestCase):
                            "git commit -a -F m", "git commit -am x", "git commit --all -F m",
                            "git commit -F m -- .", "cd x && git add . && git commit -F m"], "caminho")
 
+    def test_commit_sem_caminhos(self):
+        # Um commit sem caminhos leva o que outra sessão deixou preparado (aconteceu na ML3 com c9f440b).
+        self.assertRecusa(["git commit -F m.txt", "git commit --amend -F m.txt", "git commit -q -F m && git log"],
+                          "por caminho")
+
+    def test_saltar_os_testes_com_a_marca_a30(self):
+        # MORG_A_TESTAR=1 é só para dentro dos testes (A30); num commit do agente salta o testar.ps1.
+        self.assertRecusa(["MORG_A_TESTAR=1 git commit -F m -- a.py", "$env:MORG_A_TESTAR='1'; git commit -F m -- a",
+                           "set MORG_A_TESTAR=1&& git commit -F m -- a"], "MORG_A_TESTAR")
+
     def test_mensagem_com_varias_linhas(self):
         self.assertRecusa(['git commit -m "título\n\ncorpo"', 'git commit --message="a\nb"',
                            "git commit -m \"$(cat <<'EOF'\nx\nEOF\n)\"", 'git commit -qm "a\nb"'], "-F")
@@ -58,14 +68,21 @@ class DeixaPassar(unittest.TestCase):
 
     def test_comandos_normais(self):
         lido = mock.Mock(return_value=".githooks")
-        for comando in ['git add -- a.py "b c.md"', 'git commit -F m.txt -- a.py', 'git commit -m "uma linha"',
+        for comando in ['git add -- a.py "b c.md"', 'git commit -F m.txt -- a.py', 'git commit -m "uma linha" a.py',
                         'git config --get core.hooksPath', 'git config core.hooksPath',
                         'git config core.hooksPath .githooks', 'git push -n origin exp/a', 'git status --short -uall',
-                        'git log --oneline -5', 'git commit --amend -F m.txt', "echo 'sem aspas fechadas",
+                        'git log --oneline -5', 'git commit --amend -F m.txt -- a.py', "echo 'sem aspas fechadas",
                         'git commit -F m --author "Ana <a@example.com>" -- a.py', 'git commit -C HEAD -- a.py',
                         'git commit -F m -- -ficheiro-com-hifen.py', 'git -C pasta --no-pager log', 'ls -la', '']:
             with self.subTest(comando=comando):
                 self.assertIsNone(guarda.motivo_para_bloquear(comando, lido))
+
+    def test_commit_que_fecha_um_merge_vai_sem_caminhos(self):
+        with mock.patch.object(guarda, "merge_em_curso", return_value=True):
+            self.assertIsNone(guarda.motivo_para_bloquear("git commit -F m.txt", hooks_certos))
+
+    def test_merge_em_curso_ve_o_merge_head(self):
+        self.assertEqual(guarda.merge_em_curso(), (Path(guarda.RAIZ) / ".git" / "MERGE_HEAD").exists())
 
     def test_so_le_o_hooks_path_quando_ha_commit(self):
         lido = mock.Mock(return_value="")
