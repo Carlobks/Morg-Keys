@@ -27,6 +27,14 @@ A 1.ª verificação (`docs/morg-laws/verificacao-01-2026-10-30.md`, commit `84a
 - `get_usage` antes de cada fase: a 90 % não se começa nada grande, a 95 % para-se com uma nota A-RETOMAR;
 - os testes de hooks e de push correm num **clone descartável no scratchpad**, nunca neste repositório.
 
+## Fora do escopo
+
+- As fases F1–F7 da auditoria (só saem de lá os itens marcados "→ ML"), a experiência 0001, os jogos em ecrã
+  inteiro e a A38.
+- O push para o GitHub, até à ML15 e com o OK do dono.
+- Reescrever o histórico já publicado (o nome antigo, o `17ce46f`, os títulos longos ficam como exceção).
+- Mexer no PC instalado (`~\.glzr`, tarefas, registo): tudo se prova no repositório e num clone descartável.
+
 **Efeito no plano da auditoria (F1–F7):** saem da F4 o `CLAUDE.md`, as 35 linhas, a cobertura do `statusline.py` e
 dos hooks, o `onFailure` e os `noqa`; saem da F5 os fins de linha e os caminhos pessoais; sai da F6 a lógica das
 páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
@@ -191,11 +199,21 @@ páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
   - *Prova:* vermelho (5 falhas com o CLAUDE.md antigo) → o próprio teste apanhou 3 caminhos inválidos no texto
     novo → verde.
   - *Por validar:* se as skills aparecem numa sessão nova (só tu o vês ao abrir uma).
-- [ ] **ML7 Docs com barreira:**
-  - testes do índice dos docs, das ADR, das armadilhas, da pesquisa, dos handoffs e dos planos;
-  - corrigir o que falhar (ex.: a auditoria fora do índice);
-  - A-RETOMAR em `.context/`.
-  - *Prova:* vermelho → verde.
+- [x] **ML7 Docs com barreira** (2026-10-30):
+  - `tests/test_docs_indices.py` (6 testes), que verifica:
+    - cada `.md` e pasta de `docs/` no índice;
+    - as ADR seguidas e na tabela;
+    - cada pesquisa no índice, com data;
+    - as armadilhas A1…An seguidas, cada uma com a regra;
+    - os planos com "Fora do escopo" e a prova;
+    - os `.context/HANDOFF-<assunto>.md` com as 5 secções e hashes que existem;
+  - corrigido o que falhou:
+    - a `auditoria-2026-10-24.md` entrou no índice;
+    - este plano ganhou "Fora do escopo";
+  - A-RETOMAR em `.context/HANDOFF-morg-laws.md` (a memória passa a apontar para lá);
+  - mapa atualizado: 5 regras de docs passam de "por fazer" a "teste".
+  - *Prova:* vermelho com 3 falhas, 2 reais e 1 intervalo de datas válido que o teste passou a aceitar → verde. As
+    skills da ML6 já aparecem nesta sessão (validado).
 - [ ] **ML8 Fins de linha:** `.gitattributes` explícito, renormalizar (commit só disso) e teste.
   - *Prova:* `git ls-files --eol` coerente; testes e estragos verdes.
 - [ ] **ML9 Catracas do lint:**

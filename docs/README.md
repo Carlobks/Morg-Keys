@@ -13,6 +13,7 @@ O guia de quem usa o PC é o `Tutorial.html`; as regras de trabalho dos agentes 
 | [decisoes/](decisoes/) | Decisões (ADR): uma por ficheiro, `NNNN-titulo.md`, nunca se reutiliza um número |
 | [pesquisa/](pesquisa/README.md) | Pesquisas por tópico, com fontes e o que não foi verificado |
 | [experiencias/](experiencias/) | Experiências medidas (plano, medidas, resultados): `0001-cobertura-a-vs-c.md` |
+| [auditoria-2026-10-24.md](auditoria-2026-10-24.md) | Auditoria de segurança, código e regras de 2026-10-24: achados e o plano F0–F7 |
 | [morg-laws/](morg-laws/) | Verificações contra as regras gerais do Morg Laws (`verificacao-01-2026-10-30.md`) e o plano que as cumpre (`plano-01.md`) |
 | [pendentes.md](pendentes.md) | Trabalho combinado e ainda não feito, por ordem |
 | [regras-e-barreiras.md](regras-e-barreiras.md) | Cada regra do `CLAUDE.md` e a barreira que a obriga (hook, git, teste, permissão, CI ou texto) |

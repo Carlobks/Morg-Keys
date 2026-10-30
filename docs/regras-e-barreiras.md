@@ -16,7 +16,7 @@ tenha aqui uma linha, e que cada caminho citado exista.
 | Regra | Barreira | Onde |
 |---|---|---|
 | NUNCA ARRANCAR O AMBIENTE | hook + teste | `.claude/hooks/bloquear_arranque.py`, `tests/test_hooks.py` |
-| PLANO ANTES DE MEXER | por fazer (ML7) | teste das secções "Fora do escopo" e "Prova" nos planos copiados para docs/planos |
+| PLANO ANTES DE MEXER | teste; texto | `tests/test_docs_indices.py`: os planos em `docs/` têm "Fora do escopo" e a prova; o "sim" do dono é texto |
 | DECISÃO É DO DONO | texto | nenhuma máquina sabe o que é uma decisão do dono; skill `pondo-o-plano-a-prova` |
 | COMMIT SEM PEDIDO, PUSH COM O SIM | hook | `.claude/hooks/perguntar_antes.py` pergunta antes de cada `git push` |
 | OS HOOKS SÃO A REDE | hook + teste; CI por fazer (ML14) | `.claude/hooks/guarda_do_git.py` (`--no-verify`, `core.hooksPath`), `tests/test_hooks.py` (`onFailure: block`) |
@@ -39,9 +39,9 @@ tenha aqui uma linha, e que cada caminho citado exista.
 | SUBSTITUIÇÕES COM CONTAGEM | texto | o `assert` vive em cada script de substituição |
 | ESTRUTURA À PARTE | texto | é juízo de quem commita; a revisão do diff apanha |
 | COMENTÁRIOS FICAM | texto | é juízo de quem refatora; a revisão do diff apanha |
-| DECISÕES EM ADR | por fazer (ML7) | teste dos números únicos e da tabela do índice |
-| ARMADILHAS REGISTADAS | por fazer (ML7) | teste da numeração A1…An |
-| ÍNDICE DOS DOCS | por fazer (ML7) | teste: cada `.md` de `docs/` no índice |
-| PESQUISA ANTES DE IMPLEMENTAR | texto; por fazer (ML7) | o índice de `docs/pesquisa/README.md` com data passa a ter teste |
+| DECISÕES EM ADR | teste | `tests/test_docs_indices.py`: números seguidos e cada ADR na tabela do índice |
+| ARMADILHAS REGISTADAS | teste | `tests/test_docs_indices.py`: A1…An seguidas, cada uma com a regra |
+| ÍNDICE DOS DOCS | teste | `tests/test_docs_indices.py`: cada `.md` e pasta de `docs/` no índice |
+| PESQUISA ANTES DE IMPLEMENTAR | texto; teste | pesquisar antes é texto; `tests/test_docs_indices.py` exige cada pesquisa no índice, com data |
 | FORMATO DOS COMMITS | git | `.githooks/commit-msg` → `scripts/portoes/mensagem_commit.py` |
 | REPOSITÓRIO PARA O PC | texto | o script que copiava do PC para o repositório foi retirado: só há um sentido |
