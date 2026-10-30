@@ -127,13 +127,22 @@ páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
   - O `Sem-changelog:` fica para a ML13 (sem o `changelog.d/`, recusaria todos os feat/fix).
   - *Prova:* vermelho (3 módulos em falta) → verde; `testar.ps1` com 301 testes Python e 100 % (1827 linhas,
     596 ramos). O teste da ML1 apanhou um e-mail de exemplo inventado nestes testes, corrigido.
-- [ ] **ML3 Ligar o git:**
-  - `.githooks/pre-commit` e `commit-msg`;
-  - `core.hooksPath`;
-  - os testes passam do hook do Claude para o `pre-commit`;
-  - o hook do Claude passa a recusar `--no-verify`, `add -A/.`, `commit -a`, `-m` com várias linhas, mudar o `hooksPath` e um commit com o `hooksPath` errado;
-  - `onFailure: block` em todos.
-  - *Prova:* num clone descartável, um título errado, outro e-mail, um `fix` sem teste e um nome da lista são todos recusados; um commit certo passa.
+- [x] **ML3 Ligar o git** (2026-10-30):
+  - `.githooks/pre-commit` (identidade, lista negra nos ficheiros, `testar.ps1` com a guarda A30) e `commit-msg`
+    (formato e lista negra na mensagem); `core.hooksPath = .githooks`;
+  - `.claude/hooks/guarda_do_git.py` substitui o `testes_antes_do_commit.py` (os testes passaram para o git): recusa
+    `--no-verify`, `add -A/./--all/:/`, `commit -a` ou `-- .`, `-m` com várias linhas ou heredoc, mudar o
+    `hooksPath`, e um commit com o `hooksPath` errado;
+  - `onFailure: block` nos 3 hooks; `test_hooks.py` exige-o e exige que cada hook da pasta esteja ligado;
+  - README "Para quem contribui"; armadilha A44 (um clone novo usa a identidade global do git).
+  - *Prova:* `git add -A -n` recusado pela guarda ao vivo. No clone descartável foram recusados:
+    - o e-mail pessoal e o nome real da configuração global (apanhados sem os procurar: ver A44);
+    - um título sem tipo;
+    - um `fix` sem teste;
+    - um nome da lista num ficheiro e na mensagem;
+    - o commit com o `testar.ps1` a falhar.
+
+    O commit certo passou.
 - [ ] **ML4 Permissões:** `deny` / `ask` / `allow` no `.claude/settings.json`, mais o teste do JSON.
   - *Prova:* ler um `.env` falso (no scratchpad) é recusado; `git push` pede confirmação.
 - [ ] **ML5 Push seguro:**

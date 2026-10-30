@@ -11,7 +11,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
 
-from carregar_portoes import PASTA_PORTOES, carregar_portao
+from carregar_por_caminho import PASTA_PORTOES, carregar_portao
 
 lista_negra = carregar_portao("lista_negra")
 

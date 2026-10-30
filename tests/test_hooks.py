@@ -1,31 +1,41 @@
-"""Testes dos hooks do Claude Code em .claude/hooks/ (as decisões; o ligar ao settings.json prova-se à mão).
+"""Testes dos hooks do Claude Code em .claude/hooks/ (as decisões e a ligação no .claude/settings.json).
 
 Cada caso vem de um comando real deste projeto: os que têm de passar (glazewm command, tarefa agendada,
 ler ficheiros) e os que têm de ser recusados (arrancar o GlazeWM, o Zebar ou o boot — armadilha A2).
+A guarda do git tem os seus testes em test_guarda_do_git.py.
 """
 
-import importlib.util
 import json
+import re
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
 
-PASTA_HOOKS = Path(__file__).resolve().parent.parent / ".claude" / "hooks"
+from carregar_por_caminho import PASTA_HOOKS, RAIZ, carregar_hook
+
+arranque = carregar_hook("bloquear_arranque")
+linhas = carregar_hook("limite_de_linhas")
 
 
-def carregar(nome):
-    """Importa um hook pelo caminho (a pasta .claude não é um pacote)."""
-    especificacao = importlib.util.spec_from_file_location(nome, PASTA_HOOKS / f"{nome}.py")
-    modulo = importlib.util.module_from_spec(especificacao)
-    especificacao.loader.exec_module(modulo)
-    return modulo
+class LigacaoNoSettings(unittest.TestCase):
+    """Os hooks são a rede (Morg Laws): cada um está ligado, existe e bloqueia também se ele próprio falhar."""
 
+    def hooks_ligados(self):
+        definicoes = json.loads((RAIZ / ".claude" / "settings.json").read_text(encoding="utf-8"))
+        return [hook for grupo in definicoes["hooks"]["PreToolUse"] for hook in grupo["hooks"]]
 
-arranque = carregar("bloquear_arranque")
-commit = carregar("testes_antes_do_commit")
-linhas = carregar("limite_de_linhas")
+    def test_cada_hook_existe_e_bloqueia_se_falhar(self):
+        for hook in self.hooks_ligados():
+            nome = re.search(r"\.claude/hooks/(\w+\.py)", hook["command"]).group(1)
+            with self.subTest(hook=nome):
+                self.assertTrue((PASTA_HOOKS / nome).is_file())
+                self.assertEqual(hook.get("onFailure"), "block", "sem onFailure: block, um hook partido deixa passar")
+
+    def test_todos_os_hooks_da_pasta_estao_ligados(self):
+        ligados = {re.search(r"(\w+\.py)", hook["command"]).group(1) for hook in self.hooks_ligados()}
+        self.assertEqual(ligados, {p.name for p in PASTA_HOOKS.glob("*.py")})
 
 
 def correr_hook(nome, pedido, ambiente=None):
@@ -83,30 +93,15 @@ class BloquearArranque(unittest.TestCase):
         self.assertEqual(codigo, 0)
 
 
-class TestesAntesDoCommit(unittest.TestCase):
+class TestesNoPreCommitDoGit(unittest.TestCase):
+    """Os testes passaram do hook do Claude para o .githooks/pre-commit, com a mesma guarda da A30."""
 
-    def test_reconhece_commits(self):
-        for comando in ['git commit -m "x"', 'git -C "C:/a b" commit -q -m x', "git add -A && git commit -F m.txt",
-                        "git -c user.name=x commit --amend"]:
-            with self.subTest(comando=comando):
-                self.assertTrue(commit.e_commit(comando))
-
-    def test_ignora_o_resto(self):
-        for comando in ["git status", "git log --grep commit", "echo commit", "git push", "git show HEAD"]:
-            with self.subTest(comando=comando):
-                self.assertFalse(commit.e_commit(comando))
-
-    def test_sem_commit_nao_corre_os_testes(self):
-        # Se corresse os testes, demoraria segundos; aqui só verifica que sai logo com 0.
-        codigo, _ = correr_hook("testes_antes_do_commit", {"tool_name": "Bash", "tool_input": {"command": "git status"}})
-        self.assertEqual(codigo, 0)
-
-    def test_dentro_dos_testes_nao_volta_a_correr_os_testes(self):
-        # Regressão A30: sem esta proteção, testes -> hook -> testes -> hook… (650 processos).
-        # Testa-se a decisão, não o processo: um hook estragado aqui voltaria a entrar em ciclo.
-        self.assertTrue(commit.deve_correr_testes('git commit -m "x"', {}))
-        self.assertFalse(commit.deve_correr_testes('git commit -m "x"', {commit.MARCA_A_TESTAR: "1"}))
-        self.assertFalse(commit.deve_correr_testes("git status", {}))
+    def test_pre_commit_corre_os_testes_e_respeita_a_guarda_a30(self):
+        # Regressão A30: sem a guarda, testes -> commit -> testes -> commit… (650 processos em 2026-10-23).
+        texto = (RAIZ / ".githooks" / "pre-commit").read_text(encoding="utf-8")
+        self.assertIn("scripts/testar.ps1", texto)
+        self.assertIn('if [ -n "$MORG_A_TESTAR" ]', texto)
+        self.assertIn("MORG_A_TESTAR=1 powershell", texto)
 
 
 class LimiteDeLinhas(unittest.TestCase):

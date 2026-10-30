@@ -1,0 +1,9 @@
+#!/bin/sh
+# Portão do git (Morg Laws): a mensagem do commit segue o formato e é tão pública como o código.
+# Formato: início de scripts/portoes/mensagem_commit.py. Ativar: git config core.hooksPath .githooks
+raiz=$(git rev-parse --show-toplevel) || exit 1
+py=${MORG_PY:-C:/Windows/py.exe}
+portoes="$raiz/scripts/portoes"
+
+"$py" -I "$portoes/mensagem_commit.py" "$1" || exit 1
+grep -v '^#' "$1" | "$py" -I "$portoes/lista_negra.py" "a mensagem do commit"

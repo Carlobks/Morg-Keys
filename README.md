@@ -44,6 +44,19 @@ Sem editar ficheiros: os atalhos e as apps do arranque mudam-se no painel `Alt+E
 
 > ⚠️ Nunca arranque o GlazeWM ou o Zebar a partir de um terminal do Claude Code ou de outro agente: os programas herdam o ambiente desse terminal. Ver a armadilha A2 em [docs/armadilhas.md](docs/armadilhas.md).
 
+## Para quem contribui
+
+Depois de clonar, ligue os portões do git e use uma identidade pública (o `pre-commit` recusa outra):
+
+```bash
+git config core.hooksPath .githooks
+git config --local user.email <id>+<conta>@users.noreply.github.com
+```
+
+Cada commit corre `scripts/testar.ps1` (testes, 100 % de cobertura e lint), verifica a mensagem
+(`tipo(área): …`, formato em `scripts/portoes/mensagem_commit.py`) e procura dados pessoais. Nunca use
+`--no-verify`. Para a lista negra de nomes, que fica fora do repositório: `git config morg.listaNegra <ficheiro>`.
+
 ## Licença
 
 [GPL-3.0](LICENSE). Componentes de terceiros e respetivas licenças em [LICENCAS.txt](LICENCAS.txt) e [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt).

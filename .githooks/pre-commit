@@ -1,0 +1,31 @@
+#!/bin/sh
+# Portão do git (Morg Laws): corre em todos os commits, do agente ou feitos à mão. Nunca saltar com --no-verify.
+# Ativar depois de clonar: git config core.hooksPath .githooks
+# Python: C:\Windows\py.exe (ou outro em MORG_PY, ex.: no CI). Lógica testada em scripts/portoes/ e tests/.
+raiz=$(git rev-parse --show-toplevel) || exit 1
+py=${MORG_PY:-C:/Windows/py.exe}
+portoes="$raiz/scripts/portoes"
+
+# 1. A identidade é pública: e-mail noreply do GitHub e nome do autor fora da lista negra.
+"$py" -I "$portoes/identidade.py" || exit 1
+
+# 2. Os nomes dos ficheiros e as linhas acrescentadas não podem ter termos da lista negra.
+{
+  git diff --cached --name-only --diff-filter=ACMR
+  git diff --cached -U0 --diff-filter=ACMR | grep '^+' | grep -v '^+++'
+} | "$py" -I "$portoes/lista_negra.py" "os ficheiros do commit" || exit 1
+
+# 3. Testes, cobertura e lint (scripts/testar.ps1, ~20 s). Dentro de uma corrida de testes não se repetem: um
+#    teste que fizesse um commit voltaria a correr os testes, e assim sem fim (armadilha A30).
+if [ -n "$MORG_A_TESTAR" ]; then
+  exit 0
+fi
+saida=$(mktemp)
+if ! MORG_A_TESTAR=1 powershell -NoProfile -ExecutionPolicy Bypass -File "$raiz/scripts/testar.ps1" > "$saida" 2>&1; then
+  tail -n 40 "$saida" >&2
+  rm -f "$saida"
+  echo "Commit recusado: scripts/testar.ps1 falhou (saída acima). Corrija a causa; nunca --no-verify." >&2
+  exit 1
+fi
+rm -f "$saida"
+exit 0
