@@ -117,9 +117,16 @@ páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
   - fins de linha mantidos (trocas em bytes, com a contagem certa).
   - *Prova:* vermelho com 3 falhas (4 caminhos, 9 ficheiros com o nome, 3 com a conta) → verde com 4 testes;
     `testar.ps1` verde.
-- [ ] **ML2 Portões testados:** `scripts/portoes/` com `mensagem_commit.py` (formato, ≤ 72, corpo, `Sem-teste:`,
-  `Sem-changelog:`), `identidade.py` (noreply) e `lista_negra.py`, mais `tests/test_portoes_*.py` a 100 %.
-  - *Prova:* `testar.ps1`.
+- [x] **ML2 Portões testados** (2026-10-30): `scripts/portoes/` com:
+  - `mensagem_commit.py` (formato `tipo(área): `, ≤ 72, sem ponto final, linha em branco, corpo em fix/feat/refactor,
+    `Sem-teste:` com motivo; aceita os `Merge`/`Revert` do git);
+  - `identidade.py` (noreply + nome contra a lista negra);
+  - `lista_negra.py` (sem lista avisa; lista em falta recusa).
+  - Mais `tests/test_portoes_*.py` (39 testes) e `tests/carregar_portoes.py`; os portões entram na cobertura do
+    `testar.ps1`.
+  - O `Sem-changelog:` fica para a ML13 (sem o `changelog.d/`, recusaria todos os feat/fix).
+  - *Prova:* vermelho (3 módulos em falta) → verde; `testar.ps1` com 301 testes Python e 100 % (1827 linhas,
+    596 ramos). O teste da ML1 apanhou um e-mail de exemplo inventado nestes testes, corrigido.
 - [ ] **ML3 Ligar o git:**
   - `.githooks/pre-commit` e `commit-msg`;
   - `core.hooksPath`;
