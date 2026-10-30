@@ -20,6 +20,12 @@ COMPONENTES INCLUÍDOS NO REPOSITÓRIO
   (© Ryan L McIntyre; ver LICENSE-NerdFonts.md nessa pasta).
   https://www.jetbrains.com/lp/mono/  e  https://www.nerdfonts.com/
 
+.claude\skills\ (só para quem desenvolve; o instalador não as copia)
+  Sete skills do Morg-laws (https://github.com/Carlobks/Morg-laws), texto sob
+  CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/), copiadas sem
+  alterações com o pacote "skills" 1.7.4. A origem e o hash de cada uma estão
+  em skills-lock.json.
+
 PROGRAMAS DESCARREGADOS NA INSTALAÇÃO (não vêm no repositório)
 
 GlazeWM 3.10.1 (inclui o Zebar 3.3.1), © glzr-io, GPL-3.0.

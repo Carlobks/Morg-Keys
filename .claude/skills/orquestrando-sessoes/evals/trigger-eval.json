@@ -1,0 +1,12 @@
+[
+  {"query": "abre uma sessão nova para auditar este plano sem saber o que eu acho", "should_trigger": true},
+  {"query": "vou continuar amanhã noutra sessão, deixa o trabalho preparado", "should_trigger": true},
+  {"query": "há três sessões a mexer nesta pasta, como evito que uma leve o trabalho da outra?", "should_trigger": true},
+  {"query": "devo usar sub-agentes para esta migração grande?", "should_trigger": true},
+  {"query": "o git diz que existe um index.lock, outra sessão está a commitar?", "should_trigger": true},
+  {"query": "outra sessão diz que encontrou 12 problemas, posso confiar?", "should_trigger": true},
+  {"query": "faz o commit só dos meus arquivos", "should_trigger": false},
+  {"query": "escreve a regra sobre sub-agentes no CLAUDE.md", "should_trigger": false},
+  {"query": "abre o arquivo de sessão do usuário no Supabase", "should_trigger": false},
+  {"query": "o teste de login está a falhar", "should_trigger": false}
+]

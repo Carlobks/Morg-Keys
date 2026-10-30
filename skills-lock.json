@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "skills": {
+    "auditoria-de-seguranca": {
+      "source": "Carlobks/Morg-laws",
+      "sourceType": "github",
+      "skillPath": "skills/auditoria-de-seguranca/SKILL.md",
+      "computedHash": "03ce78ae52a1c106cb32de64c92ba8cbe13ae5394076ae9fe78ea33276e15369"
+    },
+    "desenhando-telas": {
+      "source": "Carlobks/Morg-laws",
+      "sourceType": "github",
+      "skillPath": "skills/desenhando-telas/SKILL.md",
+      "computedHash": "e2bce290bec899b5d25258ee020f315b8db39bbd82ea8ba12d5e0f3844ab9b6d"
+    },
+    "escrevendo-regras-de-agente": {
+      "source": "Carlobks/Morg-laws",
+      "sourceType": "github",
+      "skillPath": "skills/escrevendo-regras-de-agente/SKILL.md",
+      "computedHash": "12b7f3bda5e6cb22ab81a7b5cb3ec971f006d22695c78854b67aca809b781551"
+    },
+    "git-e-commits": {
+      "source": "Carlobks/Morg-laws",
+      "sourceType": "github",
+      "skillPath": "skills/git-e-commits/SKILL.md",
+      "computedHash": "a5ea548ad45a428c1ce4639629bce6e9f94dac66efb5f0f10e55b9b96505e63a"
+    },
+    "orquestrando-sessoes": {
+      "source": "Carlobks/Morg-laws",
+      "sourceType": "github",
+      "skillPath": "skills/orquestrando-sessoes/SKILL.md",
+      "computedHash": "d46888679e1888cf16d8bdf86144aa82c88313af873dac9a0f08dbf9aa9420e0"
+    },
+    "pondo-o-plano-a-prova": {
+      "source": "Carlobks/Morg-laws",
+      "sourceType": "github",
+      "skillPath": "skills/pondo-o-plano-a-prova/SKILL.md",
+      "computedHash": "b46a922a0b718d077a748923953558adcb19502c11fc1cfb31205064df16256b"
+    },
+    "testes-e-provas": {
+      "source": "Carlobks/Morg-laws",
+      "sourceType": "github",
+      "skillPath": "skills/testes-e-provas/SKILL.md",
+      "computedHash": "a96e53932f8ebe13c84e67b0081670091db3a741fb8398a46b9c097d695f6963"
+    }
+  }
+}

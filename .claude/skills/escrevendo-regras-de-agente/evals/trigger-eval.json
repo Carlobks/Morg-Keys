@@ -1,0 +1,12 @@
+[
+  {"query": "o nosso CLAUDE.md passou de 400 linhas e o agente esquece metade, como enxugo?", "should_trigger": true},
+  {"query": "quero transformar esta lição de ontem numa regra para os agentes", "should_trigger": true},
+  {"query": "cria um AGENTS.md para este repositório novo", "should_trigger": true},
+  {"query": "essa regra só vale para a pasta de migrações, onde a ponho?", "should_trigger": true},
+  {"query": "escreve uma skill para o fechamento mensal", "should_trigger": true},
+  {"query": "o agente ignora a regra de não usar any, como faço ele cumprir?", "should_trigger": true},
+  {"query": "escreve o README do produto para os clientes", "should_trigger": false},
+  {"query": "corrige o erro de tipo nesta query SQL", "should_trigger": false},
+  {"query": "faz o commit destas mudanças", "should_trigger": false},
+  {"query": "documenta a API de pagamentos para a equipe", "should_trigger": false}
+]

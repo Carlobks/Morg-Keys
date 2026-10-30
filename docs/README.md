@@ -15,7 +15,8 @@ O guia de quem usa o PC é o `Tutorial.html`; as regras de trabalho dos agentes 
 | [experiencias/](experiencias/) | Experiências medidas (plano, medidas, resultados): `0001-cobertura-a-vs-c.md` |
 | [morg-laws/](morg-laws/) | Verificações contra as regras gerais do Morg Laws (`verificacao-01-2026-10-30.md`) e o plano que as cumpre (`plano-01.md`) |
 | [pendentes.md](pendentes.md) | Trabalho combinado e ainda não feito, por ordem |
-| [proposta-CLAUDE.md](proposta-CLAUDE.md) | Proposta do novo `CLAUDE.md` (≤ 100 linhas), à espera de fechar a regra de cobertura |
+| [regras-e-barreiras.md](regras-e-barreiras.md) | Cada regra do `CLAUDE.md` e a barreira que a obriga (hook, git, teste, permissão, CI ou texto) |
+| [arquivo/](arquivo/) | Documentos cumpridos, guardados para consulta: `proposta-CLAUDE.md` (aplicada na ML6 do plano Morg Laws) |
 | [painel-apps.md](painel-apps.md) | Plano do painel "Apps e arranque" (Alt+Esc, C) |
 
 ## Decisões

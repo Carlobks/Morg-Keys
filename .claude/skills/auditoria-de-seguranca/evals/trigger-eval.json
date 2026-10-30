@@ -1,0 +1,12 @@
+[
+  {"query": "vou fazer push agora, confere se não vai nenhum segredo", "should_trigger": true},
+  {"query": "o npm audit mostra 30 avisos antigos; como travo só os novos?", "should_trigger": true},
+  {"query": "esta Server Action pode ser chamada por qualquer um?", "should_trigger": true},
+  {"query": "dá uma nota de segurança para este projeto", "should_trigger": true},
+  {"query": "antes da release, revisa as rotas de API e a autenticação", "should_trigger": true},
+  {"query": "o middleware já protege /admin, preciso conferir dentro da rota?", "should_trigger": true},
+  {"query": "escreve a migração que cria a tabela de pedidos com RLS", "should_trigger": false},
+  {"query": "o teste de login está falhando no CI, descobre porquê", "should_trigger": false},
+  {"query": "muda a cor do botão principal para azul", "should_trigger": false},
+  {"query": "faz o commit destas alterações com uma boa mensagem", "should_trigger": false}
+]

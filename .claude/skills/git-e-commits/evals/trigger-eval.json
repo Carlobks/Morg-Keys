@@ -1,0 +1,12 @@
+[
+  {"query": "commita o que fizemos", "should_trigger": true},
+  {"query": "o pre-commit recusou o meu commit, o que faço?", "should_trigger": true},
+  {"query": "escreve a mensagem de commit para esta correção", "should_trigger": true},
+  {"query": "terminei, fecha o ciclo e diz o que falta", "should_trigger": true},
+  {"query": "posso fazer push?", "should_trigger": true},
+  {"query": "corrigi o bug mas não consigo testar, como commito?", "should_trigger": true},
+  {"query": "três sessões estão nesta pasta, quem commita o quê?", "should_trigger": false},
+  {"query": "escreve um teste para este bug", "should_trigger": false},
+  {"query": "explica o que é um rebase", "should_trigger": false},
+  {"query": "revê a segurança antes do push", "should_trigger": false}
+]

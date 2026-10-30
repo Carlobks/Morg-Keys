@@ -1,0 +1,12 @@
+[
+  {"query": "corrige este bug do cálculo de horas", "should_trigger": true},
+  {"query": "o CI ficou vermelho depois do meu commit", "should_trigger": true},
+  {"query": "quantos clientes têm o e-mail duplicado?", "should_trigger": true},
+  {"query": "o teste passa mas a tela aparece vazia", "should_trigger": true},
+  {"query": "pronto, pode dizer que está feito?", "should_trigger": true},
+  {"query": "temos 300 avisos de lint antigos, como impeço que cresçam?", "should_trigger": true},
+  {"query": "faz o commit da correção", "should_trigger": false},
+  {"query": "isto tem alguma falha de segurança?", "should_trigger": false},
+  {"query": "escreve a regra de testes no AGENTS.md", "should_trigger": false},
+  {"query": "explica o que é TDD", "should_trigger": false}
+]

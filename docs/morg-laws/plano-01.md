@@ -176,12 +176,21 @@ páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
   - *Prova:* teste vermelho → verde. Num repositório de teste:
     - o push limpo para o `bare` passou, mostrando os ficheiros;
     - o commit com um token do GitHub falso (aleatório) foi recusado: "leaks found: 1", nada enviado.
-- [ ] **ML6 Regras no CLAUDE.md:**
-  - `npx skills@1.7.4 add Carlobks/Morg-laws` só com as 7 skills (ver a opção de escolher na `--help`; se não houver, instalar e tirar 3 com o `skills-lock.json` coerente);
-  - `CLAUDE.md` ≤ 100 linhas, com a Regra n.º 1, o núcleo, as regras do projeto e o índice "quando ler que skill";
-  - `docs/regras-e-barreiras.md`;
-  - `tests/test_regras.py` (tamanho, cada regra no mapa, ficheiros e ferramentas citados existem).
-  - *Prova:* `testar.ps1`; numa sessão nova, as skills aparecem na lista.
+- [x] **ML6 Regras no CLAUDE.md** (2026-10-30):
+  - 7 skills com `npx skills@1.7.4 add … -s <7 nomes> --copy` (com o OK do dono), iguais ficheiro a ficheiro à cópia
+    local lida na 1.ª verificação; `skills-lock.json` com a origem e o hash; CC BY 4.0 em `LICENCAS.txt`;
+  - `CLAUDE.md` com 92 linhas: Regra n.º 1, núcleo, nunca, testes, código, docs, commits, arquitetura e índice das
+    skills; 30 regras no formato `**TÍTULO:** regra · *motivo*`;
+  - `docs/regras-e-barreiras.md`: as 30 regras e a barreira de cada uma:
+    - 15 já têm máquina (hook, git, teste ou permissão);
+    - 7 começam por texto, com o motivo; 2 delas ganham máquina na ML7 e na ML9;
+    - 8 estão por fazer, com a fase.
+  - `tests/test_regras.py` (6 testes): tamanho, títulos únicos, cada regra no mapa, caminhos citados existentes, e as
+    skills do índice = as instaladas = as do lock;
+  - `docs/proposta-CLAUDE.md` passou para `docs/arquivo/`.
+  - *Prova:* vermelho (5 falhas com o CLAUDE.md antigo) → o próprio teste apanhou 3 caminhos inválidos no texto
+    novo → verde.
+  - *Por validar:* se as skills aparecem numa sessão nova (só tu o vês ao abrir uma).
 - [ ] **ML7 Docs com barreira:**
   - testes do índice dos docs, das ADR, das armadilhas, da pesquisa, dos handoffs e dos planos;
   - corrigir o que falhar (ex.: a auditoria fora do índice);

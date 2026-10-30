@@ -1,0 +1,12 @@
+[
+  {"query": "redesenha a tela de pagamentos, está confusa e com botões demais", "should_trigger": true},
+  {"query": "quantas abas posso pôr nesta página de cadastro?", "should_trigger": true},
+  {"query": "essa página índice só lista links para as outras, mantenho?", "should_trigger": true},
+  {"query": "o texto cinza do subtítulo tem contraste suficiente?", "should_trigger": true},
+  {"query": "cria o modal para editar o fornecedor", "should_trigger": true},
+  {"query": "o verde e o vermelho do status confundem quem é daltônico", "should_trigger": true},
+  {"query": "faz o logotipo e a paleta da nossa marca nova", "should_trigger": false},
+  {"query": "tira uma captura e prova que a tela ficou certa", "should_trigger": false},
+  {"query": "a query da tabela está lenta", "should_trigger": false},
+  {"query": "escreve a landing page de marketing do produto", "should_trigger": false}
+]
