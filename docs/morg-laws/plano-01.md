@@ -405,6 +405,12 @@ páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
     - ao vivo: `cat` do ficheiro de ambiente e download para a shell **recusados** pelo hook. O `gh pr create --help`
       correu: se apareceu a pergunta, foi o hook (não o consigo ver daqui).
   - Fica em texto o K5 (hook de fim de sessão). Por validar contigo: N2, D7 (alvos de toque) e K6 (backup).
+  - **Push** (2026-10-31, com o OK do dono):
+    - `main` `e7db97a..5f1ee68`, `exp/a` `044f96e..861c371` e a tag nova `exp-a-medida`;
+    - o gitleaks varreu 69 + 1 commits, sem achados;
+    - CI do `exp/a` (`41234044122`): **`testar` e `segredos` verdes**.
+    - Ficam por fazer: apagar o ramo `ci/teste-ml14` (com o OK) e levar o workflow ao `main`, para os estragos
+      semanais correrem.
   - Plano original da fase:
   - **Objetivo:** fechar a falha K3 e os achados M2–M4 e B2–B10 de `docs/morg-laws/verificacao-02-2026-10-31.md`,
     cada um com um teste visto a falhar antes da correção.

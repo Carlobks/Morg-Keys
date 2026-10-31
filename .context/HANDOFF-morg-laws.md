@@ -9,7 +9,7 @@ Pôr o Morg Keys a cumprir as regras do Morg Laws: cada regra do `CLAUDE.md` com
 motivo escrito de ficar só em texto. Plano: `docs/morg-laws/plano-01.md` (fases ML0–ML15; o original vive na aba
 Plano do Claude). Ponto de partida: `docs/morg-laws/verificacao-01-2026-10-30.md`. Mapa: `docs/regras-e-barreiras.md`.
 
-## Estado verificado (2026-10-31, ramo `exp/a`; enviado só para o ramo de teste `ci/teste-ml14`)
+## Estado verificado (2026-10-31, ramo `exp/a`; enviado para o GitHub com o OK do dono, CI verde)
 
 | Fase | Commits | O que ficou |
 |---|---|---|
@@ -103,8 +103,9 @@ Técnicas (tomadas durante as fases, com o motivo medido):
 
 ## Próximos passos
 
-1. **Pedido do push ao dono** (`main`, `exp/a`, tag `exp-a-medida`) e de apagar o ramo `ci/teste-ml14`. Os
-   `estragos` no CI só se provam com o workflow no `main`. Opcional: uma 3.ª verificação neutra para medir a ML16.
+1. Feito a 2026-10-31: push do `main` (`5f1ee68`), do `exp/a` (`861c371`) e da tag `exp-a-medida`; CI do `exp/a`
+   verde (corrida 41234044122 do GitHub Actions). Falta, com o OK: apagar o ramo `ci/teste-ml14` e levar o workflow ao `main` (os
+   `estragos` semanais só correm lá). Opcional: uma 3.ª verificação neutra para medir a ML16.
 2. Teste real da ML12 com o dono (animações desligadas no Windows, texto apagado, escala a 125 %).
 3. O CI corre em cada push: um vermelho no GitHub lê-se com `gh run view <id> --log-failed`.
 4. Depois do plano: a ordem está em `docs/pendentes.md` (bug do painel Apps e arranque, relatório de erros,
