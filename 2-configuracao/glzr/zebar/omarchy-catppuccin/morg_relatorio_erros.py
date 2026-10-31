@@ -20,6 +20,10 @@ from pathlib import Path
 INSTALACAO = Path.home() / ".glzr" / "instalacao.json"
 REGISTO_DO_ARRANQUE = Path(__file__).resolve().parent / ".layout-restore.log"
 LINHAS_DO_REGISTO = 20
+ARRANQUE = Path(__file__).resolve().parent / "guia" / "arranque.txt"
+PASTA_DOS_ERROS = Path.home() / ".glzr" / "erros"
+MAXIMO_DE_COPIAS = 10
+ESCONDER = {"esconder", "ocultar", "nao", "não", "off"}  # as mesmas palavras do "claude =" (claude_usage.py)
 _BASE64 = re.compile(r"[A-Za-z0-9_-]{16,}={0,2}")
 # As secções da pesquisa, por ordem (o modelo fica fora da função para ela caber nas 35 linhas).
 MODELO = """# Relatório de erro do Morg Keys
@@ -94,6 +98,29 @@ def ultimas_linhas(ficheiro, quantas=LINHAS_DO_REGISTO):
         return "\n".join(ficheiro.read_text(encoding="utf-8", errors="replace").splitlines()[-quantas:])
     except OSError:
         return ""
+
+
+def popup_ligado(arranque=ARRANQUE):
+    """O popup do erro está ligado por omissão; "erros = esconder" no arranque.txt desliga-o."""
+    try:
+        linhas = arranque.read_text(encoding="utf-8-sig").splitlines()
+    except (OSError, ValueError):
+        return True
+    for linha in linhas:
+        chave, igual, valor = linha.partition("=")
+        if igual and chave.strip().lower() == "erros":
+            return valor.strip().lower() not in ESCONDER
+    return True
+
+
+def guardar_copia(texto, agora, pasta=PASTA_DOS_ERROS, maximo=MAXIMO_DE_COPIAS):
+    """Guarda sempre uma cópia do relatório (também com o popup desligado) e deixa só as `maximo` mais recentes."""
+    pasta.mkdir(parents=True, exist_ok=True)
+    destino = pasta / f"erro-{agora:%Y%m%d-%H%M%S}.md"
+    destino.write_text(texto, encoding="utf-8")
+    for antiga in sorted(pasta.glob("erro-*.md"))[:-maximo]:
+        antiga.unlink(missing_ok=True)
+    return destino
 
 
 def montar_relatorio(erro, argv, agora, *, versao, registo, casa, nomes):

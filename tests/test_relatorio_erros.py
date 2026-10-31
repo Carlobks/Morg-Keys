@@ -104,5 +104,31 @@ class Montar(unittest.TestCase):
         self.assertIn("(vazio)", texto)
 
 
+class PopupECopias(unittest.TestCase):
+    """O popup liga-se por omissão e desliga-se com "erros = esconder"; a cópia fica sempre (os últimos 10)."""
+
+    def test_popup_ligado_por_omissao_e_desligavel(self):
+        with tempfile.TemporaryDirectory() as pasta:
+            arranque = Path(pasta) / "arranque.txt"
+            self.assertTrue(relatorio.popup_ligado(arranque))  # sem ficheiro
+            for texto, ligado in (("animacao = cafe\n", True), ("erros = mostrar\n", True),
+                                  ("ERROS = Esconder\n", False), ("erros = não\n", False),
+                                  ("# erros = esconder\nerros = mostrar\n", True), ("erros\n", True)):
+                with self.subTest(texto=texto):
+                    arranque.write_text(texto, encoding="utf-8-sig")
+                    self.assertEqual(relatorio.popup_ligado(arranque), ligado)
+
+    def test_guarda_uma_copia_e_so_os_ultimos(self):
+        with tempfile.TemporaryDirectory() as pasta:
+            erros = Path(pasta) / "erros"
+            for segundo in range(12):
+                ultimo = relatorio.guardar_copia(f"relatório {segundo}", AGORA + timedelta(seconds=segundo), erros,
+                                                 maximo=10)
+            nomes = sorted(p.name for p in erros.iterdir())
+            self.assertEqual(len(nomes), 10)
+            self.assertEqual(nomes[0], "erro-20261031-201505.md")  # os 2 mais antigos saíram
+            self.assertEqual(ultimo.read_text(encoding="utf-8"), "relatório 11")
+
+
 if __name__ == "__main__":
     unittest.main()
