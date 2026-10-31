@@ -1,7 +1,7 @@
 """A bateria de estragos (scripts/estragos.py) não encolhe (regras NUNCA ENFRAQUECER UM TESTE e NÃO PIORAR).
 
 Os estragos provam que os testes apanham código errado; tirar um estrago enfraquece essa prova sem que nenhum teste
-falhe. Em 2026-10-31 a bateria tinha 70 estragos, todos apanhados. Estrago novo: subir MINIMO no mesmo commit.
+falhe. Em 2026-10-31 a bateria tinha 80 estragos, todos apanhados. Estrago novo: subir MINIMO no mesmo commit.
 Lê-se o ficheiro sem o importar (o estragos.py muda de pasta ao ser carregado).
 """
 
@@ -10,7 +10,7 @@ import unittest
 
 from carregar_por_caminho import RAIZ
 
-MINIMO = 70
+MINIMO = 80
 
 
 def estragos():

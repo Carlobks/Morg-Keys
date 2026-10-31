@@ -62,7 +62,8 @@ MUTANTES = [
     ('f"{now} {current} tap {prev}"', 'f"{now} {current} tap -"'),
     # painel e guia em .mjs (fase 2c): apanhados pelo node --test
     ("hostname.replace(/^www\\./, '')", 'hostname'),
-    ("/[&<>\"']/g", "/[<>\"']/g"),
+    # o esc do partilhado/paineis.mjs (o bar-logica.mjs tem outro, que aceita null: daí o contexto)
+    ("String(s).replace(/[&<>\"']/g", "String(s).replace(/[<>\"']/g"),
     ('const fixed = state.fixed.includes(id);', 'const fixed = false;'),
     ('.filter(k => !drawn.has(k.key))', '.filter(() => false)'),
     (".replace(/\\//g, '_').replace(/=+$/, '');", ".replace(/\\//g, '_');"),
@@ -96,8 +97,20 @@ MUTANTES = [
     ('return round(255 * (1 - (1 - p) ** 3))', 'return round(255 * p)'),
     ('frases[(dia - 1) % len(frases)]', 'frases[dia % len(frases)]'),
     ('elif key == "nome":', 'elif key == "nomes":'),
+    # lógica das páginas tirada dos <script> em linha (ML11b): barra, arranque e painel do sistema
+    ('.filter(ws => ws.name !== SCRATCH || ws.isDisplayed)', '.filter(() => true)'),
+    ("v > 85 ? 'high'", "v >= 85 ? 'high'"),
+    ('return vol < 34 ? ICON.volLow', 'return vol <= 34 ? ICON.volLow'),
+    ('Math.min(100, Math.max(0, base + (deltaY < 0 ? 5 : -5)))', 'base + (deltaY < 0 ? 5 : -5)'),
+    ('const day = t.getUTCDay() || 7;', 'const day = t.getUTCDay();'),
+    ('agoraS - progresso.started > MAX_IDADE_S', 'agoraS - progresso.started >= MAX_IDADE_S'),
+    ('if (visivelHaMs < MIN_ITEM_MS) return [];', 'if (false) return [];'),
+    ('desdeOInicioMs > MIN_NO_ECRA_MS', 'desdeOInicioMs >= MIN_NO_ECRA_MS'),
+    ("toLowerCase().replace('é', 'e')", 'toLowerCase()'),
+    ("some(m => m.name === 'sistema')", "some(m => m.name === 'resize')"),
 ]
-FICHEIROS = [*PACK.glob("*.py"), *PACK.glob("partilhado/*.mjs"), *PACK.glob("painel/*.mjs"), *PACK.glob("guia/*.mjs")]
+FICHEIROS = [*PACK.glob("*.py"), *PACK.glob("*.mjs"), *PACK.glob("partilhado/*.mjs"), *PACK.glob("painel/*.mjs"),
+             *PACK.glob("guia/*.mjs"), *PACK.glob("arranque/*.mjs")]
 TESTES_PY = ["py", "-I", "-m", "unittest", "discover", "-s", "tests"]
 TESTES_JS = ["node", "--test", *map(str, pathlib.Path("tests").glob("*.test.mjs"))]
 
