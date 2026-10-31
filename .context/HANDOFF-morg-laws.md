@@ -32,6 +32,7 @@ Plano do Claude). Ponto de partida: `docs/morg-laws/verificacao-01-2026-10-30.md
 | ML14 | `1dcb1dc`, `82d2109` | `.github/workflows/ci.yml` (testar, gitleaks, estragos semanais), `MORG_PY`, A47; verde no GitHub (ramo `ci/teste-ml14`) |
 | ML15 | `3e85bd9`, `17aa84f` | 2.ª verificação (sessão neutra): 29 cumpridas, 11 em parte, 1 falha, 3 por validar |
 | ML16 | `bcf3a82` … `9a6cd8c` | achados da 2.ª: hook dos segredos, stash, PR, estragos numa cópia, `Teste-mudado:`, motivos, nomes, BOM, aria-label, ADR 0010 |
+| P2 (depois do plano) | `8f190c8`, `9735b3b` | bug do painel Apps e arranque: a app não aprende a janela de um processo que já corria; o Alt+Esc G saiu (decisão do dono) |
 
 Última suíte: 445 testes Python a 100 % (2306 linhas, 782 ramos: pack, portões, hooks, statusLine e changelog), 79 JS a 100 %,
 72 Pester a 100 % fora das funções excluídas; ~21 s por commit.
@@ -106,6 +107,8 @@ Técnicas (tomadas durante as fases, com o motivo medido):
 1. Feito a 2026-10-31: push do `main` (`5f1ee68`), do `exp/a` (`861c371`) e da tag `exp-a-medida`; CI do `exp/a`
    verde (corrida 41234044122 do GitHub Actions). Falta, com o OK: apagar o ramo `ci/teste-ml14` e levar o workflow ao `main` (os
    `estragos` semanais só correm lá). Opcional: uma 3.ª verificação neutra para medir a ML16.
+   P2 feito (por enviar; teste real do dono depois de reinstalar com o OK). Próximo em `docs/pendentes.md`: o
+   relatório de erros (pesquisa primeiro).
 2. Teste real da ML12 com o dono (animações desligadas no Windows, texto apagado, escala a 125 %).
 3. O CI corre em cada push: um vermelho no GitHub lê-se com `gh run view <id> --log-failed`.
 4. Depois do plano: a ordem está em `docs/pendentes.md` (bug do painel Apps e arranque, relatório de erros,
