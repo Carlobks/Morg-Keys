@@ -125,25 +125,19 @@
     </div>
 
     <script type="module">
-      // O progresso vem de progress.json, escrito pelo orquestrador
-      // (bar_helper.py boot, ou "animacao preview"):
-      // {boot_id, started, animacao, preview, nome, frase:{texto,personagem,anime}|null,
-      //  steps:[{id,label,state}], fim}.
-      const MAX_MS = 70000;       // rede de segurança (o orquestrador sai aos 60 s no máximo)
-      const MIN_ITEM_MS = 250;    // cada linha fica visível pelo menos isto
-      const CYCLE_MS = 4500;      // período dos ciclos das animações
+      // Cola com o DOM e o Zebar (docs/validacao-manual.md). Os tempos, a saudação, os ícones, o estado das
+      // etapas e quando sair decidem-se em splash-logica.mjs, testado com node --test.
+      import {
+        CYCLE_MS, EXEMPLO, MAX_MS, animacaoValida, autorDaFrase, classesDaEtapa, deveFechar, emPreVisualizacao,
+        horaTexto, iconFor, podeSair, saudacao,
+      } from './splash-logica.mjs';
+
       const $ = id => document.getElementById(id);
       const q = s => [...document.querySelectorAll(s)];
       let widget = null;
       let leaving = false;
 
-      // No navegador (file: ou ?preview, servidor pack-preview) usa dados de exemplo em vez do Zebar.
-      const PREVIEW = location.protocol === 'file:' || new URLSearchParams(location.search).has('preview');
-      const EXEMPLO = {
-        boot_id: 'exemplo', started: Date.now() / 1000, animacao: 'cafe', preview: true, nome: 'Ana', fim: false,
-        frase: { texto: 'Uma pessoa só morre quando é esquecida.', personagem: 'Dr. Hiriluk', anime: 'One Piece' },
-        steps: [{ id: 'barra', label: 'Barra', state: 'feito' }, { id: 'glazewm', label: 'Gestor de janelas', state: 'a_carregar' }],
-      };
+      const PREVIEW = emPreVisualizacao(location.protocol, location.search);
 
       async function readProgress() {
         if (PREVIEW) return EXEMPLO;
@@ -165,22 +159,21 @@
         setTimeout(() => (el.style.opacity = 0), ms - 100);
       }
 
-      // --- Saudação: "Muito bem-vindo, <nome>", a hora (pt-PT, como o relógio da barra) e a frase do dia ---
-      const fmtHora = new Intl.DateTimeFormat('pt-PT', { hour: '2-digit', minute: '2-digit' });
-      const fmtDia = new Intl.DateTimeFormat('pt-PT', { weekday: 'long', day: 'numeric', month: 'long' });
+      // --- Saudação, hora e frase do dia (textos em splash-logica.mjs) ---
       function renderSaudacao(p) {
-        $('saudacao').textContent = p.nome ? `Muito bem-vindo, ${p.nome}` : 'Muito bem-vindo';
-        const hora = () => { const d = new Date(); $('hora').textContent = `${fmtHora.format(d)} · ${fmtDia.format(d)}`; };
+        $('saudacao').textContent = saudacao(p.nome);
+        const hora = () => { $('hora').textContent = horaTexto(new Date()); };
         hora();
         setInterval(hora, 1000);
         const f = p.frase;
         if (f?.texto) {
           const citacao = document.createElement('q');
           citacao.textContent = f.texto;
+          const textoDoAutor = autorDaFrase(f);
           const autor = document.createElement('span');
           autor.className = 'autor';
-          autor.textContent = `— ${[f.personagem, f.anime].filter(Boolean).join(', ')}`;
-          $('frase').replaceChildren(citacao, ...(f.personagem || f.anime ? [autor] : []));
+          autor.textContent = textoDoAutor;
+          $('frase').replaceChildren(citacao, ...(textoDoAutor ? [autor] : []));
         }
       }
 
@@ -200,24 +193,6 @@
           },
         },
       };
-
-      // --- Lista de etapas (progresso real) ---
-      // Ícone de cada etapa (Nerd Font nf-md / nf-oct, fonte JetBrainsMono NF),
-      // pelo id que o bar_helper.py lhe dá: barra, glazewm, app:<processo>, bat:<n>, fim.
-      const APP_ICONS = {
-        claude: 0xf06c4, chrome: 0xf02af, Arc: 0xf059f, msedge: 0xf01e9,
-        Obsidian: 0xf0ebf, explorer: 0xf0256, WindowsTerminal: 0xf489,
-      };
-      function iconFor(id) {
-        if (id === 'barra') return 0xf035c;               // menu
-        if (id === 'glazewm') return 0xf0574;             // mosaico
-        if (id === 'fim') return 0xf012c;                 // visto
-        if (id === 'anim') return 0xf03d8;                // paleta (pré-visualização)
-        if (id === 'apps') return 0xf003b;
-        if (id.startsWith('bat:')) return 0xf489;         // terminal
-        if (id.startsWith('app:')) return APP_ICONS[id.slice(4)] ?? 0xf0614;
-        return 0xf0614;                                   // janela genérica
-      }
 
       // Ícones centrados a sério (como no guia, no painel e na barra): na fonte
       // "JetBrainsMono NF" cada ícone é mais largo do que a célula e fica
@@ -258,9 +233,8 @@
             shownAt.set(s.id, performance.now());
             requestAnimationFrame(() => el.classList.add('on'));
           }
-          const old = performance.now() - shownAt.get(s.id) >= MIN_ITEM_MS;
-          if (s.state === 'feito' && old) el.classList.add('done');
-          if (s.state === 'falhou' && old) el.classList.add('done', 'fail');
+          const classes = classesDaEtapa(s.state, performance.now() - shownAt.get(s.id));
+          if (classes.length) el.classList.add(...classes);
         }
       }
       const allShownDone = () => q('.it').every(el => el.classList.contains('done'));
@@ -307,14 +281,12 @@
           zebar = await import('../vendor/zebar-3.3.1.mjs');
           widget = zebar.currentWidget();
         }
-        // Guarda: só mostra se houver um arranque (ou pré-visualização) em curso
-        // (evita reaparecer, p.ex. se o Zebar relançar widgets ao mudar de monitor).
         const first = await readProgress();
-        if (!first || first.fim || Date.now() / 1000 - first.started > 60) {
+        if (deveFechar(first, Date.now() / 1000)) {
           await closeSelf();
           return;
         }
-        const name = ANIMS[first.animacao] ? first.animacao : 'cafe';
+        const name = animacaoValida(first.animacao, Object.keys(ANIMS));
         const anim = ANIMS[name];
         document.body.classList.add(`a-${name}`);
         renderSaudacao(first);
@@ -333,7 +305,7 @@
             renderSteps(p.steps || []);
             if (p.fim && allShownDone()) {
               fimSince ??= performance.now();
-              if (performance.now() - fimSince >= 300 && performance.now() - t0 > 1800) return leave();
+              if (podeSair(performance.now() - fimSince, performance.now() - t0)) return leave();
             }
           }
           setTimeout(tick, 250);
