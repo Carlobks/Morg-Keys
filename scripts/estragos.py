@@ -129,8 +129,16 @@ MUTANTES = [
     ('desdeOInicioMs > MIN_NO_ECRA_MS', 'desdeOInicioMs >= MIN_NO_ECRA_MS'),
     ("toLowerCase().replace('é', 'e')", 'toLowerCase()'),
     ("some(m => m.name === 'sistema')", "some(m => m.name === 'resize')"),
+    # P3c: o nome do Windows no relatório e a versão SemVer (juntar_changelog.py e o portão versao_lancada.py)
+    ('numero = 11 if build >= PRIMEIRO_BUILD_DO_WINDOWS_11 else 10', 'numero = 11 if build > PRIMEIRO_BUILD_DO_WINDOWS_11 else 10'),
+    ('return f"{maior + 1}.0.0" if maior else f"0.{menor + 1}.0"', 'return f"{maior + 1}.0.0"'),
+    ('if SOBE_O_MENOR.intersection(categorias):', 'if "Adicionado" in categorias:'),
+    ('or numeros(versao) <= numeros(atual):', 'or numeros(versao) < numeros(atual):'),
+    ('and not depois.endswith(parte_lancada(antes))', 'and False'),
+    ('topo[1] != versao or f"## [{versao}]" in antes:', 'topo[1] != versao:'),
 ]
 PASTAS_DO_PACK = ["*.py", "*.mjs", "partilhado/*.mjs", "painel/*.mjs", "guia/*.mjs", "arranque/*.mjs"]
+FERRAMENTAS = ["scripts/changelog/*.py", "scripts/portoes/*.py"]  # fora do pack, com testes Python
 # MORG_PY: outro Python (o CI do GitHub não garante o py), o mesmo nome do testar.ps1 e dos .githooks.
 TESTES_PY = [os.environ.get("MORG_PY", "py"), "-I", "-m", "unittest", "discover", "-s", "tests"]
 
@@ -181,6 +189,7 @@ def estragar(antes, depois, ficheiros, testes_js):
 def correr_estragos():
     """Corre a bateria na pasta atual (a cópia); devolve 0 se todos os estragos foram apanhados."""
     ficheiros = [f for padrao in PASTAS_DO_PACK for f in PACK.glob(padrao)]
+    ficheiros += [f for padrao in FERRAMENTAS for f in pathlib.Path().glob(padrao)]
     testes_js = ["node", "--test", *map(str, pathlib.Path("tests").glob("*.test.mjs"))]
     for testes in (TESTES_PY, testes_js):
         base = subprocess.run(testes, capture_output=True, timeout=180, check=False)
