@@ -296,8 +296,28 @@ páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
     - `testar.ps1` verde.
   - *Teste real (2026-10-31):* depois de reinstalar, o dono confirmou o arranque, a barra e o painel `Alt+Esc` no
     Zebar: "Está tudo a funcionar perfeitamente".
-- [ ] **ML12 Telas:** `prefers-reduced-motion`, `tabular-nums`, teste de contraste dos tokens, ADR do `rem`.
-  - *Prova:* teste; o teu teste com "Mostrar animações" desligado no Windows.
+- [x] **ML12 Telas** (2026-10-31):
+  - `83dc898`: `@media (prefers-reduced-motion: reduce)` no fim das 5 folhas (barra, guia, painel de apps, splash e
+    sistema). O plano só nomeava o splash e o sistema, mas as outras também tinham transições.
+    - Animações e transições a 0,01 ms, sem atraso e com uma só volta: fica o estado final e o sinal (o arco
+      parado). Não se usa `none`, porque o splash espera pelo `transitionend`.
+    - O brilho da chávena, movido por JavaScript, sai.
+    - `tabular-nums` no `body` de cada página.
+  - `d790cb6` (**achado**): o texto apagado usava o `overlay0`, com 3,4:1. Passou para o `overlay2` (5,8 a 6,6:1),
+    por decisão do dono. Sobre o fundo `surface0` (campos de filtro e hover das apps) fica o `subtext0`.
+    - Teste de contraste calculado a partir dos tokens das folhas, cobrindo os fundos da página, o fundo da própria
+      regra e os chips a 16 %.
+    - As exceções têm motivo: o ícone da chávena só no hover, as teclas fixas inativas e a borda do estado.
+  - ADR 0009: os `px` ficam nas páginas do Zebar, porque ali `1rem` é sempre `16px` e a escala do Windows já chega.
+  - *Prova:*
+    - `tests/test_telas.py` (8 testes): vermelho com 14 falhas e 1 erro (movimento e algarismos), e com 17
+      seletores no `overlay0` (contraste); verde depois das correções;
+    - `testar.ps1` verde.
+  - *Por validar (o teu teste real):*
+    - com "Efeitos de animação" desligado no Windows (Acessibilidade > Efeitos visuais): o arranque sem movimento e
+      os painéis sem deslizar;
+    - o texto apagado mais legível;
+    - a escala a 125 % (ADR 0009).
 - [ ] **ML13 Changelog:** `changelog.d/`, regra no `commit-msg`, fragmentos atrasados e `juntar_changelog.py`.
   - *Prova:* testes; um `feat` em `2-configuracao/` sem fragmento é recusado no clone.
 - [ ] **ML14 CI:** workflows e `MORG_PY` no `testar.ps1`.
