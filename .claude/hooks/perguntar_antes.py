@@ -3,7 +3,7 @@
 (Morg Laws; Akita #51, #79, #81.) As regras "ask" do settings.json não chegaram: em 2026-10-30 um
 `git push --dry-run` correu sem pergunta, e a escrita de um hook também (modo automático). Este hook devolve ao
 Claude Code a decisão "ask", que pergunta seja qual for o modo. Pergunta antes de:
-- Bash/PowerShell: `git push`; instalar pacotes (npm install/i/ci/add, npx, pip install) ou programas (winget,
+- Bash/PowerShell: `git push`; `gh pr create|merge` e `gh release create`; instalar pacotes (npm install/i/ci/add, npx, pip install) ou programas (winget,
   choco, scoop, Install-Module/Install-Package);
 - Write/Edit: `.claude/settings*.json`, `.claude/hooks/` e `.githooks/` deste repositório.
 Reconhece os comandos pelo texto (uma escrita pela shell não passa no Write/Edit). Sai sempre com 0; com motivo,
@@ -26,6 +26,9 @@ PERGUNTAS = [
     (re.compile(r"\bpip3?(?:\.exe)?\s+install\b", re.IGNORECASE), "pip instala pacotes"),
     (re.compile(r"\b(?:winget|choco|scoop)(?:\.exe)?\s+install\b", re.IGNORECASE), "instala um programa"),
     (re.compile(r"\bInstall-(?:Module|Package)\b", re.IGNORECASE), "instala um módulo do PowerShell"),
+    # B2 da 2.ª verificação (ML16): criar ou juntar um PR, ou lançar uma versão, publica como o push.
+    (re.compile(r"\bgh(?:\.exe)?\s+(?:pr\s+(?:create|merge)|release\s+create)\b", re.IGNORECASE),
+     "publica no GitHub (PR ou versão)"),
 ]
 
 

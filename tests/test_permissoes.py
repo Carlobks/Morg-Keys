@@ -52,6 +52,10 @@ class TresColunas(unittest.TestCase):
         local_allow = set(permissoes("settings.local.json").get("allow", []))
         self.assertEqual(local_allow & (set(projeto.get("deny", [])) | set(projeto.get("ask", []))), set())
 
+    def test_o_modo_que_salta_as_permissoes_esta_desligado(self):
+        # K3 da 2.ª verificação (ML16, Akita #50): sem isto, o modo "bypass" ignorava o deny e o ask.
+        self.assertEqual(permissoes("settings.json").get("disableBypassPermissionsMode"), "disable")
+
     def test_segredos_tambem_fora_do_git(self):
         ignorados = (RAIZ / ".gitignore").read_text(encoding="utf-8").splitlines()
         for padrao in (".env", ".env.*", "*.pem", "*.key"):

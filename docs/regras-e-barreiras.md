@@ -28,7 +28,7 @@ tenha aqui uma linha, e que cada caminho citado exista.
 | NOMES PESQUISÁVEIS | teste; texto | `tests/test_nomes.py` (nenhum ficheiro ou pasta com nome genérico solto); os nomes dentro do código são juízo da revisão |
 | TEXTO VIRA BARREIRA | teste | `tests/test_regras.py` (este mapa) |
 | SEM DADOS REAIS | teste + git | `tests/test_dados_pessoais.py`; `.githooks/pre-commit` e `commit-msg` com a lista negra |
-| SEM SEGREDOS | permissão + git + teste + CI | `.claude/settings.json` (deny), `.githooks/pre-push` (gitleaks), `tests/test_permissoes.py`; gitleaks em todo o histórico no `.github/workflows/ci.yml` |
+| SEM SEGREDOS | permissão + hook + git + teste + CI | `.claude/settings.json` (deny e `disableBypassPermissionsMode`), `.claude/hooks/bloquear_segredos.py` (ler segredos e downloads numa shell), `.githooks/pre-push` (gitleaks), `tests/test_permissoes.py`; gitleaks em todo o histórico no `.github/workflows/ci.yml` |
 | SÓ O PRÓPRIO TRABALHO | hook | `.claude/hooks/guarda_do_git.py` (`add -A`, `.`, `commit -a`, commit sem caminhos) |
 | UM SÓ COMANDO | git + CI | `.githooks/pre-commit` e `.github/workflows/ci.yml` correm `scripts/testar.ps1` |
 | COBERTURA 100 % | teste | `scripts/testar.ps1` (`--fail-under=100` no pack, portões, hooks e statusLine; `node --test` a 100 %, Pester a 100 %); a lógica das páginas em `.mjs` e os `<script>` em linha com catraca: `tests/paginas-em-linha.test.mjs` |

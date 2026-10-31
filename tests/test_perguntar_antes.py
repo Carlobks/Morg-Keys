@@ -22,13 +22,16 @@ class Decisao(unittest.TestCase):
                         'git -C "C:/a b" push', "git -c x=y push --tags", "npm install", "npm i -D x", "npm ci",
                         "npx skills@1.7.4 add a/b", "pip install coverage", "py -m pip install ruff",
                         "winget install Gitleaks.Gitleaks", "Install-Module Pester -Force", "choco install x",
-                        "scoop install x", "x && git.exe push"]:
+                        "scoop install x", "x && git.exe push",
+                        # B2 da 2.ª verificação (ML16): criar ou juntar um PR, ou lançar, também publica.
+                        "gh pr create --fill", "gh pr merge 3 --squash", "gh.exe pr create", "gh release create v1"]:
             with self.subTest(comando=comando):
                 self.assertIsNotNone(perguntar.motivo_para_perguntar(comando))
 
     def test_nao_pergunta_o_resto(self):
         for comando in ["git status", "git log --grep push", "git commit -F m -- a.py", "npm audit --json",
-                        "npm --version", "pip list", "winget show Gitleaks.Gitleaks", "Get-Module Pester", ""]:
+                        "npm --version", "pip list", "winget show Gitleaks.Gitleaks", "Get-Module Pester",
+                        "gh pr view 3", "gh pr list", "gh run view 1 --log-failed", "gh release view v1", ""]:
             with self.subTest(comando=comando):
                 self.assertIsNone(perguntar.motivo_para_perguntar(comando))
 

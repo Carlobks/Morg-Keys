@@ -65,6 +65,11 @@ class Recusa(unittest.TestCase):
                            "git commit -m \"$(cat <<'EOF'\nx\nEOF\n)\" -- a.txt", 'git commit -qm "a\nb" -- a.txt'],
                           "várias linhas")
 
+    def test_stash(self):
+        # B3 da 2.ª verificação (ML16): o stash leva o trabalho de todas as sessões que partilham a pasta.
+        self.assertRecusa(["git stash", "git stash push -m x", "git stash -u", "git stash pop", "git stash drop",
+                           "x && git stash apply"], "stash")
+
 
 class DeixaPassar(unittest.TestCase):
 
@@ -75,7 +80,8 @@ class DeixaPassar(unittest.TestCase):
                         'git config core.hooksPath .githooks', 'git push -n origin exp/a', 'git status --short -uall',
                         'git log --oneline -5', 'git commit --amend -F m.txt -- a.py', "echo 'sem aspas fechadas",
                         'git commit -F m --author "Ana <a@example.com>" -- a.py', 'git commit -C HEAD -- a.py',
-                        'git commit -F m -- -ficheiro-com-hifen.py', 'git -C pasta --no-pager log', 'ls -la', '']:
+                        'git commit -F m -- -ficheiro-com-hifen.py', 'git -C pasta --no-pager log', 'ls -la',
+                        'git stash list', 'git stash show -p stash@{0}', '']:
             with self.subTest(comando=comando):
                 self.assertIsNone(guarda.motivo_para_bloquear(comando, lido))
 

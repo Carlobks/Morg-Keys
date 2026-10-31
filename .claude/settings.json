@@ -1,5 +1,6 @@
 {
   "permissions": {
+    "disableBypassPermissionsMode": "disable",
     "deny": [
       "Read(**/.env)",
       "Read(**/.env.*)",
@@ -52,6 +53,13 @@
             "timeout": 15,
             "onFailure": "block",
             "statusMessage": "A verificar os portões do git"
+          },
+          {
+            "type": "command",
+            "command": "r=\"$CLAUDE_PROJECT_DIR\"; [ -f \"$r/.claude/hooks/bloquear_segredos.py\" ] || r=\"$(git rev-parse --show-toplevel)\"; \"C:/Windows/py.exe\" -I \"$r/.claude/hooks/bloquear_segredos.py\"",
+            "timeout": 15,
+            "onFailure": "block",
+            "statusMessage": "A verificar segredos e downloads"
           },
           {
             "type": "command",

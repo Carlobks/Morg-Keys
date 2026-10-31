@@ -8,7 +8,8 @@ Os testes, a identidade, a lista negra e a mensagem verificam-se nos hooks do gi
 - preparar tudo de uma vez (`git add -A` / `.` / `--all`, `git commit -a`, commit do caminho `.` ou sem caminhos,
   fora de um merge): o commit é por caminho, para não levar o trabalho de outra sessão;
 - `MORG_A_TESTAR` num commit: a marca da A30 faria o pre-commit saltar os testes;
-- `git commit -m` com várias linhas ou com heredoc: no Windows estraga os acentos; usar `-F <ficheiro>`.
+- `git commit -m` com várias linhas ou com heredoc: no Windows estraga os acentos; usar `-F <ficheiro>`;
+- `git stash` (fora de `list` e `show`): leva o trabalho de todas as sessões que partilham a pasta (ML16).
 Reconhece os comandos pelo texto (limites na A32). Sai com 2 e o motivo no stderr; sai com 0 nos outros casos.
 Substitui o testes_antes_do_commit.py: os testes passaram para o .githooks/pre-commit (guarda A30 lá).
 """
@@ -137,6 +138,8 @@ def motivo_para_bloquear(comando, ler_hooks):
             motivo = motivo_do_commit(args, ler_hooks)
         if not motivo and subcomando in ("push", "merge", "rebase", "am", "cherry-pick") and "--no-verify" in args:
             motivo = "--no-verify salta os portões do git."
+        if not motivo and subcomando == "stash" and args[:1] not in (["list"], ["show"]):
+            motivo = "git stash leva o trabalho de todas as sessões desta pasta; commite por caminho."
         if motivo:
             return motivo
     return None
