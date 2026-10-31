@@ -34,8 +34,10 @@ Plano do Claude). Ponto de partida: `docs/morg-laws/verificacao-01-2026-10-30.md
 | ML16 | `bcf3a82` … `9a6cd8c` | achados da 2.ª: hook dos segredos, stash, PR, estragos numa cópia, `Teste-mudado:`, motivos, nomes, BOM, aria-label, ADR 0010 |
 | P2 (depois do plano) | `8f190c8`, `9735b3b` | bug do painel Apps e arranque: a app não aprende a janela de um processo que já corria; o Alt+Esc G saiu (decisão do dono) |
 | P3 (depois do plano) | `c876696` … `d2869eb` | relatório de erros: popup desligável, "Guardar como", cópias em `~\.glzr\erros`, formulário de issue; A50 |
+| P3b | `79ab3cf`, `4b256d4` | `Alt+Esc, V` liga e desliga o aviso; hInstance inteiro na cortina (A52) |
+| P3c | `be5d5cd` … `ebe79ce` | "Windows 11 (build …)" no relatório; versão SemVer (ADR 0011): `juntar_changelog.py` calcula-a e escreve o `VERSION`, portão `versao_lancada.py`, `tests/test_versao.py`, o instalador grava `<versão>+<ramo>.<commit>`; regra VERSÃO SÓ NO LANÇAMENTO; A53 |
 
-Última suíte: 445 testes Python a 100 % (2306 linhas, 782 ramos: pack, portões, hooks, statusLine e changelog), 79 JS a 100 %,
+Estragos: 96/96 (2026-10-31, P3c). Suíte da ML16: 445 testes Python a 100 % (2306 linhas, 782 ramos: pack, portões, hooks, statusLine e changelog), 79 JS a 100 %,
 72 Pester a 100 % fora das funções excluídas; ~21 s por commit.
 
 ## Decisões e porquê
@@ -95,6 +97,12 @@ Técnicas (tomadas durante as fases, com o motivo medido):
 - **CI só com SHAs e versões fixas (ML14):** uma action com menos de 2 semanas fica de fora (setup-python
   v7.0.0 e não v7.1.0). O gitleaks no CI é o binário oficial com o sha256 no workflow, sem action de terceiros.
 - **O `testar.ps1` falha fechado sem o Python (A47):** `Get-Command $Py` antes de contar com o `$LASTEXITCODE`.
+- **Versão SemVer calculada no lançamento (ADR 0011, decisão do dono):** o `VERSION` é a única fonte; o
+  `Removido` e o `Incompatível:` sobem o MAIOR (no 0.x, o MENOR). O instalador junta o ramo e o commit nos
+  metadados (`+exp-a.c3b57e3`), que não contam para comparar. CalVer descartado: não diz se uma mudança parte algo.
+- **`instalar-versao.ps1` num ficheiro próprio:** o `instalar.ps1` estava nas 498 linhas (limite 500).
+- **"Windows 11" pelo build ≥ 22000:** facto da tabela oficial de lançamentos, mas prática da comunidade, não uma
+  recomendação da Microsoft (que manda testar a funcionalidade); aqui é só um rótulo.
 
 ## Descartado
 
@@ -111,12 +119,17 @@ Técnicas (tomadas durante as fases, com o motivo medido):
    P2 feito (por enviar; teste real do dono depois de reinstalar com o OK).
    P3 (relatório de erros) feito: `c876696`, `7b1f8e2`, `65db12c`, `d2869eb` e o fecho (plano em
    `docs/planos/0002-relatorio-de-erros.md`). Por enviar; teste real do dono (`bar_helper.py erro-de-teste`) depois
-   de reinstalar com o OK. Fica por fazer: o instalador gravar a versão no `instalacao.json` e criar a etiqueta
-   "erro" no GitHub. Depois, a pedido do dono: `Alt+Esc, V` liga e desliga o aviso (`79ab3cf`, plano
-   `docs/planos/0003-tecla-do-aviso-de-erros.md`). O 1.º teste real do relatório (dono, 21:18) funcionou; o
-   `rebentamentos.log` mostrou 3 "access violation" da cortina por arranque: hInstance cortado (A52), corrigido
-   em `4b256d4`. Por decidir com o dono: o Claude no arranque (ws 1) não é colocado, porque já corria antes de o
-   abrirmos (efeito do P2.1). Próximo em `docs/pendentes.md`: as frases do arranque.
+   de reinstalar com o OK. Fica por fazer: criar a etiqueta "erro" no GitHub. Depois, a pedido do dono:
+   `Alt+Esc, V` liga e desliga o aviso (`79ab3cf`, plano `docs/planos/0003-tecla-do-aviso-de-erros.md`). O 1.º
+   teste real do relatório (dono, 21:18) funcionou; o `rebentamentos.log` mostrou 3 "access violation" da cortina
+   por arranque: hInstance cortado (A52), corrigido em `4b256d4`.
+   P3c (plano `docs/planos/0004-versao-e-sistema-no-relatorio.md`): o relatório diz "Windows 11 (build …)" e a
+   versão passa a SemVer (ADR 0011, pesquisa `docs/pesquisa/versoes.md`). **Falta, com o OK do dono, o P3c.6:**
+   lançar a 0.1.0 (`py -I scripts/changelog/juntar_changelog.py`, sem número, que junta os 18 fragmentos e escreve
+   o `VERSION`), a tag anotada `v0.1.0` e os links de comparação no fim do `CHANGELOG.md`. O push da tag pede outro
+   "sim". Até lá o instalador grava `desconhecida+<ramo>.<commit>`.
+   Por decidir com o dono: o Claude no arranque (ws 1) não é colocado, porque já corria antes de o abrirmos
+   (efeito do P2.1). Próximo em `docs/pendentes.md`: as frases do arranque.
    Nota: o teste das 35 linhas só vê ficheiros que o git conhece; um ficheiro novo só é medido depois do `git add`.
 2. Teste real da ML12 com o dono (animações desligadas no Windows, texto apagado, escala a 125 %).
 3. O CI corre em cada push: um vermelho no GitHub lê-se com `gh run view <id> --log-failed`.
