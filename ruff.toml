@@ -7,4 +7,6 @@ line-length = 120
 [lint]
 # E402 (imports no topo): o ruff já aceita os imports do bar_helper.py depois do sys.path.insert (com
 # `py -I` a pasta do script não entra no sys.path); fora disso, um import fora do sítio é apanhado.
-extend-select = ["E402"]
+# RUF100 (noqa que já não silencia nada): regra SEM SILENCIAR ALARME; os de regras desligadas apanha-os o
+# tests/test_alarmes.py.
+extend-select = ["E402", "RUF100"]

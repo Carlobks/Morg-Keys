@@ -22,7 +22,8 @@ motivo escrito de ficar só em texto. Plano: `docs/morg-laws/plano-01.md` (fases
 | ML5 | `21996bb`, `54b1902` | gitleaks 8.30.1; histórico limpo; `.githooks/pre-push` |
 | ML6 | `994fac6` | `CLAUDE.md` com 30 regras; mapa das barreiras; 7 skills |
 | ML7 | `5343c18` | testes dos índices, ADR, armadilhas, pesquisa, planos e handoffs |
-| ML8 | `88ca6ef` + este commit | `.gitattributes` explícito; fins de linha normalizados; estragos 70/70 |
+| ML8 | `88ca6ef`, `2d083fd` | `.gitattributes` explícito; fins de linha normalizados; estragos 70/70 |
+| ML9 | este commit | catracas: alarmes, 35 linhas por função, PSScriptAnalyzer, estragos; ADR 0008 |
 
 ## Decisões (do dono, 2026-10-30)
 
@@ -40,8 +41,8 @@ motivo escrito de ficar só em texto. Plano: `docs/morg-laws/plano-01.md` (fases
 
 ## Próximos passos
 
-1. ML9: catracas do lint (RUF100, 35 linhas por função, PSScriptAnalyzer, MUTANTES) e ADR das regras do Biome.
-2. ML10 a ML13: catracas do lint, nomes, cobertura das páginas, telas, changelog.
+1. ML10: nomes (`comum/comum.mjs`, `tests/*.Comum.ps1`), teste dos nomes proibidos, ADR do `bar_helper`.
+2. ML11 a ML13: catracas do lint, nomes, cobertura das páginas, telas, changelog.
 3. ML14: CI (só se prova depois de um push, com o OK do dono). ML15: 2.ª verificação numa sessão nova.
 4. Depois: a F1 da auditoria (arranque robusto).
 

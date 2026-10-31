@@ -225,14 +225,27 @@ páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
     - `git ls-files --eol`: 165 `lf/lf`, 12 `lf/crlf`, 10 binários;
     - `testar.ps1` verde (360 testes) e estragos **70/70 apanhados**.
   - O portão da ML2 recusou-me um título com 77 caracteres: encurtado.
-- [ ] **ML9 Catracas do lint:**
-  - `RUF100`;
-  - `noqa` com motivo;
-  - 35 linhas por função (Python, PowerShell, JS) com linha de base;
-  - definições e linha de base do PSScriptAnalyzer;
-  - catraca dos `MUTANTES`;
-  - ADR das regras do Biome.
-  - *Prova:* uma função nova com 36 linhas faz o `testar.ps1` falhar.
+- [x] **ML9 Catracas do lint** (2026-10-31):
+  - `RUF100` no `ruff.toml`; `tests/test_alarmes.py`:
+    - cada `noqa`, `pragma` ou `node:coverage` com motivo;
+    - contagem máxima: 4, 1 e 2;
+    - `noqa` só de regras que o ruff tem ligadas (perguntado ao próprio ruff).
+  - **Achado:** a auditoria Q5 estava errada. A `SIM115` e a `BLE001` estão ligadas por omissão no ruff 0.17 (cerca
+    de 400 regras). Tirei os 3 `noqa`, o ruff acusou, e reponho-os.
+  - 35 linhas por função:
+    - Python: `tests/test_tamanho_das_funcoes.py`, com 4 antigas que só encolhem;
+    - JS: `noExcessiveLinesPerFunction` do Biome como erro (0 funções `.mjs` acima);
+    - PowerShell: no `testar.ps1` (0 acima).
+  - PSScriptAnalyzer: `tests/linha-de-base-pssa.txt` (50 avisos em 6 regras), comparada no `testar.ps1`. Sem ficheiro
+    de definições: desligar uma regra seria silenciar.
+  - `tests/test_estragos_minimo.py` (≥ 70 estragos); ADR 0008 (regras do Biome desligadas; a experiência fica com a
+    seguinte).
+  - *Prova:* cada catraca vista a falhar com uma mudança temporária, depois reposta:
+    - um `noqa` falso: 3 falhas;
+    - uma função de 36 linhas: falha;
+    - a linha de base do PSScriptAnalyzer: "10 avisos, linha de base 9";
+    - `testar.ps1` verde (366 testes).
+  - O HTML inline ainda não passa pelo Biome (ML11b).
 - [ ] **ML10 Nomes:** renomear `comum.mjs` e `*.Comum.ps1`; teste dos nomes proibidos; ADR do `bar_helper`.
   - *Prova:* `testar.ps1`; o grep de cada nome novo dá < 5 resultados.
 - [ ] **ML11a Cobertura das ferramentas:** `statusline.py`, hooks e portões dentro dos 100 %.

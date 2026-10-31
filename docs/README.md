@@ -31,6 +31,7 @@ O guia de quem usa o PC é o `Tutorial.html`; as regras de trabalho dos agentes 
 | [0005](decisoes/0005-painel-escolher-e-enviar.md) | Painel "Apps e arranque": escolher e enviar | aceite |
 | [0006](decisoes/0006-icones-em-svg.md) | Ícones em SVG em vez de canvas | aceite |
 | [0007](decisoes/0007-foco-do-teclado-nos-paineis.md) | Foco do teclado pela janela de topo | aceite |
+| [0008](decisoes/0008-regras-do-biome-desligadas.md) | Duas regras do Biome desligadas (cascata do CSS) | aceite |
 
 ## Mapa das secções antigas (§N do `COMO-FOI-FEITO.md`)
 

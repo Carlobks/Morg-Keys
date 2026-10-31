@@ -16,7 +16,10 @@
       "complexity": {
         // `.hidden { display: none !important }` e `body.busy * { cursor: progress !important }` têm de
         // ganhar a qualquer outra regra; sem `!important` deixavam de esconder / de mostrar a espera.
-        "noImportantStyles": "off"
+        "noImportantStyles": "off",
+        // Regra FICHEIROS PEQUENOS do CLAUDE.md: até 35 linhas por função. Nenhuma função dos .mjs passa hoje, por
+        // isso trava logo. O JS dentro dos <script> das páginas ainda não é lido pelo Biome (sai para .mjs na ML11b).
+        "noExcessiveLinesPerFunction": { "level": "error", "options": { "maxLines": 35 } }
       }
     }
   }

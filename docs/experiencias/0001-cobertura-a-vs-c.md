@@ -34,7 +34,7 @@
 | 3 | **Versão A** no ramo `exp/a` | subagente novo | cobertura 100 % da lógica; exclusões com motivo |
 | 4 | **Versão C** no ramo `exp/c` (a partir de `exp/a`) | subagente novo | contratos + testes no Sandbox a correr |
 | 5 | **Bateria de bugs reais** (lista abaixo), um de cada vez numa cópia isolada, contra a suíte A e a suíte C | agente | tabela de bugs apanhados |
-| 6 | Resultados aqui; ADR 0008 com a regra de cobertura; aplicar o `CLAUDE.md` novo; juntar o ramo vencedor ao `main` | agente + OK do utilizador | — |
+| 6 | Resultados aqui; ADR com a regra de cobertura (o número livre seguinte: a 0008 já é das regras do Biome); aplicar o `CLAUDE.md` novo; juntar o ramo vencedor ao `main` | agente + OK do utilizador | — |
 
 ### Fase 2 — plano detalhado (2026-10-23)
 Regra: comportamento igual; os testes da fase 1 não mudam nas asserções (só a ligação ao sistema falso);

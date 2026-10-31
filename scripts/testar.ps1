@@ -98,6 +98,28 @@ try {
     $Erros = @($Achados | Where-Object { $_.Severity -in 'Error', 'ParseError' })
     $Erros | ForEach-Object { Write-Output "$($_.ScriptName):$($_.Line) $($_.RuleName): $($_.Message)" }
     if ($Erros.Count -gt 0) { $Falhas.Add('Lint PowerShell') }
+
+    # 5. Catracas do PowerShell (regras NÃO PIORAR e FICHEIROS PEQUENOS): os avisos por regra batem com
+    #    tests\linha-de-base-pssa.txt (nem mais, nem menos sem baixar o ficheiro) e nenhuma função passa de 35 linhas.
+    Write-Titulo 'Catracas do PowerShell (avisos por regra e funções até 35 linhas)'
+    $Base = @{}
+    Get-Content (Join-Path $Raiz 'tests\linha-de-base-pssa.txt') -Encoding UTF8 | Where-Object { $_ -match '^\w' } |
+        ForEach-Object { $Partes = $_ -split '\s+'; $Base[$Partes[0]] = [int]$Partes[1] }
+    $Agora = @{}
+    $Achados | Group-Object RuleName | ForEach-Object { $Agora[$_.Name] = $_.Count }
+    foreach ($Regra in @($Base.Keys + $Agora.Keys | Sort-Object -Unique)) {
+        if ($Agora[$Regra] -ne $Base[$Regra]) {
+            Write-Output "  ${Regra}: $([int]$Agora[$Regra]) avisos, linha de base $([int]$Base[$Regra])"
+            $Falhas.Add("Catraca PSScriptAnalyzer ($Regra)")
+        }
+    }
+    Get-ChildItem -Path $Raiz -Recurse -Include '*.ps1', '*.psm1' -File | Where-Object { $_.FullName -notmatch '\\node_modules\\' } |
+        ForEach-Object {
+            $Arvore = [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$null, [ref]$null)
+            $Arvore.FindAll({ param($n) $n -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true) |
+                Where-Object { $_.Extent.EndLineNumber - $_.Extent.StartLineNumber + 1 -gt 35 } |
+                ForEach-Object { Write-Output "  função longa: $($_.Name) ($($_.Extent.File))"; $Falhas.Add('Funções com mais de 35 linhas') }
+        }
 }
 finally {
     Pop-Location

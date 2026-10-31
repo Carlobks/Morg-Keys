@@ -1,0 +1,9 @@
+# Linha de base do PSScriptAnalyzer (lida pelo scripts/testar.ps1; regra NÃO PIORAR do CLAUDE.md).
+# "<regra> <avisos>" medidos a 2026-10-31. Só desce: uma regra nova ou uma contagem maior faz o testar.ps1 falhar,
+# e uma contagem menor também, até este ficheiro descer no mesmo commit que corrige.
+PSAvoidUsingEmptyCatchBlock 2
+PSAvoidUsingPositionalParameters 5
+PSAvoidUsingWriteHost 10
+PSReviewUnusedParameter 8
+PSUseBOMForUnicodeEncodedFile 1
+PSUseDeclaredVarsMoreThanAssignments 24

@@ -20,8 +20,8 @@ tenha aqui uma linha, e que cada caminho citado exista.
 | DECISÃO É DO DONO | texto | nenhuma máquina sabe o que é uma decisão do dono; skill `pondo-o-plano-a-prova` |
 | COMMIT SEM PEDIDO, PUSH COM O SIM | hook | `.claude/hooks/perguntar_antes.py` pergunta antes de cada `git push` |
 | OS HOOKS SÃO A REDE | hook + teste; CI por fazer (ML14) | `.claude/hooks/guarda_do_git.py` (`--no-verify`, `core.hooksPath`), `tests/test_hooks.py` (`onFailure: block`) |
-| NÃO PIORAR | teste; por fazer (ML9) | `tests/test_ficheiros_texto.py` (linhas por ficheiro); funções e PSScriptAnalyzer na ML9 |
-| SEM SILENCIAR ALARME | por fazer (ML9) | `RUF100` e contagem de `noqa`/`pragma` com motivo |
+| NÃO PIORAR | teste | catracas: `tests/test_ficheiros_texto.py` (linhas), `tests/test_tamanho_das_funcoes.py`, `tests/test_alarmes.py`, `tests/linha-de-base-pssa.txt` no `scripts/testar.ps1` |
+| SEM SILENCIAR ALARME | teste | `tests/test_alarmes.py` (motivo, contagem, só regras ligadas), `RUF100` no `ruff.toml`; regras desligadas do Biome na ADR 0008 |
 | BUG TRAZ TESTE | git | `.githooks/commit-msg` → `scripts/portoes/mensagem_commit.py` (fix sem `tests/` exige `Sem-teste:`) |
 | PROVAR MEDINDO | git; texto | `.githooks/pre-commit` corre os testes; dizer o que não se verificou é texto |
 | NOMES PESQUISÁVEIS | por fazer (ML10) | teste dos nomes proibidos nos ficheiros |
@@ -31,8 +31,8 @@ tenha aqui uma linha, e que cada caminho citado exista.
 | SÓ O PRÓPRIO TRABALHO | hook | `.claude/hooks/guarda_do_git.py` (`add -A`, `.`, `commit -a`, commit sem caminhos) |
 | UM SÓ COMANDO | git | `.githooks/pre-commit` corre `scripts/testar.ps1` |
 | COBERTURA 100 % | teste | `scripts/testar.ps1` (`--fail-under=100`, `node --test` a 100 %, Pester a 100 %) |
-| NUNCA ENFRAQUECER UM TESTE | texto; por fazer (ML9) | `scripts/estragos.py` mostra se os testes apanham erros; catraca dos estragos na ML9 |
-| FICHEIROS PEQUENOS | hook + teste; por fazer (ML9) | `.claude/hooks/limite_de_linhas.py`, `tests/test_ficheiros_texto.py`; 35 linhas por função na ML9 |
+| NUNCA ENFRAQUECER UM TESTE | teste; texto | `tests/test_estragos_minimo.py` (os estragos não encolhem); afrouxar uma asserção é juízo da revisão |
+| FICHEIROS PEQUENOS | hook + teste | `.claude/hooks/limite_de_linhas.py`, `tests/test_ficheiros_texto.py`; 35 linhas por função: `tests/test_tamanho_das_funcoes.py`, `biome.jsonc`, `scripts/testar.ps1` |
 | PYTHON ISOLADO | teste | `tests/test_ponto_de_entrada.py` corre o ajudante com `-I` noutra pasta |
 | CODIFICAÇÃO | por fazer (F4) | teste do BOM nos `.ps1` (F4 da auditoria) |
 | FINS DE LINHA | por fazer (ML8) | `.gitattributes` explícito e teste |
