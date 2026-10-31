@@ -16,6 +16,7 @@
   --text: #cdd6f4;
   --subtext0: #a6adc8;
   --overlay0: #6c7086;
+  --overlay2: #9399b2; /* texto apagado: 5,8:1 no base (o overlay0 dava 3,4:1; WCAG 1.4.3 pede 4,5) */
   --surface0: #313244;
   --surface1: #45475a;
   --base: #1e1e2e;
@@ -141,7 +142,7 @@ section h2 {
   letter-spacing: 0.08em;
   color: var(--c);
 }
-section h2 small { margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--overlay0); font-size: 11px; }
+section h2 small { margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--overlay2); font-size: 11px; }
 
 .ico {
   width: 24px; height: 24px; flex: none; border-radius: 7px;
@@ -173,11 +174,11 @@ header kbd { --k: var(--subtext0); height: 20px; font-size: 11px; }
   font: inherit; font-size: 13px; outline: none;
 }
 #apps input:focus { border-color: var(--green); }
-#apps input::placeholder { color: var(--overlay0); }
+#apps input::placeholder { color: var(--subtext0); }
 #list { flex: 1; min-height: 0; overflow-y: auto; margin: 0 -4px; padding: 0 4px; border-radius: 8px; }
 #list::-webkit-scrollbar, .right::-webkit-scrollbar { width: 8px; }
 #list::-webkit-scrollbar-thumb, .right::-webkit-scrollbar-thumb { background: var(--surface1); border-radius: 4px; }
-#list .group { margin: 8px 4px 4px; font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--overlay0); }
+#list .group { margin: 8px 4px 4px; font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--overlay2); }
 #list .group:first-child { margin-top: 0; }
 /* Seleção (rato ou teclado): cursor = linha onde as setas estão; sel = escolhida para enviar. */
 .app {
@@ -190,8 +191,10 @@ header kbd { --k: var(--subtext0); height: 20px; font-size: 11px; }
 .app.sel { background: color-mix(in srgb, var(--green) 18%, var(--surface0)); box-shadow: inset 2px 0 0 var(--green); }
 .app .ico { width: 22px; height: 22px; font-size: 12px; border-radius: 6px; }
 .app .lb { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.app .used { font-size: 10.5px; color: var(--overlay0); }
-.empty { padding: 10px 6px; font-size: 12px; color: var(--overlay0); }
+.app .used { font-size: 10.5px; color: var(--overlay2); }
+/* Sobre o fundo surface0 do hover e do cursor o overlay2 dá 4,45:1: aí sobe para o subtext0 (5,65:1). */
+.app:hover .used, .app.cursor .used { color: var(--subtext0); }
+.empty { padding: 10px 6px; font-size: 12px; color: var(--overlay2); }
 #site { display: flex; gap: 6px; margin-top: 8px; }
 #site input { margin: 0; flex: 1; }
 #site .btn { --k: var(--green); height: 32px; }
@@ -225,10 +228,10 @@ header kbd { --k: var(--subtext0); height: 20px; font-size: 11px; }
 .key .what { display: flex; align-items: center; gap: 5px; min-width: 0; font-size: 11px; }
 .key .what .ico { width: 18px; height: 18px; font-size: 11px; border-radius: 5px; }
 .key .what span:last-child { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.key.free .what { color: var(--overlay0); }
+.key.free .what { color: var(--overlay2); }
 .key.has { border-color: color-mix(in srgb, var(--k) 60%, transparent); cursor: pointer; }
 .key.fixed { --k: var(--overlay0); opacity: 0.45; }
-.key.fixed .what { color: var(--overlay0); }
+.key.fixed .what { color: var(--overlay2); }
 /* A enviar: os destinos possíveis acendem (teclas livres ou ocupadas, workspaces). */
 body.sending .key:not(.fixed), body.sending .box { cursor: pointer; }
 body.sending .key:not(.fixed):not(.sel) { --k: var(--green); border-style: dashed; border-color: color-mix(in srgb, var(--green) 60%, transparent); }
@@ -259,9 +262,9 @@ body.sending .key:not(.fixed):hover, body.sending .box:hover { background: color
 }
 .box.has { border-style: solid; }
 body.sending .box { --k: var(--green); border-color: color-mix(in srgb, var(--green) 60%, transparent); }
-.box .head { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--overlay0); margin-bottom: 2px; }
+.box .head { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--overlay2); margin-bottom: 2px; }
 .box .head kbd { --k: var(--mauve); }
-.box .hint { font-size: 11px; color: var(--overlay0); padding: 4px 2px; }
+.box .hint { font-size: 11px; color: var(--overlay2); padding: 4px 2px; }
 .chip {
   position: relative;
   display: flex; align-items: center; gap: 6px;
@@ -286,7 +289,7 @@ body.sending header .hint { display: none; }
 
 footer {
   display: flex; align-items: center; gap: 10px;
-  padding: 9px 22px; font-size: 11.5px; color: var(--overlay0);
+  padding: 9px 22px; font-size: 11.5px; color: var(--overlay2);
   background: var(--mantle); border-top: 1px solid var(--surface0);
 }
 footer b { color: var(--subtext0); font-weight: 600; }

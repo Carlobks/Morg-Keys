@@ -15,6 +15,7 @@
   --text: #cdd6f4;
   --subtext0: #a6adc8;
   --overlay0: #6c7086;
+  --overlay2: #9399b2; /* texto apagado: 5,8:1 no base (o overlay0 dava 3,4:1; WCAG 1.4.3 pede 4,5) */
   --surface0: #313244;
   --surface1: #45475a;
   --base: #1e1e2e;
@@ -129,7 +130,7 @@ button {
 .workspace.empty {
   background: transparent;
   border-color: transparent;
-  color: var(--overlay0);
+  color: var(--overlay2);
 }
 
 .workspace:hover {
@@ -227,7 +228,7 @@ button {
 .so-icone #claude-text { display: none; }
 
 .claude .sep {
-  color: var(--overlay0);
+  color: var(--overlay2);
 }
 
 /* Valores com mais de 15 min: esbatidos (podem já não ser os atuais). */

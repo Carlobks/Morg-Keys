@@ -71,7 +71,7 @@
             opacity: 0; transform: translateY(5px); transition: opacity 300ms, transform 300ms, color 300ms; }
       .it.on { opacity: 1; transform: none; }
       .it.done { color: #cdd6f4; }
-      .it.fail { color: #6c7086; }
+      .it.fail { color: #9399b2; }  /* overlay2: 6,2:1 no fundo da lista */
       .ico { width: 26px; height: 26px; flex: none; border-radius: 8px; display: grid; place-items: center;
              font-family: 'JetBrainsMono NF', monospace; font-size: 14px; color: var(--c);
              background: color-mix(in srgb, var(--c) 16%, transparent); }
@@ -88,7 +88,7 @@
                             border: solid var(--c); border-width: 0 2px 2px 0; transform: rotate(45deg); }
       .it.fail .st { --c: #6c7086; }
       .it.fail .st::after { content: '!'; left: 0; right: 0; top: 2px; text-align: center; transform: none;
-                            border: 0; font: 700 13px 'JetBrainsMono NF', monospace; color: #6c7086; }
+                            border: 0; font: 700 13px 'JetBrainsMono NF', monospace; color: #9399b2; }
       @keyframes spin { to { transform: rotate(360deg); } }
 
       /* Animações desligadas no Windows (Acessibilidade > Efeitos visuais > Efeitos de animação): sai o movimento e

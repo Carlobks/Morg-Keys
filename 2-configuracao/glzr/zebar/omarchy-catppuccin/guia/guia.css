@@ -15,6 +15,7 @@
   --text: #cdd6f4;
   --subtext0: #a6adc8;
   --overlay0: #6c7086;
+  --overlay2: #9399b2; /* texto apagado: 5,8:1 no base (o overlay0 dava 3,4:1; WCAG 1.4.3 pede 4,5) */
   --surface0: #313244;
   --surface1: #45475a;
   --base: #1e1e2e;
@@ -135,7 +136,7 @@ header input:focus { border-color: var(--mauve); }
 
 .close:hover { background: var(--surface0); color: var(--text); }
 body.standalone .close { display: none; }
-header input::placeholder { color: var(--overlay0); }
+header input::placeholder { color: var(--subtext0); }
 
 main {
   flex: 1;
@@ -238,7 +239,7 @@ header kbd { --k: var(--subtext0); height: 20px; font-size: 11px; }
 
 .keys .or {
   font-size: 11px;
-  color: var(--overlay0);
+  color: var(--overlay2);
   padding: 0 2px;
 }
 
@@ -247,7 +248,7 @@ header kbd { --k: var(--subtext0); height: 20px; font-size: 11px; }
 footer {
   padding: 9px 22px;
   font-size: 11.5px;
-  color: var(--overlay0);
+  color: var(--overlay2);
   background: var(--mantle);
   border-top: 1px solid var(--surface0);
 }
