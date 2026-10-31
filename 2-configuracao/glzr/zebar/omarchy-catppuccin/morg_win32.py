@@ -38,6 +38,9 @@ kernel32.WaitForSingleObject.argtypes = [HANDLE, wintypes.DWORD]
 kernel32.ReleaseMutex.argtypes = [HANDLE]
 kernel32.CloseHandle.argtypes = [HANDLE]
 kernel32.GetTickCount64.restype = ctypes.c_ulonglong
+# Sem isto o hInstance da cortina ficava cortado a 32 bits e o Windows dava "access violation" (tests/test_win32_tipos.py).
+kernel32.GetModuleHandleW.restype = wintypes.HMODULE
+kernel32.GetModuleHandleW.argtypes = [wintypes.LPCWSTR]
 kernel32.SetThreadExecutionState.restype = wintypes.DWORD
 kernel32.SetThreadExecutionState.argtypes = [wintypes.DWORD]
 

@@ -41,6 +41,11 @@ MUTANTES = [
     ('return valor is None or valor.lower() not in ESCONDER', 'return True'),
     ('for antiga in sorted(pasta.glob("erro-*.md"))[:-maximo]:', 'for antiga in []:'),
     ('if not issubclass(tipo, KeyboardInterrupt):', 'if True:'),
+    # o hInstance da cortina inteiro (64 bits) e o rebentamentos.log com limite
+    (('cortina ficava cortado a 32 bits e o Windows dava "access violation" (tests/test_win32_tipos.py).\n'
+      'kernel32.GetModuleHandleW.restype = wintypes.HMODULE\n'),
+     'cortina ficava cortado a 32 bits e o Windows dava "access violation" (tests/test_win32_tipos.py).\n'),
+    ('registo.stat().st_size > LIMITE_DOS_REBENTAMENTOS', 'registo.stat().st_size < 0'),
     # P3b: Alt+Esc, V liga e desliga o aviso
     ('ligar = not popup_ligado(arranque)', 'ligar = popup_ligado(arranque)'),
     ("return line && ESCONDER.has(line.split('=')[1].trim().toLowerCase()) ? 'desligado' : 'ligado';",

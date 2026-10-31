@@ -35,6 +35,7 @@ LINHAS_DO_REGISTO = 20
 ARRANQUE = Path(__file__).resolve().parent / "guia" / "arranque.txt"
 PASTA_DOS_ERROS = Path.home() / ".glzr" / "erros"
 MAXIMO_DE_COPIAS = 10
+LIMITE_DOS_REBENTAMENTOS = 64 * 1024  # acima disto o rebentamentos.log passa a .antigo.log e começa de novo
 ESCONDER = {"esconder", "ocultar", "nao", "não", "off"}  # as mesmas palavras do "claude =" (claude_usage.py)
 _BASE64 = re.compile(r"[A-Za-z0-9_-]{16,}={0,2}")
 # As secções da pesquisa, por ordem (o modelo fica fora da função para ela caber nas 35 linhas).
@@ -231,7 +232,10 @@ def instalar(argv, tratar=tratar_erro):
     """Chamado pelo bar_helper.py: os erros que chegam ao topo viram relatório (sys.excepthook, sem apanhar tudo
     num except) e os rebentamentos em C, como no ctypes, ficam em rebentamentos.log (faulthandler)."""
     PASTA_DOS_ERROS.mkdir(parents=True, exist_ok=True)
-    faulthandler.enable(file=os.open(PASTA_DOS_ERROS / "rebentamentos.log", os.O_WRONLY | os.O_APPEND | os.O_CREAT))
+    registo = PASTA_DOS_ERROS / "rebentamentos.log"
+    if registo.exists() and registo.stat().st_size > LIMITE_DOS_REBENTAMENTOS:  # o bar_helper corre muitas vezes
+        os.replace(registo, registo.with_suffix(".antigo.log"))
+    faulthandler.enable(file=os.open(registo, os.O_WRONLY | os.O_APPEND | os.O_CREAT))
 
     def gancho(tipo, erro, pilha):
         if not issubclass(tipo, KeyboardInterrupt):

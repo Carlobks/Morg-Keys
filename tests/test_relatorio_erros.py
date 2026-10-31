@@ -238,13 +238,28 @@ class Instalar(unittest.TestCase):
     """bar_helper.py instala o gancho: os erros que chegam ao topo viram relatório; os rebentamentos em C vão
     para um ficheiro (faulthandler)."""
 
-    def instalar(self, tratar):
+    def test_o_registo_dos_rebentamentos_nao_cresce_sem_fim(self):
+        # Cada arranque acrescentava linhas ao rebentamentos.log (2026-10-31); acima do limite passa a .antigo.log.
+        pasta = tempfile.TemporaryDirectory()
+        self.addCleanup(pasta.cleanup)
+        registo = Path(pasta.name) / "rebentamentos.log"
+        registo.write_bytes(b"x" * (relatorio.LIMITE_DOS_REBENTAMENTOS + 1))
+        self.instalar(lambda erro, argv: None, Path(pasta.name))
+        self.assertFalse(registo.exists())
+        self.assertEqual((Path(pasta.name) / "rebentamentos.antigo.log").stat().st_size,
+                         relatorio.LIMITE_DOS_REBENTAMENTOS + 1)
+        registo.write_bytes(b"pequeno")
+        self.instalar(lambda erro, argv: None, Path(pasta.name))
+        self.assertEqual(registo.read_bytes(), b"pequeno")  # abaixo do limite fica
+
+    def instalar(self, tratar, pasta_dos_erros=None):
         ganchos = {}
         pasta = tempfile.TemporaryDirectory()  # antes de simular o os.open, que o tempfile também usa
         self.addCleanup(pasta.cleanup)
+        pasta_dos_erros = pasta_dos_erros or Path(pasta.name)
         with mock.patch("sys.excepthook", None), mock.patch.object(relatorio, "faulthandler") as falta, \
                 mock.patch.object(relatorio.os, "open", return_value=7), \
-                mock.patch.object(relatorio, "PASTA_DOS_ERROS", Path(pasta.name)):
+                mock.patch.object(relatorio, "PASTA_DOS_ERROS", pasta_dos_erros):
             relatorio.instalar(["bar_helper.py", "boot"], tratar)
             ganchos["gancho"] = __import__("sys").excepthook
             falta.enable.assert_called_once_with(file=7)
