@@ -113,7 +113,10 @@ Técnicas (tomadas durante as fases, com o motivo medido):
    `docs/planos/0002-relatorio-de-erros.md`). Por enviar; teste real do dono (`bar_helper.py erro-de-teste`) depois
    de reinstalar com o OK. Fica por fazer: o instalador gravar a versão no `instalacao.json` e criar a etiqueta
    "erro" no GitHub. Depois, a pedido do dono: `Alt+Esc, V` liga e desliga o aviso (`79ab3cf`, plano
-   `docs/planos/0003-tecla-do-aviso-de-erros.md`). Próximo em `docs/pendentes.md`: as frases do arranque.
+   `docs/planos/0003-tecla-do-aviso-de-erros.md`). O 1.º teste real do relatório (dono, 21:18) funcionou; o
+   `rebentamentos.log` mostrou 3 "access violation" da cortina por arranque: hInstance cortado (A52), corrigido
+   em `4b256d4`. Por decidir com o dono: o Claude no arranque (ws 1) não é colocado, porque já corria antes de o
+   abrirmos (efeito do P2.1). Próximo em `docs/pendentes.md`: as frases do arranque.
    Nota: o teste das 35 linhas só vê ficheiros que o git conhece; um ficheiro novo só é medido depois do `git add`.
 2. Teste real da ML12 com o dono (animações desligadas no Windows, texto apagado, escala a 125 %).
 3. O CI corre em cada push: um vermelho no GitHub lê-se com `gh run view <id> --log-failed`.
