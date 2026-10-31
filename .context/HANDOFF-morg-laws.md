@@ -9,7 +9,7 @@ Pôr o Morg Keys a cumprir as regras do Morg Laws: cada regra do `CLAUDE.md` com
 motivo escrito de ficar só em texto. Plano: `docs/morg-laws/plano-01.md` (fases ML0–ML15; o original vive na aba
 Plano do Claude). Ponto de partida: `docs/morg-laws/verificacao-01-2026-10-30.md`. Mapa: `docs/regras-e-barreiras.md`.
 
-## Estado verificado (2026-10-31, ramo `exp/a`, nada enviado para o GitHub)
+## Estado verificado (2026-10-31, ramo `exp/a`; enviado só para o ramo de teste `ci/teste-ml14`)
 
 | Fase | Commits | O que ficou |
 |---|---|---|
@@ -29,7 +29,7 @@ Plano do Claude). Ponto de partida: `docs/morg-laws/verificacao-01-2026-10-30.md
 | ML11b | `13579f9`, `4c7b6a9`, `27c66fd`, `090c765`, `e98ea02` | lógica das 3 páginas em `*-logica.mjs`; catraca e Biome nos scripts em linha |
 | ML12 | `83dc898`, `d790cb6` | sem animações quando o Windows as desliga; tabular-nums; contraste 4,5:1; ADR 0009 |
 | ML13 | `07afb3a`, `86ec68b` | `changelog.d/`, `juntar_changelog.py`, `Sem-changelog:` no `commit-msg`; 10 fragmentos atrasados |
-| ML14 (local) | `1dcb1dc` | `.github/workflows/ci.yml` (testar, gitleaks, estragos semanais), `MORG_PY`, A47; falta a prova real com push |
+| ML14 | `1dcb1dc`, `82d2109` | `.github/workflows/ci.yml` (testar, gitleaks, estragos semanais), `MORG_PY`, A47; verde no GitHub (ramo `ci/teste-ml14`) |
 
 Última suíte: 424 testes Python a 100 % (2269 linhas, 770 ramos: pack, portões, hooks, statusLine e changelog), 79 JS a 100 %,
 72 Pester a 100 % fora das funções excluídas; ~21 s por commit.
@@ -101,10 +101,10 @@ Técnicas (tomadas durante as fases, com o motivo medido):
 
 ## Próximos passos
 
-1. **ML14, prova real:** com o OK do dono, enviar para um ramo de teste e ver as tarefas `testar` e `segredos`
-   verdes (e correr os `estragos` à mão pelo workflow_dispatch). O YAML ainda não foi lido pelo GitHub.
+1. **ML15:** 2.ª verificação numa sessão nova, com um pedido neutro; depois, o pedido do push (`main`, `exp/a`,
+   tag) e de apagar o ramo `ci/teste-ml14`. Os `estragos` no CI só se provam com o workflow no `main`.
 2. Teste real da ML12 com o dono (animações desligadas no Windows, texto apagado, escala a 125 %).
-3. ML15: 2.ª verificação numa sessão nova, neutra; depois o pedido do push.
+3. O CI corre em cada push: um vermelho no GitHub lê-se com `gh run view <id> --log-failed`.
 4. Depois do plano: a ordem está em `docs/pendentes.md` (bug do painel Apps e arranque, relatório de erros,
    frases, modal do Claude, guia do Alt+R, F1–F7, experiência 0001, jogos e A38).
 

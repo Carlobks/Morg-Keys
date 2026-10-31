@@ -340,7 +340,7 @@ páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
       - aceite com `Sem-changelog:`.
     - O `pre-commit` não correu no clone, porque lá não há `node_modules` para o Biome.
   - *Não feito:* estragos novos para o portão e o juntar (o mínimo de 80 mantém-se).
-- [~] **ML14 CI** (2026-10-31; a parte local está feita, falta a prova real):
+- [x] **ML14 CI** (2026-10-31):
   - `.github/workflows/ci.yml` com três tarefas:
     - `testar`: o `testar.ps1` no `windows-latest`, em cada push e PR;
     - `segredos`: o gitleaks 8.30.1 em todo o histórico, com o sha256 conferido;
@@ -357,8 +357,14 @@ páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
     - `tests/test_ci.py` (8 testes) vermelho, depois verde;
     - `testar.ps1` verde com `MORG_PY` no `python.exe` real (423 testes Python a 100 %, 72 Pester);
     - `testar.ps1` verde normal (424).
-  - *Por provar:* o YAML ainda não foi lido pelo GitHub (não há um validador local). A prova real só vem com um
-    push e o teu OK (pode ser num ramo de teste).
+  - *Prova real* (com o OK do dono, push só para o ramo `ci/teste-ml14`):
+    - 1.ª corrida (`41229680427`): `segredos` verde; `testar` com 2 falhas, porque o checkout não liga o
+      `core.hooksPath` que os testes da guarda do git exigem. O JS, o Pester, o lint e as catracas já passaram.
+    - `82d2109`: o CI liga os portões como diz o README, sem afrouxar os testes. Teste vermelho, depois verde.
+    - 2.ª corrida (`41230243035`): **`testar` verde (3 min) e `segredos` verde**.
+  - *Não provado:* os `estragos` no GitHub. O `workflow_dispatch` e o agendamento só correm quando o workflow
+    estiver no ramo por omissão (`main`).
+  - O ramo `ci/teste-ml14` continua no GitHub. Apagá-lo pede o OK do dono.
 - [ ] **ML15 2.ª verificação Morg Laws:**
   - auditoria numa sessão nova, com um pedido neutro (sem as conclusões);
   - comparar as contagens com a 1.ª;
