@@ -68,8 +68,8 @@ if (ePreVisualizacao(location)) {
     // pyw.exe = lançador oficial do Python: o caminho não muda com atualizações.
     const PYW = 'C:\\Windows\\pyw.exe';
     // O caminho vem do HTML (data-helper): o instalador só troca {{HOME}} em .html, não em .mjs.
-    const HELPER = document.documentElement.dataset.helper;
-    hideWindow = () => zebar.shellExec(PYW, ['-I', HELPER, 'guide-hide']).catch(console.error);
+    const BAR_HELPER = document.documentElement.dataset.helper;
+    hideWindow = () => zebar.shellExec(PYW, ['-I', BAR_HELPER, 'guide-hide']).catch(console.error);
 
     // A animação cresce a partir da chávena: a origem da transformação
     // é a posição da chávena relativa a esta janela (origemDaChavena, em paineis.mjs).

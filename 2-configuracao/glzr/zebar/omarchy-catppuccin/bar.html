@@ -59,7 +59,7 @@
       // oficial do Python: o caminho não muda quando o Python é atualizado.
       const PY = 'C:\\Windows\\py.exe';
       const PACK = '{{HOME}}/.glzr/zebar/omarchy-catppuccin';
-      const helper = (...args) => zebar.shellExec(PY, ['-I', `${PACK}/bar_helper.py`, ...args]);
+      const correrBarHelper = (...args) => zebar.shellExec(PY, ['-I', `${PACK}/bar_helper.py`, ...args]);
       const USAGE_EVERY_MS = 30_000; // só lê um ficheiro pequeno
       const AWAKE_EVERY_MS = 5_000;
 
@@ -170,7 +170,7 @@
       $('network').addEventListener('click', () => openWin('ms-availablenetworks:'));
       // Definições Rápidas (= Win+A): não abrem por URI neste Windows, por isso
       // o bar_helper.py carrega Win+A.
-      $('audio').addEventListener('click', () => helper('quick').catch(console.error));
+      $('audio').addEventListener('click', () => correrBarHelper('quick').catch(console.error));
       $('audio').addEventListener('contextmenu', e => {
         e.preventDefault();
         const audio = providers.outputMap.audio;
@@ -198,9 +198,9 @@
         el.classList.toggle('off', !v.on);
         el.title = v.title;
       }
-      const refreshAwake = () => helper('awake', 'status').then(r => renderAwake(r.stdout)).catch(console.error);
+      const refreshAwake = () => correrBarHelper('awake', 'status').then(r => renderAwake(r.stdout)).catch(console.error);
       $('awake').addEventListener('click', () =>
-        helper('awake', 'toggle').then(r => renderAwake(r.stdout)).catch(console.error));
+        correrBarHelper('awake', 'toggle').then(r => renderAwake(r.stdout)).catch(console.error));
       renderAwake('off');
       refreshAwake();
       setInterval(refreshAwake, AWAKE_EVERY_MS);

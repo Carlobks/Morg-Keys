@@ -6,6 +6,7 @@ Conta o nome inteiro ou uma parte separada por ponto (`instalar.Comum.ps1`); um 
 `comum/comum.mjs` e `tests/*.Comum.ps1`.
 """
 
+import re
 import subprocess
 import unittest
 from pathlib import PurePosixPath
@@ -37,6 +38,17 @@ class NomesPesquisaveis(unittest.TestCase):
                                   capture_output=True, text=True, encoding="utf-8", check=True).stdout.splitlines()
         existentes = [caminho for caminho in caminhos if (RAIZ / caminho).exists()]
         self.assertEqual(nomes_proibidos(existentes), [], "dê um nome que diga a função (menos de 5 resultados no grep)")
+
+    def test_nenhum_identificador_generico_solto_nas_paginas(self):
+        # B8 da 2.ª verificação (ML16): `const helper` no bar.html e `const data` no painel/apps-logica.mjs.
+        declaracao = re.compile(r"\b(?:const|let|var|function)\s+(\w+)\b")
+        pack = RAIZ / "2-configuracao" / "glzr" / "zebar" / "omarchy-catppuccin"
+        for ficheiro in [*pack.rglob("*.mjs"), *pack.rglob("*.html")]:
+            if "vendor" in ficheiro.parts:
+                continue
+            soltos = [nome for nome in declaracao.findall(ficheiro.read_text(encoding="utf-8")) if nome.lower() in PROIBIDOS]
+            with self.subTest(ficheiro=ficheiro.name):
+                self.assertEqual(soltos, [], "dê um nome que diga a função")
 
 
 if __name__ == "__main__":

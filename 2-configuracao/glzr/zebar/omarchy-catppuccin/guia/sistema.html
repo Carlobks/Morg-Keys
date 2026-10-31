@@ -160,7 +160,7 @@
         // Anima ao entrar na camada; se a camada acabar e o painel ainda se vir
         // (ex.: saída pela barra), pede ao bar_helper.py para o esconder.
         const PYW = 'C:\\Windows\\pyw.exe';
-        const HELPER = '{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py';
+        const BAR_HELPER = '{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py';
         const providers = zebar.createProviderGroup({ glazewm: { type: 'glazewm' } });
         providers.onOutput(async () => {
           const active = camadaAtiva(providers.outputMap.glazewm?.bindingModes);
@@ -169,7 +169,7 @@
           if (active && !document.body.classList.contains('open')) drawIcons();
           document.body.classList.toggle('open', active);
           if (!active && (await win.isVisible())) {
-            zebar.shellExec(PYW, ['-I', HELPER, 'layer-hide']).catch(console.error);
+            zebar.shellExec(PYW, ['-I', BAR_HELPER, 'layer-hide']).catch(console.error);
           }
         });
       } else {

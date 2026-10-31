@@ -186,10 +186,10 @@ if (ePreVisualizacao(location)) {
     const PY = 'C:\\Windows\\py.exe';
     const PYW = 'C:\\Windows\\pyw.exe';
     // O caminho vem do HTML (data-helper): o instalador só troca {{HOME}} em .html, não em .mjs.
-    const HELPER = document.documentElement.dataset.helper;
-    call = async args => JSON.parse((await zebar.shellExec(PY, ['-I', HELPER, 'panel', ...args])).stdout);
+    const BAR_HELPER = document.documentElement.dataset.helper;
+    call = async args => JSON.parse((await zebar.shellExec(PY, ['-I', BAR_HELPER, 'panel', ...args])).stdout);
     // Esconder passa sempre pelo bar_helper.py (um só dono da visibilidade, A9).
-    hideWindow = () => zebar.shellExec(PYW, ['-I', HELPER, 'panel-hide']).catch(console.error);
+    hideWindow = () => zebar.shellExec(PYW, ['-I', BAR_HELPER, 'panel-hide']).catch(console.error);
 
     const { ox, oy } = origemDaChavena(screen.width, await win.outerPosition(), await win.scaleFactor());
     document.documentElement.style.setProperty('--ox', ox);
