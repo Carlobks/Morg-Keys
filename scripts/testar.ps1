@@ -13,17 +13,25 @@ $Portoes = Join-Path $Raiz 'scripts\portoes'
 $HooksDoClaude = Join-Path $Raiz '.claude\hooks'
 $Statusline = Join-Path $Raiz '2-configuracao\claude'
 $Changelog = Join-Path $Raiz 'scripts\changelog'
-$Py = 'C:\Windows\py.exe'
+# MORG_PY: outro Python (o CI do GitHub não garante o C:\Windows\py.exe; o mesmo nome dos .githooks).
+$Py = if ($env:MORG_PY) { $env:MORG_PY } else { 'C:\Windows\py.exe' }
 $Falhas = New-Object System.Collections.Generic.List[string]
 
 function Write-Titulo([string]$Texto) { Write-Output ''; Write-Output "== $Texto" }
+
+# Falhar fechado: sem o Python, o "& $Py" falha sem mexer no $LASTEXITCODE e o resultado diria "OK".
+if (-not (Get-Command $Py -ErrorAction SilentlyContinue)) {
+    Write-Output "FALHOU: Python não encontrado ($Py). Ver MORG_PY no início de scripts\testar.ps1."
+    exit 1
+}
 
 Push-Location $Raiz
 try {
     # 1. Python: unittest com cobertura de linhas e ramos. Sem -I: o coverage está nos pacotes do utilizador.
     #    Conta a lógica do pack, os portões do git (scripts\portoes), os hooks do Claude Code (.claude\hooks)
-    #    a statusLine (2-configuracao\claude) e o juntar do changelog (scripts\changelog); os testes não. Abaixo de 100 % falha. A cola com o Windows
-    #    que não se testa tem "# pragma: no cover" com o motivo (lista em docs/validacao-manual.md).
+    #    a statusLine (2-configuracao\claude) e o juntar do changelog (scripts\changelog); os testes não.
+    #    Abaixo de 100 % falha. A cola com o Windows que não se testa tem "# pragma: no cover" com o motivo
+    #    (lista em docs/validacao-manual.md).
     Write-Titulo 'Python (unittest + coverage)'
     & $Py -m coverage run --branch "--source=$Pack,$Portoes,$HooksDoClaude,$Statusline,$Changelog" -m unittest discover -s tests
     if ($LASTEXITCODE -ne 0) { $Falhas.Add('Python') }

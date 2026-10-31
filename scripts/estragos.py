@@ -111,7 +111,8 @@ MUTANTES = [
 ]
 FICHEIROS = [*PACK.glob("*.py"), *PACK.glob("*.mjs"), *PACK.glob("partilhado/*.mjs"), *PACK.glob("painel/*.mjs"),
              *PACK.glob("guia/*.mjs"), *PACK.glob("arranque/*.mjs")]
-TESTES_PY = ["py", "-I", "-m", "unittest", "discover", "-s", "tests"]
+# MORG_PY: outro Python (o CI do GitHub não garante o py), o mesmo nome do testar.ps1 e dos .githooks.
+TESTES_PY = [os.environ.get("MORG_PY", "py"), "-I", "-m", "unittest", "discover", "-s", "tests"]
 TESTES_JS = ["node", "--test", *map(str, pathlib.Path("tests").glob("*.test.mjs"))]
 
 

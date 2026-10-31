@@ -59,7 +59,9 @@ Cada commit corre `scripts/testar.ps1` (testes, 100 % de cobertura e lint), veri
 `changelog.d/README.md`) ou a linha `Sem-changelog: <motivo>`. Para a lista negra de nomes, que fica fora do repositório: `git config morg.listaNegra <ficheiro>`.
 Cada push mostra os ficheiros a enviar, procura segredos com o [gitleaks](https://github.com/gitleaks/gitleaks)
 (`winget install Gitleaks.Gitleaks`; sem ele o push não sai) e corre o `npm audit` contra
-`.seguranca/audit-linha-de-base.txt`.
+`.seguranca/audit-linha-de-base.txt`. No GitHub, o CI (`.github/workflows/ci.yml`) volta a correr o
+`scripts/testar.ps1` num Windows limpo e o gitleaks em todo o histórico; uma vez por semana, os estragos. Para
+usar outro Python localmente: `MORG_PY=<caminho do python.exe>`.
 
 ## Licença
 

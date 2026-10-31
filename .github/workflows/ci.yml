@@ -1,0 +1,88 @@
+# CI do Morg Keys (ML14): o mesmo scripts/testar.ps1 do pre-commit num Windows limpo, o gitleaks em todo o
+# histórico e, uma vez por semana, os estragos. Apanha o commit feito à mão sem os hooks do git.
+# Regras (tests/test_ci.py): actions fixadas por SHA com a versão em comentário; o token só lê; versões fixas,
+# as mesmas da máquina de quem desenvolve; o gitleaks descarregado com o hash conferido.
+name: CI
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "17 4 * * 1" # segunda-feira às 04:17 UTC: estragos
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  testar:
+    if: github.event_name != 'schedule'
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        id: python
+        with:
+          python-version: "3.11.9"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24.14.1"
+      - name: Ferramentas com versões fixas
+        shell: powershell
+        env:
+          MORG_PY: ${{ steps.python.outputs.python-path }}
+        run: |
+          & $env:MORG_PY -m pip install --disable-pip-version-check coverage==7.17.0 ruff==0.17.2
+          npm ci --ignore-scripts
+          Install-Module Pester -RequiredVersion 6.2.0 -Force -SkipPublisherCheck -Scope CurrentUser
+          Install-Module PSScriptAnalyzer -RequiredVersion 1.25.0 -Force -Scope CurrentUser
+      - name: Testes, cobertura e lint (scripts/testar.ps1)
+        shell: powershell
+        env:
+          MORG_PY: ${{ steps.python.outputs.python-path }}
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/testar.ps1
+
+  segredos:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: gitleaks 8.30.1 em todo o histórico
+        run: |
+          curl -sSfL -o gitleaks.tar.gz https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  gitleaks.tar.gz" | sha256sum -c -
+          tar -xzf gitleaks.tar.gz gitleaks
+          ./gitleaks git --redact --no-banner .
+
+  estragos:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        id: python
+        with:
+          python-version: "3.11.9"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24.14.1"
+      - name: Estragos (testes de mutação; nenhum pode escapar)
+        shell: powershell
+        env:
+          MORG_PY: ${{ steps.python.outputs.python-path }}
+        run: |
+          $saida = & $env:MORG_PY -I scripts/estragos.py
+          $saida
+          # "N.O" e não "NÃO": o PowerShell 5.1 pode ler este bloco noutra codificação.
+          if ($LASTEXITCODE -ne 0 -or ($saida -match '^(ESCAPOU|N.O ENCONTRADO)')) { exit 1 }

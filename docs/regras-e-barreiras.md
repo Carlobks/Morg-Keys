@@ -9,7 +9,8 @@ tenha aqui uma linha, e que cada caminho citado exista.
 - **git:** um hook do git em `.githooks/` (vale para o agente e para quem commita à mão);
 - **teste:** um teste do `scripts/testar.ps1`, que corre em cada commit;
 - **permissão:** uma regra em `.claude/settings.json`;
-- **CI:** uma verificação no GitHub (ainda por fazer, ML14);
+- **CI:** uma verificação no GitHub, em `.github/workflows/ci.yml` (regras em `tests/test_ci.py`); vale também
+  para o commit feito à mão sem os hooks do git;
 - **texto:** só a regra escrita (não há máquina que a decida; o motivo está ao lado);
 - **por fazer:** a barreira tem fase marcada no plano `docs/morg-laws/plano-01.md`.
 
@@ -19,7 +20,7 @@ tenha aqui uma linha, e que cada caminho citado exista.
 | PLANO ANTES DE MEXER | teste; texto | `tests/test_docs_indices.py`: os planos em `docs/` têm "Fora do escopo" e a prova; o "sim" do dono é texto |
 | DECISÃO É DO DONO | texto | nenhuma máquina sabe o que é uma decisão do dono; skill `pondo-o-plano-a-prova` |
 | COMMIT SEM PEDIDO, PUSH COM O SIM | hook | `.claude/hooks/perguntar_antes.py` pergunta antes de cada `git push` |
-| OS HOOKS SÃO A REDE | hook + teste; CI por fazer (ML14) | `.claude/hooks/guarda_do_git.py` (`--no-verify`, `core.hooksPath`), `tests/test_hooks.py` (`onFailure: block`) |
+| OS HOOKS SÃO A REDE | hook + teste + CI | `.claude/hooks/guarda_do_git.py` (`--no-verify`, `core.hooksPath`), `tests/test_hooks.py` (`onFailure: block`); quem saltar os hooks à mão é apanhado no `.github/workflows/ci.yml` |
 | NÃO PIORAR | teste | catracas: `tests/test_ficheiros_texto.py` (linhas), `tests/test_tamanho_das_funcoes.py`, `tests/test_alarmes.py`, `tests/linha-de-base-pssa.txt` no `scripts/testar.ps1` |
 | SEM SILENCIAR ALARME | teste | `tests/test_alarmes.py` (motivo, contagem, só regras ligadas), `RUF100` no `ruff.toml`; regras desligadas do Biome na ADR 0008 |
 | BUG TRAZ TESTE | git | `.githooks/commit-msg` → `scripts/portoes/mensagem_commit.py` (fix sem `tests/` exige `Sem-teste:`) |
@@ -27,9 +28,9 @@ tenha aqui uma linha, e que cada caminho citado exista.
 | NOMES PESQUISÁVEIS | teste; texto | `tests/test_nomes.py` (nenhum ficheiro ou pasta com nome genérico solto); os nomes dentro do código são juízo da revisão |
 | TEXTO VIRA BARREIRA | teste | `tests/test_regras.py` (este mapa) |
 | SEM DADOS REAIS | teste + git | `tests/test_dados_pessoais.py`; `.githooks/pre-commit` e `commit-msg` com a lista negra |
-| SEM SEGREDOS | permissão + git + teste | `.claude/settings.json` (deny), `.githooks/pre-push` (gitleaks), `tests/test_permissoes.py` |
+| SEM SEGREDOS | permissão + git + teste + CI | `.claude/settings.json` (deny), `.githooks/pre-push` (gitleaks), `tests/test_permissoes.py`; gitleaks em todo o histórico no `.github/workflows/ci.yml` |
 | SÓ O PRÓPRIO TRABALHO | hook | `.claude/hooks/guarda_do_git.py` (`add -A`, `.`, `commit -a`, commit sem caminhos) |
-| UM SÓ COMANDO | git | `.githooks/pre-commit` corre `scripts/testar.ps1` |
+| UM SÓ COMANDO | git + CI | `.githooks/pre-commit` e `.github/workflows/ci.yml` correm `scripts/testar.ps1` |
 | COBERTURA 100 % | teste | `scripts/testar.ps1` (`--fail-under=100` no pack, portões, hooks e statusLine; `node --test` a 100 %, Pester a 100 %); a lógica das páginas em `.mjs` e os `<script>` em linha com catraca: `tests/paginas-em-linha.test.mjs` |
 | NUNCA ENFRAQUECER UM TESTE | teste; texto | `tests/test_estragos_minimo.py` (os estragos não encolhem); afrouxar uma asserção é juízo da revisão |
 | FICHEIROS PEQUENOS | hook + teste | `.claude/hooks/limite_de_linhas.py`, `tests/test_ficheiros_texto.py`; 35 linhas por função: `tests/test_tamanho_das_funcoes.py`, `biome.jsonc`, `tests/paginas-em-linha.test.mjs`, `scripts/testar.ps1` |
