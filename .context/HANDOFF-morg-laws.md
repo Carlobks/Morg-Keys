@@ -107,8 +107,15 @@ Técnicas (tomadas durante as fases, com o motivo medido):
 1. Feito a 2026-10-31: push do `main` (`5f1ee68`), do `exp/a` (`861c371`) e da tag `exp-a-medida`; CI do `exp/a`
    verde (corrida 41234044122 do GitHub Actions). Falta, com o OK: apagar o ramo `ci/teste-ml14` e levar o workflow ao `main` (os
    `estragos` semanais só correm lá). Opcional: uma 3.ª verificação neutra para medir a ML16.
-   P2 feito (por enviar; teste real do dono depois de reinstalar com o OK). Próximo em `docs/pendentes.md`: o
-   relatório de erros (pesquisa primeiro).
+   P2 feito (por enviar; teste real do dono depois de reinstalar com o OK).
+   **A-RETOMAR (P3, relatório de erros; plano aprovado na aba Plano):** pesquisa feita
+   (`docs/pesquisa/relatorio-de-erros.md`) e P3.1 feito (`c876696`, `morg_relatorio_erros.py` a 100 %). Parei
+   antes do P3.2 (popup `MessageBoxW` + "Guardar como" `GetSaveFileNameW`, `erros = mostrar|esconder` no
+   `arranque.txt`, `faulthandler`, `bar_helper.py erro-de-teste`) com a quota das 5 h perto dos 90 %. Depois:
+   P3.3 (`.github/ISSUE_TEMPLATE/erro.yml`) e P3.4 (fragmento, estragos, pendentes, `docs/planos/0002-…`; o
+   `copiar_plano.py` do scratchpad precisa da entrada "P3" no dicionário PLANOS). O `instalacao.json` ainda não
+   grava a versão: o relatório diz "desconhecida" até o instalador a gravar.
+   Nota: o teste das 35 linhas só vê ficheiros que o git conhece; um ficheiro novo só é medido depois do `git add`.
 2. Teste real da ML12 com o dono (animações desligadas no Windows, texto apagado, escala a 125 %).
 3. O CI corre em cada push: um vermelho no GitHub lê-se com `gh run view <id> --log-failed`.
 4. Depois do plano: a ordem está em `docs/pendentes.md` (bug do painel Apps e arranque, relatório de erros,
