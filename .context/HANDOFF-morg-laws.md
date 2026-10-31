@@ -6,10 +6,10 @@ ficheiro. Atualizado no commit que fecha cada fase. Modelo: skill `orquestrando-
 ## Objetivo
 
 Pôr o Morg Keys a cumprir as regras do Morg Laws: cada regra do `CLAUDE.md` com uma barreira de máquina, ou com o
-motivo escrito de ficar só em texto. Plano: `docs/morg-laws/plano-01.md` (fases ML0–ML15). Ponto de partida:
-`docs/morg-laws/verificacao-01-2026-10-30.md`. Mapa atual: `docs/regras-e-barreiras.md`.
+motivo escrito de ficar só em texto. Plano: `docs/morg-laws/plano-01.md` (fases ML0–ML15; o original vive na aba
+Plano do Claude). Ponto de partida: `docs/morg-laws/verificacao-01-2026-10-30.md`. Mapa: `docs/regras-e-barreiras.md`.
 
-## Estado verificado (2026-10-30, ramo `exp/a`, nada enviado para o GitHub)
+## Estado verificado (2026-10-31, ramo `exp/a`, nada enviado para o GitHub)
 
 | Fase | Commits | O que ficou |
 |---|---|---|
@@ -19,33 +19,75 @@ motivo escrito de ficar só em texto. Plano: `docs/morg-laws/plano-01.md` (fases
 | ML2 | `bac19a6` | `scripts/portoes/` (mensagem, identidade, lista negra) a 100 % |
 | ML3 | `af01506`, `c9f440b`, `7986911` | `.githooks/` + `core.hooksPath`; `.claude/hooks/guarda_do_git.py` |
 | ML4 | `42edd20`, `f9307b0` | deny/ask/allow; `.claude/hooks/perguntar_antes.py` |
-| ML5 | `21996bb`, `54b1902` | gitleaks 8.30.1; histórico limpo; `.githooks/pre-push` |
+| ML5 | `21996bb`, `54b1902` | gitleaks 8.30.1; histórico limpo (62 commits); `.githooks/pre-push` |
 | ML6 | `994fac6` | `CLAUDE.md` com 30 regras; mapa das barreiras; 7 skills |
 | ML7 | `5343c18` | testes dos índices, ADR, armadilhas, pesquisa, planos e handoffs |
 | ML8 | `88ca6ef`, `2d083fd` | `.gitattributes` explícito; fins de linha normalizados; estragos 70/70 |
 | ML9 | `627f2bb` | catracas: alarmes, 35 linhas por função, PSScriptAnalyzer, estragos; ADR 0008 |
-| ML10 | este commit | `partilhado/paineis.mjs`, `tests/*.Preparacao.ps1`; `tests/test_nomes.py` |
+| ML10 | `8c5a363` | `partilhado/paineis.mjs`, `tests/*.Preparacao.ps1`; `tests/test_nomes.py` |
 
-## Decisões (do dono, 2026-10-30)
+Última suíte: 370 testes Python a 100 % (1911 linhas, 626 ramos), 45 JS, 72 Pester a 100 %; ~21 s por commit.
 
-- As fases Morg Laws vêm antes da F1 da auditoria.
-- Commits `tipo(área): …` obrigados por hook; changelog por fragmentos em `changelog.d/` (ML13).
-- Só as 7 skills que servem; **sem AGENTS.md** (só se usa o Claude).
-- Não se reescreve o histórico publicado.
+## Decisões e porquê
+
+Do dono (2026-10-30), perguntadas com recomendação:
+- **Morg Laws antes da F1:** as fases criam a rede (hooks do git, gitleaks, CI) que protege tudo o que vem depois,
+  incluindo o push que está à espera.
+- **Commits `tipo(área): …` com hook:** formato do Morg Laws; só um hook o obriga. O histórico antigo fica.
+- **Changelog por fragmentos (`changelog.d/`, ML13):** o produto é instalado por outras pessoas.
+- **Só 7 skills:** SQL, Supabase e Next.js não se aplicam a este projeto.
+- **Sem AGENTS.md:** só se usa o Claude; as regras ficam no `CLAUDE.md`.
+- **Não reescrever o histórico publicado:** o nome real nos testes antigos, o `17ce46f` sem teste e os títulos
+  longos ficam como exceção registada (secção D do plano).
+- **Push e instalações sempre com o OK, fase a fase:** o dono aprova cada fase ("faz a MLn") e cada instalação.
+
+Técnicas (tomadas durante as fases, com o motivo medido):
+- **Nome fictício "Ana" (e "Bruno" na conta simulada do Pester); lista negra fora do repositório**
+  (`git config morg.listaNegra`): os nomes reais não podem estar escritos nem no teste que os procura.
+- **Testes no `.githooks/pre-commit`, não no hook do Claude:** um hook do Claude só trava o agente; o do git vale
+  também à mão. A guarda `MORG_A_TESTAR` (A30) evita o ciclo testes → commit → testes.
+- **`guarda_do_git.py` recusa** `--no-verify`, `add -A/./:/`, `commit -a`, commit sem caminhos (fora de merge),
+  `-m` com várias linhas e `MORG_A_TESTAR` num commit: cada um salta ou estraga os portões (as duas últimas brechas
+  vieram do meu próprio `c9f440b`).
+- **Hook `perguntar_antes.py` em vez de só regras `ask`:** no modo automático as regras `ask` do `settings.json`
+  não perguntam (o dono confirmou: o push a seco correu sem pergunta); com o hook, a pergunta apareceu (A46).
+- **`settings.local.json` sem `py -I -` nem `gh pr *`:** o primeiro corria qualquer código, o segundo deixava criar e
+  juntar PRs sem perguntar.
+- **gitleaks e npm audit a falhar fechado:** sem gitleaks ou com relatório ilegível o push não sai; a linha de base
+  do npm audit só encolhe (nunca se acrescenta um aviso para passar).
+- **`CLAUDE.md` ≤ 100 linhas com `**TÍTULO:**` + mapa das barreiras + `tests/test_regras.py`:** regra só escrita
+  não se cumpre; um caminho citado que não existe ensina o agente a saltar a regra.
+- **Handoff em `.context/` no repositório:** a memória do agente fica fora do git e de outras contas.
+- **LF no git, CRLF só em `.ps1/.psm1/.cmd/.bat`:** o `cmd.exe` falha com LF nos `goto`; o resto é LF (A27).
+- **`noqa` de `SIM115`/`BLE001` mantidos:** a auditoria Q5 errou; o ruff 0.17 liga ~400 regras por omissão
+  (medido). O `tests/test_alarmes.py` pergunta ao ruff que regras estão ligadas.
+- **PSScriptAnalyzer com linha de base, sem ficheiro de definições:** desligar uma regra seria silenciá-la.
+- **Biome `noExcessiveLinesPerFunction` como erro:** 0 funções `.mjs` acima de 35 linhas, por isso trava logo.
+- **ADR 0008 para as regras do Biome desligadas:** a experiência 0001 fica com o número livre seguinte.
+- **`partilhado/paineis.mjs` e ADR do `bar_helper` dispensada:** a regra é sobre nomes *soltos*.
+- **`Sem-changelog:` só na ML13:** sem `changelog.d/` o portão recusaria todos os feat/fix.
 
 ## Descartado
 
-- Regras `ask` no `settings.json` como única barreira: no modo automático não perguntam. Ficou o hook
-  `perguntar_antes.py`, que o dono confirmou que pergunta.
-- Testes no hook do Claude: passaram para o `.githooks/pre-commit`, para valerem também à mão.
-- `git commit -- <caminhos>` para mudar a marca de executável: perde-a no Windows (A45).
+- Regras `ask` como única barreira (ver acima).
+- `git commit -- <caminhos>` para a marca de executável: perde-a no Windows; usar `git add --chmod=+x` e
+  `git commit -i` (A45).
+- Uma lista de regras do ruff escrita à mão no teste: estava errada; pergunta-se ao ruff.
 
 ## Próximos passos
 
-1. ML11a: `statusline.py`, hooks do Claude e portões dentro dos 100 % de cobertura.
-2. ML11b a ML13: catracas do lint, nomes, cobertura das páginas, telas, changelog.
-3. ML14: CI (só se prova depois de um push, com o OK do dono). ML15: 2.ª verificação numa sessão nova.
-4. Depois: a F1 da auditoria (arranque robusto).
+1. **ML11a:** `2-configuracao/claude/statusline.py`, `.claude/hooks/` e `scripts/portoes/` dentro dos 100 % (o
+   `--source` do `testar.ps1` só tem o pack e os portões).
+2. ML11b (lógica das páginas em `.mjs`, uma página por commit), ML12 (telas), ML13 (changelog).
+3. ML14: CI (só se prova depois de um push, com o OK do dono). ML15: 2.ª verificação numa sessão nova, neutra.
+4. Depois: a F1 da auditoria (arranque robusto); a experiência 0001 (fases 4–6); jogos; A38.
 
-Cuidados: Regra n.º 1 (A2); cada commit corre os testes (~21 s); o gitleaks está fora do PATH das consolas
-antigas (`%LOCALAPPDATA%\Microsoft\WinGet\Packages\Gitleaks.Gitleaks_*`).
+**Cuidados:**
+- Regra n.º 1 (A2): nunca arrancar o ambiente a partir daqui.
+- Cada commit corre os testes (~21 s). Passar a mensagem por `py -I scripts/portoes/mensagem_commit.py <ficheiro>`
+  antes do commit: títulos acima de 72 caracteres já foram recusados 2×.
+- Commit por caminho; os ficheiros apagados vão só no `commit`, não no `add`.
+- Editar em bytes com `assert` da contagem; ver `git ls-files --eol` antes e depois.
+- O gitleaks está fora do PATH das consolas antigas: `%LOCALAPPDATA%\Microsoft\WinGet\Packages\Gitleaks.Gitleaks_*`.
+- A lista negra está em `%USERPROFILE%\.config\morg-keys\` (as permissões negam ao agente lê-la).
+- A identidade global do git tem o nome real e um e-mail pessoal: um clone novo precisa de `--local` (A44).
