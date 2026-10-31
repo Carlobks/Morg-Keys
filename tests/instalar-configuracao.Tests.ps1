@@ -202,6 +202,7 @@ Describe 'Ambiente de trabalho do Windows' {
   BeforeEach {
     Limpar
     New-Item -ItemType Directory -Force $Glzr | Out-Null
+    Mock GitDoPacote { $null }   # a versão sem o git; o teste da versão simula-a
     Mock Get-ItemProperty { [pscustomobject]@{ HideIcons = 0 } } -ParameterFilter { $Name -eq 'HideIcons' }
     Mock Get-ItemProperty { [pscustomobject]@{ Settings = [byte[]](0..15) } } -ParameterFilter { $Name -eq 'Settings' }
     Mock Set-ItemProperty {}
@@ -216,6 +217,12 @@ Describe 'Ambiente de trabalho do Windows' {
     Should -Invoke Start-Process -ParameterFilter { $FilePath -eq 'explorer.exe' }
     $estado = Get-Content (Join-Path $Glzr 'instalacao.json') -Raw | ConvertFrom-Json
     ($estado.copia_anterior, $estado.statusline, $estado.hideicons_antes, $estado.barra_antes) | Should -Be @('C:\copia', $true, 0, 8)
+  }
+  It 'grava a versão instalada, para o relatório de erros (ADR 0011)' {
+    Mock VersaoDoPacote { '0.1.0+exp-a.c3b57e3' }
+    AjustarAmbienteDeTrabalho $null $false
+    (Get-Content (Join-Path $Glzr 'instalacao.json') -Raw | ConvertFrom-Json).versao | Should -Be '0.1.0+exp-a.c3b57e3'
+    Should -Invoke VersaoDoPacote -ParameterFilter { $pasta -eq $Pacote }
   }
   It 'com -ManterIcones e -ManterBarraWindows não muda nada' {
     $ManterIcones = $true

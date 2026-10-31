@@ -36,6 +36,7 @@ param(
   [switch]$NaoIniciar
 )
 $Pacote = Split-Path $PSScriptRoot -Parent
+. (Join-Path $PSScriptRoot 'instalar-versao.ps1')   # VersaoDoPacote (ADR 0011)
 $Casa = $env:USERPROFILE
 $AppData = $env:APPDATA   # o Claude Code instalado pelo npm fica em $AppData\npm\claude.cmd
 $Glzr = Join-Path $Casa '.glzr'
@@ -406,7 +407,7 @@ print("ok")
 # ---------------------------------------------------------------------------
 function AjustarAmbienteDeTrabalho($copia, $statusAplicado) {
   $adv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
-  $estado = [ordered]@{ instalado_em = (Get-Date -Format s); copia_anterior = $copia; statusline = $statusAplicado }
+  $estado = [ordered]@{ versao = VersaoDoPacote $Pacote; instalado_em = (Get-Date -Format s); copia_anterior = $copia; statusline = $statusAplicado }
   # Numa reinstalação, o "antes" é o da 1.ª instalação (senão o desinstalar repunha os nossos valores).
   $orig = if ($copia -and (Test-Path (Join-Path $copia 'instalacao.json'))) { Get-Content (Join-Path $copia 'instalacao.json') -Raw -Encoding UTF8 | ConvertFrom-Json }
   $hide = (Get-ItemProperty $adv -Name HideIcons -ErrorAction SilentlyContinue).HideIcons

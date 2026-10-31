@@ -31,6 +31,7 @@ foreach ($funcao in $FuncoesExcluidas.Keys) {
   if ($funcao -ne 'Sair') { Mock $funcao ([scriptblock]::Create("throw 'o teste tocou no Windows: $funcao'")) }
 }
 Mock Sair { throw 'Sair' }
+Mock GitDoPacote { throw 'o teste tocou no git real: GitDoPacote' }   # do instalar-versao.ps1, carregado pelo instalador
 foreach ($cmdlet in 'Read-Host', 'Start-Process', 'Stop-Process', 'Set-ItemProperty', 'New-ItemProperty', 'Get-ItemProperty',
                     'Register-ScheduledTask', 'Unregister-ScheduledTask', 'Start-ScheduledTask', 'Get-ScheduledTask', 'Invoke-WebRequest', 'Unblock-File',
                     'Get-CimInstance', 'Get-AuthenticodeSignature') {
