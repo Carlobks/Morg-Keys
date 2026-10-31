@@ -71,6 +71,7 @@ class Workflow(unittest.TestCase):
         estragos = tarefa("estragos")
         self.assertIn("github.event_name == 'schedule'", estragos)
         self.assertIn("scripts/estragos.py", estragos)
+        self.assertIn("npm ci --ignore-scripts", estragos)  # o teste das páginas corre o Biome do node_modules
         self.assertIn("MORG_PY: ${{ steps.python.outputs.python-path }}", estragos)
         self.assertIn("github.event_name != 'schedule'", tarefa("testar"))
 

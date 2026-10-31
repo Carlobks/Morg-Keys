@@ -119,11 +119,17 @@ TESTES_PY = [os.environ.get("MORG_PY", "py"), "-I", "-m", "unittest", "discover"
 
 
 @contextlib.contextmanager
-def copia_do_repositorio(correr=subprocess.run):
-    """Pasta temporária com um git worktree do último commit; removida no fim, também se rebentar (M4)."""
+def copia_do_repositorio(correr=subprocess.run, copiar=shutil.copytree):
+    """Pasta temporária com um git worktree do último commit; removida no fim, também se rebentar (M4).
+
+    Leva uma cópia do node_modules (o teste das páginas corre o Biome de lá). Copiado e não ligado: com uma
+    junção, o "worktree remove --force" podia apagar o node_modules verdadeiro.
+    """
     pasta = pathlib.Path(tempfile.mkdtemp(prefix="morg-estragos-")) / "copia"
     correr(["git", "-C", str(RAIZ), "worktree", "add", "--detach", "--quiet", str(pasta), "HEAD"], check=True)
     try:
+        if (RAIZ / "node_modules").is_dir():
+            copiar(RAIZ / "node_modules", pasta / "node_modules")
         yield pasta
     finally:
         correr(["git", "-C", str(RAIZ), "worktree", "remove", "--force", str(pasta)], check=False)

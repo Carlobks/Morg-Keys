@@ -79,6 +79,8 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "24.14.1"
+      - name: Biome para o teste das páginas
+        run: npm ci --ignore-scripts
       - name: Estragos (testes de mutação; nenhum pode escapar)
         shell: powershell
         env:

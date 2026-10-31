@@ -58,6 +58,18 @@ class Copia(unittest.TestCase):
         remover = self.correr.call_args_list[-1].args[0]
         self.assertEqual(remover[3:6], ["worktree", "remove", "--force"])
 
+    def test_leva_o_node_modules_copiado_e_nao_ligado(self):
+        # O teste das páginas corre o Biome do node_modules, que o worktree não tem (1.ª corrida da ML16). Copia-se:
+        # uma ligação (junção) podia levar o "worktree remove --force" a apagar o node_modules verdadeiro.
+        copiar = mock.Mock()
+        with self.estragos.copia_do_repositorio(self.correr, copiar) as pasta:
+            pass
+        modulos = self.estragos.RAIZ / "node_modules"
+        if modulos.is_dir():
+            copiar.assert_called_once_with(modulos, pasta / "node_modules")
+        else:  # num clone sem npm ci não há nada para levar
+            copiar.assert_not_called()
+
     def test_remove_a_copia_tambem_se_rebentar(self):
         with self.assertRaises(RuntimeError), self.estragos.copia_do_repositorio(self.correr) as pasta:
             raise RuntimeError
