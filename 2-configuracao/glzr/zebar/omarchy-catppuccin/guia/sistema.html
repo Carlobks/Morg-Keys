@@ -83,56 +83,20 @@
     </div>
 
     <script type="module">
-      // Igual à camada "sistema" do config.yaml do GlazeWM (lá estão as ações).
-      // Ícones: códigos Nerd Font (fonte JetBrainsMono NF), família nf-md.
-      const GROUPS = [
-        { title: 'Ligações', color: 'var(--blue)', items: [
-          ['W', 0xf05a9, 'Wi-Fi'],
-          ['B', 0xf00af, 'Bluetooth'],
-          ['A', 0xf057e, 'Som'],
-        ] },
-        { title: 'Ecrã', color: 'var(--yellow)', items: [
-          ['D', 0xf0379, 'Ecrã'],
-          ['N', 0xf0594, 'Luz noturna'],
-          ['I', 0xf0176, 'Não suspender'],
-        ] },
-        { title: 'Sistema', color: 'var(--green)', items: [
-          ['T', 0xf0430, 'Gestor de Tarefas'],
-          ['P', 0xf0241, 'Energia'],
-          ['L', 0xf033e, 'Bloquear'],
-        ] },
-        { title: 'Personalizar', color: 'var(--mauve)', items: [
-          ['C', 0xf030c, 'Apps e arranque'],
-          ['G', 0xf0193, 'Gravar arranjo'],
-          ['E', 0xf03d8, 'Animação: <b id="anim">…</b>', true],
-        ] },
-        { title: 'Sessão', color: 'var(--red)', wide: true, items: [
-          ['Q', 0xf0206, 'Sair do GlazeWM'],
-          ['R', 0xf0709, 'Reiniciar'],
-          ['O', 0xf0425, 'Desligar'],
-        ] },
-      ];
-      const esc = s => String(s).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
-      document.getElementById('groups').innerHTML = GROUPS.map(g => `
-        <section class="group${g.wide ? ' wide' : ''}" style="--c:${g.color}">
-          <h2>${esc(g.title)}</h2>
-          <ul>${g.items.map(([k, icon, label, html]) => `
-            <li><span class="ico" data-icon="${icon}"></span><span class="lb">${html ? label : esc(label)}</span><kbd>${esc(k)}</kbd></li>`).join('')}
-          </ul>
-        </section>`).join('');
+      // Cola com o DOM e o Zebar (docs/validacao-manual.md). Os grupos, o seu HTML, o nome da animação e a
+      // camada ativa decidem-se em sistema-logica.mjs, testado com node --test.
+      import { animacaoDoArranque, camadaAtiva, GROUPS, gruposHTML } from './sistema-logica.mjs';
+
+      document.getElementById('groups').innerHTML = gruposHTML(GROUPS);
       drawIcons();
 
       // Animação escolhida (arranque.txt, nesta mesma pasta): lida enquanto o
       // painel está aberto, para se ver a troca a cada toque no E.
-      const NOMES = { cafe: 'Café' };
       async function refreshAnim() {
         try {
           const res = await fetch(`./arranque.txt?t=${Date.now()}`, { cache: 'no-store' });
-          const line = (await res.text()).split(/\r?\n/)
-            .find(l => /^\s*anima[cç][aã]o\s*=/i.test(l));
-          const key = (line?.split('=')[1] ?? 'cafe').trim().toLowerCase().replace('é', 'e');
+          const label = animacaoDoArranque(await res.text());
           const el = document.getElementById('anim');
-          const label = NOMES[key] ?? key;
           if (el.textContent !== label) {
             el.textContent = label;
             el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
@@ -186,8 +150,7 @@
         const HELPER = '{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py';
         const providers = zebar.createProviderGroup({ glazewm: { type: 'glazewm' } });
         providers.onOutput(async () => {
-          const modes = providers.outputMap.glazewm?.bindingModes ?? [];
-          const active = modes.some(m => m.name === 'sistema');
+          const active = camadaAtiva(providers.outputMap.glazewm?.bindingModes);
           // Ícones redesenhados a cada abertura: desenhados só no arranque do Zebar (PC
           // ocupado), alguns saíam incompletos ou vazios e ficavam assim até reiniciar.
           if (active && !document.body.classList.contains('open')) drawIcons();
