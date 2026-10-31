@@ -175,3 +175,48 @@ Next.js não se aplicam.
 - O comportamento das sessões (perguntar ao dono, o "sim" do plano): não fica no repositório.
 - O CI do ramo `exp/a` com `26656de`: o último CI visto é o do ramo `ci/teste-ml14`.
 - O conteúdo dos 4 commits do M1 foi contado, não lido linha a linha.
+
+## Comparação com a 1.ª
+
+Escrita depois do commit `3e85bd9`, que gravou as contagens acima sem ter lido a 1.ª verificação.
+
+| | 1.ª (2026-10-30, 55 commits) | 2.ª (2026-10-31, 94 commits) |
+|---|---|---|
+| Regras aplicáveis | 41 | 44 (+ 2 que não se aplicam) |
+| Cumpridas | 17 (41,5 %) | 29 (65,9 %) |
+| Em parte | 11 | 11 |
+| Falhas | 9 | 1 |
+| Por validar | 4 | 3 |
+
+As duas listas não são iguais (a 2.ª separa as regras das telas e conta à parte os itens "máquina" do livro), por
+isso compara-se por assunto e não só pelo total.
+
+**O que mudou para melhor (as 9 falhas da 1.ª):**
+1. Portão do git: `.githooks/` com `pre-commit`, `commit-msg` e `pre-push`, ligado (`core.hooksPath`) — N4.
+2. `pre-push` com gitleaks (falha fechado) e `npm audit` com linha de base — S1, S2.
+3. CI no GitHub: `testar.ps1`, gitleaks em todo o histórico e estragos semanais — N4, N8, T1.
+4. e 5. Nomes e caminhos pessoais tirados da árvore, com teste e lista negra — V2 (ver o que ficou, abaixo).
+6. Correção sem teste: o `commit-msg` exige `Sem-teste:`; 0 casos desde o portão — N7.
+7. Formato das mensagens: 39 de 39 commits desde o portão no formato e ≤ 72 — G1.
+8. `deny` para `.env`, chaves e credenciais na ferramenta Read — V3 (ver o que ficou).
+9. Changelog por fragmentos, exigido pelo `commit-msg` — G2.
+
+**Dos "em parte" da 1.ª, passaram a cumpridos:** CLAUDE.md com as regras (94 linhas, testado), alarmes (todos com
+motivo, só regras ligadas), cobertura 100 % real (statusline, hooks e lógica das páginas dentro), `onFailure:
+block` nos hooks, catracas das funções e do PSScriptAnalyzer, fins de linha (`.gitattributes` explícito, 0 ficheiros
+fora), handoff no repositório, permissões em três colunas, planos com "fora do escopo" e prova, movimento
+(`prefers-reduced-motion`). Os `px` passaram a decisão escrita (ADR 0009). O `comum` foi renomeado.
+
+**Dos "por validar" da 1.ª:** commit por caminho e "teste que falha" passaram a máquina (guarda do git; estragos
+80/80); o contraste passou a teste. Ficam por validar os alvos de toque e o backup.
+
+**O que piorou:** nada do que a 1.ª mediu voltou atrás. Uma diferença pequena: a 1.ª contou "0 menções a
+`--no-verify`" nos commits; agora 1 corpo de commit (`af01506`) cita a opção, mas para descrever a guarda que a
+trava, não para a usar.
+
+**O que a 1.ª não viu e a 2.ª encontrou:** M1 (a limpeza dos dados pessoais ficou só na árvore; 4 commits já
+publicados ainda têm o caminho pessoal), M2 (`cat .env` pelo terminal), M3 (`curl | sh`), M4 (estragos no disco
+partilhado), B1 (modo que salta permissões), B2 (`gh pr create`), B3 (`git stash`), B4 (mapa das barreiras
+desatualizado), B5 (`uncloak.ps1` sem BOM), B6 (regras sem motivo), B7 (botões `✕` só com `title`) e B9
+("Joao Silva"). A 1.ª dava "push e PR" como cumprida; esta leitura é mais estrita e põe-na em parte por causa do
+`gh pr create`.
