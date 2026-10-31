@@ -17,6 +17,7 @@ Procure por palavra-chave neste índice ou com `grep -ri "<palavra>" docs/pesqui
 | [quota-claude.md](quota-claude.md) | De onde vem o uso do plano Claude; como faz o ai-usagebar; regras da Anthropic sobre tokens | rate_limits, statusLine, OAuth, /api/oauth/usage, credenciais | 2026-10-24 |
 | [relatorio-de-erros.md](relatorio-de-erros.md) | O que um relatório de erro leva para uma issue (OpenTelemetry, RFC 9457, Mozilla, GitHub, Python) | exceção, stack trace, problem details, issue forms, faulthandler, privacidade, Windows 11, build 22000 | 2026-10-31 |
 | [changelog.md](changelog.md) | Changelog por fragmentos (formato, categorias, juntar na versão) | Keep a Changelog, towncrier, changelog.d, Sem-changelog | 2026-10-31 |
+| [versoes.md](versoes.md) | Número de versão: SemVer, quando sobe, tags e histórico (CalVer descartado) | SemVer, VERSION, 0.y.z, build metadata, tag anotada, CalVer | 2026-10-31 |
 | [licencas-publicacao.md](licencas-publicacao.md) | Licenças para publicar o repositório | GPL-3.0, OFL, VC++, binários | 2026-10-22 |
 
 Regra: pesquisa nova → ficheiro novo (ou secção nova no ficheiro do tópico) + linha neste índice.
