@@ -33,6 +33,7 @@ O guia de quem usa o PC é o `Tutorial.html`; as regras de trabalho dos agentes 
 | [0007](decisoes/0007-foco-do-teclado-nos-paineis.md) | Foco do teclado pela janela de topo | aceite |
 | [0008](decisoes/0008-regras-do-biome-desligadas.md) | Duas regras do Biome desligadas (cascata do CSS) | aceite |
 | [0009](decisoes/0009-px-nas-paginas-do-zebar.md) | Tamanhos em `px` nas páginas do Zebar (o `rem` não se aplica) | aceite |
+| [0010](decisoes/0010-historico-publicado-nao-se-reescreve.md) | O histórico já publicado não se reescreve (caminho pessoal em commits antigos) | aceite |
 
 ## Mapa das secções antigas (§N do `COMO-FOI-FEITO.md`)
 

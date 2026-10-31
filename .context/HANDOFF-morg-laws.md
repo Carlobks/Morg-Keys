@@ -30,8 +30,10 @@ Plano do Claude). Ponto de partida: `docs/morg-laws/verificacao-01-2026-10-30.md
 | ML12 | `83dc898`, `d790cb6` | sem animações quando o Windows as desliga; tabular-nums; contraste 4,5:1; ADR 0009 |
 | ML13 | `07afb3a`, `86ec68b` | `changelog.d/`, `juntar_changelog.py`, `Sem-changelog:` no `commit-msg`; 10 fragmentos atrasados |
 | ML14 | `1dcb1dc`, `82d2109` | `.github/workflows/ci.yml` (testar, gitleaks, estragos semanais), `MORG_PY`, A47; verde no GitHub (ramo `ci/teste-ml14`) |
+| ML15 | `3e85bd9`, `17aa84f` | 2.ª verificação (sessão neutra): 29 cumpridas, 11 em parte, 1 falha, 3 por validar |
+| ML16 | `bcf3a82` … `9a6cd8c` | achados da 2.ª: hook dos segredos, stash, PR, estragos numa cópia, `Teste-mudado:`, motivos, nomes, BOM, aria-label, ADR 0010 |
 
-Última suíte: 424 testes Python a 100 % (2269 linhas, 770 ramos: pack, portões, hooks, statusLine e changelog), 79 JS a 100 %,
+Última suíte: 445 testes Python a 100 % (2306 linhas, 782 ramos: pack, portões, hooks, statusLine e changelog), 79 JS a 100 %,
 72 Pester a 100 % fora das funções excluídas; ~21 s por commit.
 
 ## Decisões e porquê
@@ -101,8 +103,8 @@ Técnicas (tomadas durante as fases, com o motivo medido):
 
 ## Próximos passos
 
-1. **ML15:** 2.ª verificação numa sessão nova, com um pedido neutro; depois, o pedido do push (`main`, `exp/a`,
-   tag) e de apagar o ramo `ci/teste-ml14`. Os `estragos` no CI só se provam com o workflow no `main`.
+1. **Pedido do push ao dono** (`main`, `exp/a`, tag `exp-a-medida`) e de apagar o ramo `ci/teste-ml14`. Os
+   `estragos` no CI só se provam com o workflow no `main`. Opcional: uma 3.ª verificação neutra para medir a ML16.
 2. Teste real da ML12 com o dono (animações desligadas no Windows, texto apagado, escala a 125 %).
 3. O CI corre em cada push: um vermelho no GitHub lê-se com `gh run view <id> --log-failed`.
 4. Depois do plano: a ordem está em `docs/pendentes.md` (bug do painel Apps e arranque, relatório de erros,
@@ -117,3 +119,5 @@ Técnicas (tomadas durante as fases, com o motivo medido):
 - O gitleaks está fora do PATH das consolas antigas: `%LOCALAPPDATA%\Microsoft\WinGet\Packages\Gitleaks.Gitleaks_*`.
 - A lista negra está em `%USERPROFILE%\.config\morg-keys\` (as permissões negam ao agente lê-la).
 - A identidade global do git tem o nome real e um e-mail pessoal: um clone novo precisa de `--local` (A44).
+- O hook `bloquear_segredos` recusa qualquer comando que só cite um segredo ou o padrão do download (ex.: num
+  heredoc); escrever o script num ficheiro e corrê-lo. Mudar ou tirar linhas em `tests/` pede `Teste-mudado:`.

@@ -387,6 +387,67 @@ páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
   - o teu teste real;
   - depois, o pedido do push (`main`, `exp/a`, tag).
 
+- [x] **ML16 Achados da 2.ª verificação** (2026-10-31; pedido pelo dono: "corrige antes" do push).
+  - **Feito:** 9 commits, de `bcf3a82` a `9a6cd8c`, e a ADR 0010. A tabela achado → commit → barreira está no fim
+    da verificação 02.
+  - Achados durante o trabalho:
+    - a 1.ª corrida dos estragos na cópia parou porque o worktree não tem `node_modules` (o Biome do teste das
+      páginas). Corrigido em `97e20a5`: o `node_modules` é copiado, e não ligado, e a tarefa `estragos` do CI
+      ganhou o `npm ci`;
+    - a barreira dos nomes apanhou mais 3 `HELPER`, além dos 2 da verificação;
+    - o `Teste-mudado:` recusou o próprio commit que o criou, e o da linha de base do PSScriptAnalyzer, até
+      levarem o motivo;
+    - o hook dos segredos recusa também um texto que só cita o padrão (ex.: num heredoc), o limite da A32.
+  - *Prova:*
+    - cada teste vermelho antes da correção, depois verde;
+    - `testar.ps1` verde (445 testes Python a 100 %, 72 Pester);
+    - **estragos 80/80 na cópia**, com o `git status` limpo durante a corrida;
+    - ao vivo: `cat` do ficheiro de ambiente e download para a shell **recusados** pelo hook. O `gh pr create --help`
+      correu: se apareceu a pergunta, foi o hook (não o consigo ver daqui).
+  - Fica em texto o K5 (hook de fim de sessão). Por validar contigo: N2, D7 (alvos de toque) e K6 (backup).
+  - Plano original da fase:
+  - **Objetivo:** fechar a falha K3 e os achados M2–M4 e B2–B10 de `docs/morg-laws/verificacao-02-2026-10-31.md`,
+    cada um com um teste visto a falhar antes da correção.
+  - **Fora do escopo:**
+    - reescrever o histórico publicado (o M1 fica como exceção numa ADR);
+    - os alvos de toque e o backup (D7 e K6), que se validam contigo;
+    - o push.
+  - **Passos**, um commit por grupo:
+    1. **Permissões e hooks do agente** (K3, M2, M3, B2, B3):
+       - `disableBypassPermissionsMode: "disable"` no `.claude/settings.json`;
+       - novo hook `.claude/hooks/bloquear_segredos.py` (Bash e PowerShell): recusa comandos que nomeiam `.env`,
+         `.env.*`, `*.pem`, `*.key`, `~/.ssh` ou as credenciais do Claude, e recusa um download que vai direto
+         para uma shell (`curl|wget|iwr|irm … | sh|bash|iex|powershell`);
+       - o `perguntar_antes.py` passa a perguntar antes de `gh pr create|merge` e `gh release create`;
+       - o `guarda_do_git.py` recusa o `git stash`, salvo `list` e `show`, porque leva o trabalho de outras sessões;
+       - testes em `test_permissoes.py`, `test_hooks*.py` e `test_guarda_do_git.py`;
+       - a mudança no `settings.json` e nos hooks pede o teu "sim" na hora, porque o hook `perguntar_antes` o exige.
+    2. **Estragos numa cópia** (M4): o `estragos.py` corre num `git worktree add --detach` temporário, em vez do
+       disco partilhado, e remove-o no fim, também se rebentar. Mede o último commit. O teste confere que a pasta
+       dos estragos não é a raiz do repositório.
+    3. **Teste mudado pede o porquê** (B10): o `commit-msg` exige a linha `Teste-mudado: <motivo>` quando o
+       commit apaga ou muda linhas de ficheiros que já existiam em `tests/`. Acrescentar casos não pede nada.
+       O K5 (hook de fim de sessão) fica em texto, com o motivo: o handoff é atualizado no commit que fecha cada
+       fase, e um hook de fim de sessão dispararia em cada turno.
+    4. **Regras com motivo** (B6, B4): cada regra do `CLAUDE.md` ganha o motivo. Onde não couber nas 100 linhas,
+       o motivo vai para uma coluna "Porquê" no `docs/regras-e-barreiras.md`. O `test_regras.py` exige o motivo
+       num dos dois sítios. O mapa corrige os FINS DE LINHA (a barreira já existe desde a ML8).
+    5. **Pequenos** (B5, B7, B8, B9):
+       - BOM no `uncloak.ps1`, com a linha de base do PSScriptAnalyzer a descer de 1 para 0, e um teste que exige
+         o BOM em todos os `.ps1`;
+       - `aria-label="Fechar"` nos botões ✕, mantendo o ✕ (o rótulo visível decides tu no teste real);
+       - `helper` e `data` renomeados pela função, com o `test_nomes.py` a apanhar identificadores genéricos em
+         `.mjs` e `.html`;
+       - "Joao Silva" → "Ana" no `Tutorial.html`.
+    6. **M1 em ADR 0010:** o histórico já publicado fica como está (o motivo é o da secção D7), e a árvore está
+       limpa com o teste.
+  - *Prova:*
+    - cada teste vermelho antes da correção, depois verde;
+    - `testar.ps1` verde;
+    - estragos 80/80, já corridos na cópia, com o `git status` limpo durante a corrida;
+    - sondas ao vivo dos hooks novos: `cat .env` e `curl … | sh` recusados, e `gh pr create` a perguntar.
+  - Depois: a verificação 02 ganha uma nota com o que fechou, e segue-se o pedido do push.
+
 ## Ficheiros principais
 
 - Novos:

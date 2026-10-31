@@ -220,3 +220,29 @@ partilhado), B1 (modo que salta permissões), B2 (`gh pr create`), B3 (`git stas
 desatualizado), B5 (`uncloak.ps1` sem BOM), B6 (regras sem motivo), B7 (botões `✕` só com `title`) e B9
 ("Joao Silva"). A 1.ª dava "push e PR" como cumprida; esta leitura é mais estrita e põe-na em parte por causa do
 `gh pr create`.
+
+## Depois da verificação: o que a ML16 fechou (2026-10-31)
+
+Acrescentado pela sessão do plano, não pela leitura independente. As contagens acima ficam como foram medidas; a
+3.ª verificação é que dirá os números novos.
+
+| Achado | Commit | Barreira |
+|---|---|---|
+| K3 modo que salta as permissões | `bcf3a82` | `disableBypassPermissionsMode` no `.claude/settings.json`; `tests/test_permissoes.py` |
+| M2 ler segredos pela shell | `bcf3a82` | `.claude/hooks/bloquear_segredos.py`; recusa vista ao vivo |
+| M3 download direto para uma shell | `bcf3a82` | o mesmo hook; recusa vista ao vivo |
+| B2 `gh pr create` sem pergunta | `bcf3a82` | `.claude/hooks/perguntar_antes.py` |
+| B3 `git stash` | `bcf3a82` | `.claude/hooks/guarda_do_git.py` |
+| M4 estragos no disco partilhado | `b58a71e`, `97e20a5` | `scripts/estragos.py` num `git worktree` temporário; `tests/test_estragos_copia.py`; 80/80 na cópia com o `git status` limpo |
+| B10 teste mudado sem o porquê | `922d198` | `Teste-mudado:` no `commit-msg`; recusou o próprio commit sem a linha |
+| B6 regras sem motivo | `0d4dda7` | `tests/test_regras.py` exige o motivo em cada regra |
+| B4 mapa desatualizado | `0d4dda7` | `tests/test_regras.py`: "por fazer (MLn)" falha com a fase feita |
+| B8 identificadores genéricos | `2e0342e` | `tests/test_nomes.py` (apanhou mais 3: `HELPER`) |
+| B5 `uncloak.ps1` sem BOM | `cc719fc` | `tests/test_ficheiros_texto.py`; catraca do PSScriptAnalyzer desceu |
+| B7 botões ✕ só com `title` | `ae51169` | `aria-label`; `tests/test_telas.py` |
+| B9 "Joao Silva" | `9a6cd8c` | texto |
+| M1 caminho pessoal no histórico publicado | ADR 0010 | exceção decidida: não se reescreve |
+
+Ficam por fazer: K5 (hook de fim de sessão), que fica em texto porque o handoff é atualizado no commit que fecha
+cada fase e um hook de fim de sessão dispararia em cada turno; e os "por validar" (N2, D7, K6), que se validam com
+o dono.
