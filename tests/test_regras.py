@@ -51,6 +51,30 @@ class ClaudeMdCurto(unittest.TestCase):
         self.assertEqual(len(titulos), len(set(titulos)), "dois títulos iguais acabam por se contradizer")
 
 
+def regras():
+    """{título: texto da regra com as linhas de continuação} do CLAUDE.md."""
+    blocos, atual = {}, None
+    for linha in texto(CLAUDE_MD).splitlines():
+        cabeca = TITULO.match(linha[2:]) if linha.startswith("- ") else None
+        if cabeca:
+            atual = cabeca.group(1)
+            blocos[atual] = linha
+        elif atual and linha.startswith("  "):
+            blocos[atual] += " " + linha.strip()
+        else:
+            atual = None
+    return blocos
+
+
+class CadaRegraDizOPorque(unittest.TestCase):
+    """B6 da 2.ª verificação (ML16): o motivo é o que torna a regra aplicável a casos novos (skill §3)."""
+
+    def test_cada_regra_tem_o_motivo(self):
+        todas = regras()
+        self.assertEqual(set(todas), set(TITULO.findall(texto(CLAUDE_MD))))
+        self.assertEqual([titulo for titulo, corpo in todas.items() if "· *" not in corpo], [])
+
+
 class CadaRegraTemBarreira(unittest.TestCase):
 
     def test_cada_regra_esta_no_mapa_e_o_mapa_nao_tem_regras_a_mais(self):
@@ -60,6 +84,16 @@ class CadaRegraTemBarreira(unittest.TestCase):
         for titulo, (barreira, _) in linhas_do_mapa().items():
             with self.subTest(regra=titulo):
                 self.assertTrue(barreira.startswith(BARREIRAS), f"barreira '{barreira}' fora de {BARREIRAS}")
+
+
+    def test_por_fazer_so_de_fases_por_fazer(self):
+        # B4 da 2.ª verificação (ML16): FINS DE LINHA dizia "por fazer (ML8)" com a ML8 feita há um dia.
+        plano = texto(RAIZ / "docs" / "morg-laws" / "plano-01.md")
+        for titulo, (barreira, _) in linhas_do_mapa().items():
+            fase = re.match(r"por fazer \((ML\d+\w?)\)", barreira)
+            if fase:
+                with self.subTest(regra=titulo, fase=fase.group(1)):
+                    self.assertNotIn(f"- [x] **{fase.group(1)} ", plano, "a fase já está feita: atualize o mapa")
 
 
 class NadaApontaParaOQueNaoExiste(unittest.TestCase):
