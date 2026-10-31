@@ -15,6 +15,7 @@ Procure por palavra-chave neste índice ou com `grep -ri "<palavra>" docs/pesqui
 | [zebar-webview2.md](zebar-webview2.md) | O que se aprendeu do código do Zebar/Tauri/WebView2 | foco, MoveFocus, includeFiles, permissões, DnD | 2026-10-22/23 |
 | [arranque-windows.md](arranque-windows.md) | Início de sessão (linha do tempo, paragem de ~5 s, WPR), cortina que escurece, passagem sem piscar, ecrã de boas-vindas e fontes das frases | SignalDesktopSwitch, WS_EX_LAYERED, scrnsave, requestAnimationFrame, DPI, frases | 2026-10-24 |
 | [quota-claude.md](quota-claude.md) | De onde vem o uso do plano Claude; como faz o ai-usagebar; regras da Anthropic sobre tokens | rate_limits, statusLine, OAuth, /api/oauth/usage, credenciais | 2026-10-24 |
+| [changelog.md](changelog.md) | Changelog por fragmentos (formato, categorias, juntar na versão) | Keep a Changelog, towncrier, changelog.d, Sem-changelog | 2026-10-31 |
 | [licencas-publicacao.md](licencas-publicacao.md) | Licenças para publicar o repositório | GPL-3.0, OFL, VC++, binários | 2026-10-22 |
 
 Regra: pesquisa nova → ficheiro novo (ou secção nova no ficheiro do tópico) + linha neste índice.

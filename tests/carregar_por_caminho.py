@@ -1,5 +1,5 @@
 """Carrega e corre pelo caminho os scripts que não estão num pacote: os portões do git, os hooks do Claude
-Code e a statusLine."""
+Code, a statusLine e o juntar do changelog."""
 
 import importlib.util
 import io
@@ -12,6 +12,7 @@ RAIZ = Path(__file__).resolve().parent.parent
 PASTA_PORTOES = RAIZ / "scripts" / "portoes"
 PASTA_HOOKS = RAIZ / ".claude" / "hooks"
 PASTA_STATUSLINE = RAIZ / "2-configuracao" / "claude"
+PASTA_CHANGELOG = RAIZ / "scripts" / "changelog"
 
 
 def _carregar(caminho, nome):
@@ -34,6 +35,11 @@ def carregar_hook(nome):
 def carregar_statusline():
     """Importa 2-configuracao/claude/statusline.py como módulo."""
     return _carregar(PASTA_STATUSLINE / "statusline.py", "statusline")
+
+
+def carregar_changelog():
+    """Importa scripts/changelog/juntar_changelog.py como módulo."""
+    return _carregar(PASTA_CHANGELOG / "juntar_changelog.py", "juntar_changelog")
 
 
 def correr_como_script(caminho, entrada):

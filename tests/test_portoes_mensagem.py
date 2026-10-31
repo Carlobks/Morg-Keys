@@ -1,7 +1,8 @@
 """Portão da mensagem do commit (scripts/portoes/mensagem_commit.py): formato do Morg Laws (git-e-commits).
 
 Título `tipo(área): …` com até 72 caracteres e sem ponto final; linha em branco; corpo com o porquê em
-fix/feat/refactor; um fix sem ficheiro em tests/ leva `Sem-teste: <motivo>`.
+fix/feat/refactor; um fix sem ficheiro em tests/ leva `Sem-teste: <motivo>`; um feat ou fix que mexa no que se
+instala leva um fragmento em changelog.d/ ou `Sem-changelog: <motivo>`.
 """
 
 import io
@@ -16,7 +17,8 @@ from carregar_por_caminho import PASTA_PORTOES, carregar_portao
 
 mensagem = carregar_portao("mensagem_commit")
 CORPO = "\n\nO que mudou e porquê.\n\nCo-Authored-By: Claude <noreply@anthropic.com>\n"
-COM_TESTE = ["scripts/instalar.ps1", "tests/instalar.Tests.ps1"]
+# Mexe no instalador: leva o teste e o fragmento do changelog.
+COM_TESTE = ["scripts/instalar.ps1", "tests/instalar.Tests.ps1", "changelog.d/2026-10-31-instalador.md"]
 
 
 class Titulo(unittest.TestCase):
@@ -72,7 +74,7 @@ class Corpo(unittest.TestCase):
 class SemTeste(unittest.TestCase):
 
     def test_fix_sem_ficheiro_de_teste_e_recusado(self):
-        erros = mensagem.erros("fix(x): y" + CORPO, ["scripts/instalar.ps1"])
+        erros = mensagem.erros("fix(x): y" + CORPO, ["scripts/portoes/a.py"])
         self.assertEqual(len(erros), 1)
         self.assertIn("Sem-teste:", erros[0])
 
@@ -85,6 +87,41 @@ class SemTeste(unittest.TestCase):
 
     def test_outros_tipos_nao_precisam_de_teste(self):
         self.assertEqual(mensagem.erros("feat(x): y" + CORPO, ["a.py"]), [])
+
+
+
+class SemChangelog(unittest.TestCase):
+
+    def test_feat_ou_fix_no_que_se_instala_sem_fragmento_e_recusado(self):
+        for ficheiro in ("2-configuracao/glzr/glazewm/config.yaml", "scripts/instalar.ps1",
+                         "scripts/desinstalar.ps1", "INSTALAR.cmd", "DESINSTALAR.cmd"):
+            for tipo in ("feat", "fix"):
+                with self.subTest(ficheiro=ficheiro, tipo=tipo):
+                    erros = mensagem.erros(f"{tipo}(x): y" + CORPO, [ficheiro, "tests/a.py"])
+                    self.assertEqual(len(erros), 1)
+                    self.assertIn("Sem-changelog:", erros[0])
+                    self.assertIn("changelog.d/", erros[0])
+
+    def test_com_fragmento_passa(self):
+        ficheiros = ["2-configuracao/a.css", "tests/a.py", "changelog.d/2026-10-31-barra.md"]
+        self.assertEqual(mensagem.erros("feat(barra): y" + CORPO, ficheiros), [])
+
+    def test_fragmento_tem_de_ser_md_na_pasta(self):
+        ficheiros = ["2-configuracao/a.css", "tests/a.py", "changelog.d/README.txt", "docs/changelog.d/x.md"]
+        self.assertEqual(len(mensagem.erros("feat(barra): y" + CORPO, ficheiros)), 1)
+
+    def test_sem_changelog_com_motivo_passa(self):
+        texto = "fix(x): y\n\nPorquê.\n\nSem-changelog: só muda um comentário\n"
+        self.assertEqual(mensagem.erros(texto, ["2-configuracao/a.py", "tests/a.py"]), [])
+
+    def test_sem_changelog_sem_motivo_nao_conta(self):
+        texto = "feat(x): y\n\nPorquê.\n\nSem-changelog:\n"
+        self.assertIn("Sem-changelog:", mensagem.erros(texto, ["2-configuracao/a.py"])[0])
+
+    def test_outros_tipos_e_outras_pastas_nao_precisam(self):
+        self.assertEqual(mensagem.erros("refactor(x): y" + CORPO, ["2-configuracao/a.py"]), [])
+        self.assertEqual(mensagem.erros("docs: y\n", ["2-configuracao/a.md"]), [])
+        self.assertEqual(mensagem.erros("feat(portoes): y" + CORPO, ["scripts/portoes/a.py"]), [])
 
 
 class PontoDeEntrada(unittest.TestCase):

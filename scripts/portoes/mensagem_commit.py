@@ -2,7 +2,9 @@
 
 - título `tipo(área): …` (a área é opcional), com até 72 caracteres e sem ponto final;
 - linha em branco entre o título e o corpo; fix, feat e refactor levam corpo com o que mudou e porquê;
-- um fix sem nenhum ficheiro em tests/ leva a linha `Sem-teste: <motivo>`.
+- um fix sem nenhum ficheiro em tests/ leva a linha `Sem-teste: <motivo>`;
+- um feat ou fix que mexa no que se instala (2-configuracao/, instalador, desinstalador) leva um fragmento
+  changelog.d/*.md ou a linha `Sem-changelog: <motivo>` (formato em scripts/changelog/juntar_changelog.py).
 Os títulos que o próprio git escreve (Merge …, Revert "…") passam. As linhas com # são do git e não contam.
 Uso: py -I scripts/portoes/mensagem_commit.py <ficheiro da mensagem>   Sai com 1 se recusar.
 """
@@ -24,6 +26,10 @@ TITULOS_DO_GIT = ("Merge ", 'Revert "')
 # Linhas finais de metadados: não contam como corpo.
 RODAPE = re.compile(r"^(?:Co-Authored-By|Signed-off-by|Sem-teste|Sem-changelog):", re.IGNORECASE)
 SEM_TESTE = re.compile(r"^Sem-teste: *\S", re.MULTILINE)
+SEM_CHANGELOG = re.compile(r"^Sem-changelog: *\S", re.MULTILINE)
+# O que chega ao PC de quem instala: mudar isto num feat ou fix é notícia para essa pessoa.
+INSTALADO = ("2-configuracao/", "scripts/instalar", "scripts/desinstalar", "INSTALAR.cmd", "DESINSTALAR.cmd")
+FRAGMENTO = re.compile(r"^changelog\.d/[^/]+\.md$")
 
 
 def linhas_da_mensagem(texto):
@@ -64,7 +70,16 @@ def erros(texto, ficheiros):
     if tipo == "fix" and not any(f.startswith("tests/") for f in ficheiros) and not SEM_TESTE.search(texto):
         motivos.append("ERRO: um fix traz o teste que pega o bug (ficheiro em tests/) ou a linha "
                        "'Sem-teste: <motivo concreto>'.")
+    if tipo in ("feat", "fix") and falta_changelog(texto, ficheiros):
+        motivos.append(f"ERRO: um {tipo} que mexe no que se instala leva um fragmento "
+                       "changelog.d/AAAA-MM-DD-assunto.md ou a linha 'Sem-changelog: <motivo concreto>'.")
     return motivos
+
+
+def falta_changelog(texto, ficheiros):
+    """True se o commit mexe no que se instala sem fragmento do changelog nem `Sem-changelog:`."""
+    mexe = any(f.startswith(INSTALADO) for f in ficheiros)
+    return mexe and not any(FRAGMENTO.match(f) for f in ficheiros) and not SEM_CHANGELOG.search(texto)
 
 
 def ficheiros_do_commit(correr=None):

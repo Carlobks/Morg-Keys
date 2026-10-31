@@ -69,6 +69,8 @@ Cada regra abaixo tem a barreira que a obriga em `docs/regras-e-barreiras.md`; o
 
 - **FORMATO DOS COMMITS:** título `tipo(área): …` até 72 caracteres, linha em branco, corpo com o que mudou e
   porquê; mensagem num ficheiro (`-F`), com `Co-Authored-By` do modelo. · *A mensagem é tão pública como o código.*
+- **CHANGELOG POR FRAGMENTO:** um feat ou fix no que se instala leva `changelog.d/AAAA-MM-DD-assunto.md` ou
+  `Sem-changelog: <motivo>`. · *Quem instala precisa de saber o que mudou; um ficheiro único colide.*
 - **REPOSITÓRIO PARA O PC:** editar no repositório e reinstalar; nunca copiar do `~\.glzr` para o repositório.
 
 ## Arquitetura (detalhe em `docs/arquitetura.md`)

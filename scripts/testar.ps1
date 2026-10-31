@@ -12,6 +12,7 @@ $Pack = Join-Path $Raiz '2-configuracao\glzr\zebar\omarchy-catppuccin'
 $Portoes = Join-Path $Raiz 'scripts\portoes'
 $HooksDoClaude = Join-Path $Raiz '.claude\hooks'
 $Statusline = Join-Path $Raiz '2-configuracao\claude'
+$Changelog = Join-Path $Raiz 'scripts\changelog'
 $Py = 'C:\Windows\py.exe'
 $Falhas = New-Object System.Collections.Generic.List[string]
 
@@ -21,10 +22,10 @@ Push-Location $Raiz
 try {
     # 1. Python: unittest com cobertura de linhas e ramos. Sem -I: o coverage está nos pacotes do utilizador.
     #    Conta a lógica do pack, os portões do git (scripts\portoes), os hooks do Claude Code (.claude\hooks)
-    #    e a statusLine (2-configuracao\claude); os testes não. Abaixo de 100 % falha. A cola com o Windows
+    #    a statusLine (2-configuracao\claude) e o juntar do changelog (scripts\changelog); os testes não. Abaixo de 100 % falha. A cola com o Windows
     #    que não se testa tem "# pragma: no cover" com o motivo (lista em docs/validacao-manual.md).
     Write-Titulo 'Python (unittest + coverage)'
-    & $Py -m coverage run --branch "--source=$Pack,$Portoes,$HooksDoClaude,$Statusline" -m unittest discover -s tests
+    & $Py -m coverage run --branch "--source=$Pack,$Portoes,$HooksDoClaude,$Statusline,$Changelog" -m unittest discover -s tests
     if ($LASTEXITCODE -ne 0) { $Falhas.Add('Python') }
     & $Py -m coverage report --skip-empty --show-missing --fail-under=100
     if ($LASTEXITCODE -ne 0) { $Falhas.Add('Cobertura Python') }

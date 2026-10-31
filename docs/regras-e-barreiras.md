@@ -44,4 +44,5 @@ tenha aqui uma linha, e que cada caminho citado exista.
 | ÍNDICE DOS DOCS | teste | `tests/test_docs_indices.py`: cada `.md` e pasta de `docs/` no índice |
 | PESQUISA ANTES DE IMPLEMENTAR | texto; teste | pesquisar antes é texto; `tests/test_docs_indices.py` exige cada pesquisa no índice, com data |
 | FORMATO DOS COMMITS | git | `.githooks/commit-msg` → `scripts/portoes/mensagem_commit.py` |
+| CHANGELOG POR FRAGMENTO | git + teste | `.githooks/commit-msg` → `scripts/portoes/mensagem_commit.py`; `tests/test_changelog.py` confere cada fragmento |
 | REPOSITÓRIO PARA O PC | texto | o script que copiava do PC para o repositório foi retirado: só há um sentido |
