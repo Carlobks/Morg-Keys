@@ -5,16 +5,20 @@ o ficheiro (também se rebentar). Procura o texto em todos esses ficheiros (o c�
 ficheiro numa refatoração).
 Antes de estragar, confirma que os testes passam com o código certo (senão todos dariam "apanhado").
 Estrago novo: acrescentar (texto certo, texto estragado) a MUTANTES, depois de cada bug ou função nova.
+Corre numa cópia (um `git worktree` do último commit numa pasta temporária), nunca no disco partilhado: outra
+sessão a testar ou a commitar veria os mutantes (ML16, M4). O que não está commitado não entra.
 
 Uso: py -I scripts\\estragos.py   (de qualquer pasta; ~10 min)
 """
 
+import contextlib
 import os
 import pathlib
+import shutil
 import subprocess
+import tempfile
 
 RAIZ = pathlib.Path(__file__).resolve().parent.parent
-os.chdir(RAIZ)
 PACK = pathlib.Path("2-configuracao/glzr/zebar/omarchy-catppuccin")
 MUTANTES = [
     ('if not parts or parts[0] != "alt":', 'if not parts or parts[0] not in ("alt", "shift"):'),
@@ -109,38 +113,69 @@ MUTANTES = [
     ("toLowerCase().replace('é', 'e')", 'toLowerCase()'),
     ("some(m => m.name === 'sistema')", "some(m => m.name === 'resize')"),
 ]
-FICHEIROS = [*PACK.glob("*.py"), *PACK.glob("*.mjs"), *PACK.glob("partilhado/*.mjs"), *PACK.glob("painel/*.mjs"),
-             *PACK.glob("guia/*.mjs"), *PACK.glob("arranque/*.mjs")]
+PASTAS_DO_PACK = ["*.py", "*.mjs", "partilhado/*.mjs", "painel/*.mjs", "guia/*.mjs", "arranque/*.mjs"]
 # MORG_PY: outro Python (o CI do GitHub não garante o py), o mesmo nome do testar.ps1 e dos .githooks.
 TESTES_PY = [os.environ.get("MORG_PY", "py"), "-I", "-m", "unittest", "discover", "-s", "tests"]
-TESTES_JS = ["node", "--test", *map(str, pathlib.Path("tests").glob("*.test.mjs"))]
 
 
-def onde_esta(texto):
-    achados = [p for p in FICHEIROS if p.read_text(encoding="utf-8").count(texto) == 1]
+@contextlib.contextmanager
+def copia_do_repositorio(correr=subprocess.run):
+    """Pasta temporária com um git worktree do último commit; removida no fim, também se rebentar (M4)."""
+    pasta = pathlib.Path(tempfile.mkdtemp(prefix="morg-estragos-")) / "copia"
+    correr(["git", "-C", str(RAIZ), "worktree", "add", "--detach", "--quiet", str(pasta), "HEAD"], check=True)
+    try:
+        yield pasta
+    finally:
+        correr(["git", "-C", str(RAIZ), "worktree", "remove", "--force", str(pasta)], check=False)
+        shutil.rmtree(pasta.parent, ignore_errors=True)
+
+
+def onde_esta(texto, ficheiros):
+    achados = [p for p in ficheiros if p.read_text(encoding="utf-8").count(texto) == 1]
     return achados[0] if len(achados) == 1 else None
 
 
-for testes in (TESTES_PY, TESTES_JS):
-    base = subprocess.run(testes, capture_output=True, timeout=180, check=False)
-    if base.returncode != 0:  # com testes já vermelhos, todos os estragos seriam "apanhados" (falso 100 %)
-        raise SystemExit("Os testes falham com o código certo: corrija antes de correr os estragos.")
-
-apanhados = 0
-for antes, depois in MUTANTES:
-    ficheiro = onde_esta(antes)
+def estragar(antes, depois, ficheiros, testes_js):
+    """Aplica um estrago, corre os testes e repõe o ficheiro; devolve True (apanhado), False ou None (não achado)."""
+    ficheiro = onde_esta(antes, ficheiros)
     if not ficheiro:
         print(f"NÃO ENCONTRADO (ou repetido): {antes[:60]!r}")
-        continue
+        return None
     original = ficheiro.read_bytes()
     ficheiro.write_bytes(original.decode("utf-8").replace(antes, depois).encode("utf-8"))
     try:
-        r = subprocess.run(TESTES_JS if ficheiro.suffix == ".mjs" else TESTES_PY, capture_output=True, timeout=180, check=False)
+        r = subprocess.run(testes_js if ficheiro.suffix == ".mjs" else TESTES_PY, capture_output=True, timeout=180,
+                           check=False)
         apanhado = r.returncode != 0
     except subprocess.TimeoutExpired:
         apanhado = True
     finally:
         ficheiro.write_bytes(original)
-    apanhados += apanhado
     print(f"{'APANHADO' if apanhado else 'ESCAPOU '} {ficheiro.name}: {antes[:60]!r}")
-print(f"\n{apanhados}/{len(MUTANTES)} apanhados")
+    return apanhado
+
+
+def correr_estragos():
+    """Corre a bateria na pasta atual (a cópia); devolve 0 se todos os estragos foram apanhados."""
+    ficheiros = [f for padrao in PASTAS_DO_PACK for f in PACK.glob(padrao)]
+    testes_js = ["node", "--test", *map(str, pathlib.Path("tests").glob("*.test.mjs"))]
+    for testes in (TESTES_PY, testes_js):
+        base = subprocess.run(testes, capture_output=True, timeout=180, check=False)
+        if base.returncode != 0:  # com testes já vermelhos, todos os estragos seriam "apanhados" (falso 100 %)
+            raise SystemExit("Os testes falham com o código certo: corrija antes de correr os estragos.")
+    apanhados = sum(estragar(antes, depois, ficheiros, testes_js) is True for antes, depois in MUTANTES)
+    print(f"\n{apanhados}/{len(MUTANTES)} apanhados")
+    return 0 if apanhados == len(MUTANTES) else 1
+
+
+def main():
+    with copia_do_repositorio() as pasta:
+        os.chdir(pasta)
+        try:
+            return correr_estragos()
+        finally:
+            os.chdir(RAIZ)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
