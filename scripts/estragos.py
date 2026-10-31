@@ -34,6 +34,13 @@ MUTANTES = [
     # P2: a app do painel não aprende a janela de um processo que já corria (o Claude do arranque do Windows)
     ('others | ja_corriam, poll)', 'others, poll)'),
     ('ja_corriam = {_norm(p) for p in _running_images()}', 'ja_corriam = set()'),
+    # P3: relatório de erros (limpeza, popup desligável, cópias, gancho)
+    ('for variante in (casa.replace("\\\\", "\\\\\\\\"), casa,', 'for variante in (casa,'),
+    ('for nome in sorted((n for n in nomes if n), key=len, reverse=True):', 'for nome in []:'),
+    ('return ["<dados do painel>" if _BASE64.fullmatch(a) else a for a in argumentos]', 'return list(argumentos)'),
+    ('return valor is None or valor.lower() not in ESCONDER', 'return True'),
+    ('for antiga in sorted(pasta.glob("erro-*.md"))[:-maximo]:', 'for antiga in []:'),
+    ('if not issubclass(tipo, KeyboardInterrupt):', 'if True:'),
     ('late = time.monotonic() - start > wait * 2 / 3', 'late = True'),
     ('if p in running and p not in have_windows and not entry["launch"].get("args"):', 'if False:'),
     ('or _norm(process) in running or', 'or'),

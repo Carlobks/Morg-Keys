@@ -34,7 +34,11 @@ janelas.
     testes usam a "Ana" como conta falsa;
   - os argumentos em base64 do painel ficam de fora;
   - a versão do Morg Keys vem do `instalacao.json`, que o instalador já grava; se faltar, diz "desconhecida".
-- [ ] **P3.2 O popup e o guardar** (cola fina com o Windows):
+- [x] **P3.2 O popup e o guardar** (2026-10-31: `7b1f8e2` com o popup desligável e as cópias, `65db12c` com o
+  popup, o "Guardar como" e o gancho. A cola com o Windows ficou testada com o Windows simulado, sem `pragma`. A
+  estrutura `OPENFILENAMEW` foi conferida: 152 bytes. **Achado (A50):** o teste que corre o `bar_helper.py` no
+  processo dos testes passou a instalar o gancho e a criar `~\.glzr\erros` no PC real; agora simula-o. **Não feito:**
+  o instalador ainda não grava a versão no `instalacao.json`, por isso o relatório diz "desconhecida"):
   - o `bar_helper.py` passa a apanhar a exceção no topo (`main`) e o `faulthandler` escreve num ficheiro os
     rebentamentos em C (o ctypes);
   - popup nativo do Windows (`MessageBoxW`), que aparece mesmo com o Zebar em baixo, que é quando os erros mais
@@ -44,9 +48,9 @@ janelas.
   - `erros = mostrar | esconder` no `arranque.txt` (por omissão `mostrar`). Com `esconder`, não há popup, mas o
     relatório fica na mesma em `~\.glzr\erros\` (os últimos 10), para se poder ir buscar depois;
   - a cola com o Windows fica excluída da cobertura, com o motivo e o passo manual em `docs/validacao-manual.md`.
-- [ ] **P3.3 A issue no GitHub:** formulário `.github/ISSUE_TEMPLATE/erro.yml` com o resumo, os passos, o que
+- [x] **P3.3 A issue no GitHub** (`d2869eb`; a etiqueta "erro" ainda tem de ser criada no GitHub): formulário `.github/ISSUE_TEMPLATE/erro.yml` com o resumo, os passos, o que
   esperava, o que aconteceu e o relatório colado (`render: shell`). O README "Para quem contribui" aponta para ele.
-- [ ] **P3.4 Fecho:**
+- [x] **P3.4 Fecho** (6 estragos novos, todos apanhados; mínimo dos estragos 80 → 86; armadilha A50):
   - fragmento do changelog;
   - estragos novos para o relatório e a limpeza;
   - o `docs/pendentes.md` perde o item;
