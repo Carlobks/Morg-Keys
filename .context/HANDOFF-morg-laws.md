@@ -89,7 +89,7 @@ Técnicas (tomadas durante as fases, com o motivo medido):
 
 1. **ML12:** `prefers-reduced-motion` no splash e no painel do sistema, `tabular-nums` na hora e na bateria, teste
    de contraste dos tokens Catppuccin e ADR do `rem`.
-2. ML13 (changelog). O teste real das 3 páginas (ML11b) fica com o dono, depois de reinstalar.
+2. ML13 (changelog). As 3 páginas da ML11b foram validadas pelo dono no Zebar (2026-10-31).
 3. ML14: CI (só se prova depois de um push, com o OK do dono). ML15: 2.ª verificação numa sessão nova, neutra.
 4. Depois: a F1 da auditoria (arranque robusto); a experiência 0001 (fases 4–6); jogos; A38.
 

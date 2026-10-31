@@ -294,7 +294,8 @@ páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
     - cobertura JS 100 % (79 testes);
     - o teste dos imports, a catraca e o Biome vistos a falhar com estragos temporários;
     - `testar.ps1` verde.
-  - *Por validar:* as três páginas no Zebar (Regra n.º 1). Fica para o teu teste real, depois de reinstalar.
+  - *Teste real (2026-10-31):* depois de reinstalar, o dono confirmou o arranque, a barra e o painel `Alt+Esc` no
+    Zebar: "Está tudo a funcionar perfeitamente".
 - [ ] **ML12 Telas:** `prefers-reduced-motion`, `tabular-nums`, teste de contraste dos tokens, ADR do `rem`.
   - *Prova:* teste; o teu teste com "Mostrar animações" desligado no Windows.
 - [ ] **ML13 Changelog:** `changelog.d/`, regra no `commit-msg`, fragmentos atrasados e `juntar_changelog.py`.
