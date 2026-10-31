@@ -40,6 +40,8 @@ jobs:
           npm ci --ignore-scripts
           Install-Module Pester -RequiredVersion 6.2.0 -Force -SkipPublisherCheck -Scope CurrentUser
           Install-Module PSScriptAnalyzer -RequiredVersion 1.25.0 -Force -Scope CurrentUser
+      - name: Ligar os portões do git (como no README; os testes da guarda do git exigem-no)
+        run: git config core.hooksPath .githooks
       - name: Testes, cobertura e lint (scripts/testar.ps1)
         shell: powershell
         env:

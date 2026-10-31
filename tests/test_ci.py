@@ -52,6 +52,8 @@ class Workflow(unittest.TestCase):
         self.assertIn("MORG_PY: ${{ steps.python.outputs.python-path }}", testar)
         self.assertIn("-File scripts/testar.ps1", testar)
         self.assertIn("fetch-depth: 0", testar)  # os testes dos docs conferem hashes do histórico
+        # Os testes da guarda do git exigem os portões ligados, como no README; o checkout não os liga.
+        self.assertIn("git config core.hooksPath .githooks", testar)
         for versao in VERSOES:
             with self.subTest(versao=versao):
                 self.assertIn(versao, testar)
