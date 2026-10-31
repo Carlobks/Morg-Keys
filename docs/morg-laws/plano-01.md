@@ -318,8 +318,28 @@ páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
       os painéis sem deslizar;
     - o texto apagado mais legível;
     - a escala a 125 % (ADR 0009).
-- [ ] **ML13 Changelog:** `changelog.d/`, regra no `commit-msg`, fragmentos atrasados e `juntar_changelog.py`.
-  - *Prova:* testes; um `feat` em `2-configuracao/` sem fragmento é recusado no clone.
+- [x] **ML13 Changelog** (2026-10-31):
+  - `07afb3a`:
+    - `changelog.d/AAAA-MM-DD-assunto.md` com `Categoria: …` na primeira linha e os itens com "- ". As categorias
+      e a ordem são as do Keep a Changelog 1.1.0, e o ficheiro por mudança vem do towncrier
+      (`docs/pesquisa/changelog.md`);
+    - `scripts/changelog/juntar_changelog.py` (`<versão> [--rascunho]`) junta os fragmentos no `CHANGELOG.md` e
+      apaga-os. Fica numa pasta própria para entrar no `--source` da cobertura sem levar o `estragos.py`;
+    - o `commit-msg` recusa um feat ou fix em `2-configuracao/`, no instalador ou no desinstalador sem fragmento
+      nem `Sem-changelog: <motivo>`;
+    - `tests/test_changelog.py` confere cada fragmento;
+    - regra CHANGELOG POR FRAGMENTO no `CLAUDE.md` e no mapa das barreiras; README.
+  - `86ec68b`: 10 fragmentos atrasados, com o que mudou desde o último push do `exp/a` (`044f96e`).
+  - **Achado:** o `--rascunho` rebentava numa consola cp1252 com o "✻" (A16). Teste vermelho → escreve em UTF-8.
+  - *Prova:*
+    - vermelho: 11 falhas e 1 erro no portão, e o módulo em falta;
+    - verde: `testar.ps1` com 416 testes Python a 100 % (2269 linhas, 770 ramos) e 72 Pester;
+    - no clone descartável, o hook `commit-msg` com um `feat` em `styles.css`:
+      - recusado sem fragmento;
+      - aceite com o fragmento;
+      - aceite com `Sem-changelog:`.
+    - O `pre-commit` não correu no clone, porque lá não há `node_modules` para o Biome.
+  - *Não feito:* estragos novos para o portão e o juntar (o mínimo de 80 mantém-se).
 - [ ] **ML14 CI:** workflows e `MORG_PY` no `testar.ps1`.
   - *Prova local:* `testar.ps1` com `MORG_PY`.
   - *Prova real:* só depois do teu OK para o push (pode ir para um ramo de teste).

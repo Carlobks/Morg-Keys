@@ -28,8 +28,9 @@ Plano do Claude). Ponto de partida: `docs/morg-laws/verificacao-01-2026-10-30.md
 | ML11a | `f039a5c` | hooks do Claude e `statusline.py` nos 100 %; `correr_como_script()` |
 | ML11b | `13579f9`, `4c7b6a9`, `27c66fd`, `090c765`, `e98ea02` | lógica das 3 páginas em `*-logica.mjs`; catraca e Biome nos scripts em linha |
 | ML12 | `83dc898`, `d790cb6` | sem animações quando o Windows as desliga; tabular-nums; contraste 4,5:1; ADR 0009 |
+| ML13 | `07afb3a`, `86ec68b` | `changelog.d/`, `juntar_changelog.py`, `Sem-changelog:` no `commit-msg`; 10 fragmentos atrasados |
 
-Última suíte: 396 testes Python a 100 % (2186 linhas, 736 ramos: pack, portões, hooks e statusLine), 79 JS a 100 %,
+Última suíte: 416 testes Python a 100 % (2269 linhas, 770 ramos: pack, portões, hooks, statusLine e changelog), 79 JS a 100 %,
 72 Pester a 100 % fora das funções excluídas; ~21 s por commit.
 
 ## Decisões e porquê
@@ -82,6 +83,10 @@ Técnicas (tomadas durante as fases, com o motivo medido):
   abaixo do `subtext0`. Sobre `surface0` (4,45:1) usa-se o `subtext0`.
 - **Reduced-motion a 0,01 ms e não `none`:** o splash espera pelo `transitionend` da opacidade para soltar a cortina.
 - **`px` nas páginas (ADR 0009):** no Zebar `1rem` é sempre `16px` e a escala do Windows já chega às páginas.
+- **Fragmento `AAAA-MM-DD-assunto.md` com `Categoria:` dentro (ML13):** sem hash (não existe antes do commit) e
+  sem a categoria no nome (um nome errado mudava-a sem ninguém notar). Categorias do Keep a Changelog.
+- **`scripts/changelog/` numa pasta própria:** o `--source` da cobertura aceita pastas; `scripts/` levaria o
+  `estragos.py`. Os scripts que escrevem na consola escrevem bytes UTF-8 (A16): o "✻" rebentava o print.
 
 ## Descartado
 
@@ -92,10 +97,10 @@ Técnicas (tomadas durante as fases, com o motivo medido):
 
 ## Próximos passos
 
-1. **ML13:** `changelog.d/`, a regra `Sem-changelog:` no `commit-msg`, os fragmentos atrasados e
-   `scripts/juntar_changelog.py`.
+1. **ML14:** CI no `windows-latest` (`MORG_PY` no `testar.ps1`, actions fixadas por SHA); só se prova com um
+   push, com o OK do dono.
 2. Teste real da ML12 com o dono (animações desligadas no Windows, texto apagado, escala a 125 %).
-3. ML14: CI (só se prova depois de um push, com o OK do dono). ML15: 2.ª verificação numa sessão nova, neutra.
+3. ML15: 2.ª verificação numa sessão nova, neutra; depois o pedido do push.
 4. Depois do plano: a ordem está em `docs/pendentes.md` (bug do painel Apps e arranque, relatório de erros,
    frases, modal do Claude, guia do Alt+R, F1–F7, experiência 0001, jogos e A38).
 
