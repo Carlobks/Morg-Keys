@@ -60,8 +60,10 @@ class Recusa(unittest.TestCase):
                            "set MORG_A_TESTAR=1&& git commit -F m -- a"], "MORG_A_TESTAR")
 
     def test_mensagem_com_varias_linhas(self):
-        self.assertRecusa(['git commit -m "título\n\ncorpo"', 'git commit --message="a\nb"',
-                           "git commit -m \"$(cat <<'EOF'\nx\nEOF\n)\"", 'git commit -qm "a\nb"'], "-F")
+        # Com caminhos: sem eles a recusa vinha da regra "sem caminhos" e este teste passava sem chegar aqui (ML11a).
+        self.assertRecusa(['git commit -m "título\n\ncorpo" -- a.txt', 'git commit --message="a\nb" -- a.txt',
+                           "git commit -m \"$(cat <<'EOF'\nx\nEOF\n)\" -- a.txt", 'git commit -qm "a\nb" -- a.txt'],
+                          "várias linhas")
 
 
 class DeixaPassar(unittest.TestCase):
