@@ -19,6 +19,8 @@ MAIOR_LINHA_ACEITE = 2000  # o Tutorial tem linhas de ~650 caracteres; 2000 dá 
 LIMITE_DE_LINHAS = 500  # regra do CLAUDE.md: ficheiros pequenos, uma responsabilidade cada
 # Textos de terceiros que não se dividem.
 SEM_LIMITE_DE_LINHAS = ("LICENSE",)
+# Ficheiros com uma só linha por definição: o VERSION (ADR 0011), cujo formato o tests/test_versao.py confere.
+UMA_SO_LINHA = ("VERSION",)
 # Ficheiros antigos acima do limite, com o tamanho que tinham em 2026-10-23: só podem encolher.
 # Quando um descer das 500 linhas, sai desta lista. A fase 2c da experiência 0001 dividiu os
 # últimos (painel/apps.html, 830, e guia/guia.html, 622) em .html + .css + .mjs.
@@ -41,6 +43,8 @@ class FicheirosDeTextoIntactos(unittest.TestCase):
 
     def test_cada_ficheiro_tem_varias_linhas(self):
         for caminho in ficheiros_de_texto_rastreados():
+            if caminho in UMA_SO_LINHA:
+                continue
             with self.subTest(ficheiro=caminho):
                 texto = (RAIZ_REPOSITORIO / caminho).read_text(encoding="utf-8-sig")
                 self.assertGreaterEqual(texto.count("\n"), 2, "sem quebras de linha: foi estragado?")
