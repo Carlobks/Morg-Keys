@@ -1,0 +1,48 @@
+# Formulário de issue para um erro do Morg Keys (P3.3; campos da pesquisa em docs/pesquisa/relatorio-de-erros.md).
+name: Erro
+description: Algo do Morg Keys falhou ou não fez o que devia.
+title: "[Erro] "
+labels: ["erro"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por avisar. Se apareceu o aviso "Morg Keys: erro", o relatório guardado ajuda muito: cole-o no fim.
+  - type: input
+    id: resumo
+    attributes:
+      label: Resumo
+      description: O que falhou, numa linha (ex. "o painel Apps e arranque não abre").
+    validations:
+      required: true
+  - type: textarea
+    id: passos
+    attributes:
+      label: Passos para reproduzir
+      description: Numerados, do início. Diga também se acontece sempre ou só às vezes.
+      placeholder: |
+        1. Liguei o PC.
+        2. Carreguei em Alt+Esc e depois em C.
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: O que esperava
+    validations:
+      required: true
+  - type: textarea
+    id: aconteceu
+    attributes:
+      label: O que aconteceu
+      description: Só o que viu, sem suposições.
+    validations:
+      required: true
+  - type: textarea
+    id: relatorio
+    attributes:
+      label: Relatório do erro
+      description: >-
+        O ficheiro que guardou no aviso, ou a cópia mais recente em .glzr\erros, na sua pasta pessoal.
+        Reveja-o antes de publicar: não deve ter o seu nome nem caminhos pessoais (o Morg Keys tira-os, mas confirme).
+      render: shell

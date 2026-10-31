@@ -63,6 +63,9 @@ Cada push mostra os ficheiros a enviar, procura segredos com o [gitleaks](https:
 `scripts/testar.ps1` num Windows limpo e o gitleaks em todo o histórico; uma vez por semana, os estragos. Para
 usar outro Python localmente: `MORG_PY=<caminho do python.exe>`.
 
+Encontrou um erro? Abra uma issue com o formulário **Erro** (`.github/ISSUE_TEMPLATE/erro.yml`) e cole o relatório
+que o Morg Keys guardou (o aviso "Morg Keys: erro" pergunta onde guardar; há sempre uma cópia em `.glzr\erros`).
+
 ## Licença
 
 [GPL-3.0](LICENSE). Componentes de terceiros e respetivas licenças em [LICENCAS.txt](LICENCAS.txt) e [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt).
