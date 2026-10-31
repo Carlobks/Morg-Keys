@@ -1,4 +1,4 @@
-<#
+﻿<#
   Volta a mostrar janelas que o GlazeWM deixou escondidas ("cloaked") ao sair.
 
   O GlazeWM esconde as janelas dos workspaces que não estão à vista com uma

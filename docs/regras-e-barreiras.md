@@ -35,7 +35,7 @@ tenha aqui uma linha, e que cada caminho citado exista.
 | NUNCA ENFRAQUECER UM TESTE | teste; texto | `tests/test_estragos_minimo.py` (os estragos não encolhem); afrouxar uma asserção é juízo da revisão |
 | FICHEIROS PEQUENOS | hook + teste | `.claude/hooks/limite_de_linhas.py`, `tests/test_ficheiros_texto.py`; 35 linhas por função: `tests/test_tamanho_das_funcoes.py`, `biome.jsonc`, `tests/paginas-em-linha.test.mjs`, `scripts/testar.ps1` |
 | PYTHON ISOLADO | teste | `tests/test_ponto_de_entrada.py` corre o ajudante com `-I` noutra pasta |
-| CODIFICAÇÃO | por fazer (F4) | teste do BOM nos `.ps1` (F4 da auditoria) |
+| CODIFICAÇÃO | teste | `tests/test_ficheiros_texto.py` (BOM em cada `.ps1`); o `$funcao` da A37 é texto |
 | FINS DE LINHA | teste | `.gitattributes` (CRLF só nos `.ps1`, `.psm1`, `.cmd` e `.bat`), `tests/test_fins_de_linha.py` (índice e disco conforme a extensão) |
 | SUBSTITUIÇÕES COM CONTAGEM | texto | o `assert` vive em cada script de substituição |
 | ESTRUTURA À PARTE | texto | é juízo de quem commita; a revisão do diff apanha |

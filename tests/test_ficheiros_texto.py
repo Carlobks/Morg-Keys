@@ -73,6 +73,14 @@ class FicheirosDeTextoIntactos(unittest.TestCase):
                 maximo = GRANDES_POR_DIVIDIR.get(caminho, LIMITE_DE_LINHAS)
                 self.assertLessEqual(linhas, maximo, f"{linhas} linhas (máximo {maximo})")
 
+    def test_ps1_em_utf8_com_bom(self):
+        # Regra CODIFICAÇÃO (A16): sem BOM, o PowerShell 5.1 lê o .ps1 como ANSI e estraga os acentos. B5 da
+        # 2.ª verificação (ML16): o uncloak.ps1 estava sem BOM e só a catraca do PSScriptAnalyzer o via.
+        for caminho in ficheiros_de_texto_rastreados():
+            if caminho.endswith((".ps1", ".psm1")):
+                with self.subTest(ficheiro=caminho):
+                    self.assertTrue((RAIZ_REPOSITORIO / caminho).read_bytes().startswith(b"\xef\xbb\xbf"))
+
     def test_lista_de_grandes_esta_atualizada(self):
         for caminho in GRANDES_POR_DIVIDIR:
             with self.subTest(ficheiro=caminho):

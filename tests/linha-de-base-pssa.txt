@@ -5,5 +5,4 @@ PSAvoidUsingEmptyCatchBlock 2
 PSAvoidUsingPositionalParameters 5
 PSAvoidUsingWriteHost 10
 PSReviewUnusedParameter 8
-PSUseBOMForUnicodeEncodedFile 1
 PSUseDeclaredVarsMoreThanAssignments 24
