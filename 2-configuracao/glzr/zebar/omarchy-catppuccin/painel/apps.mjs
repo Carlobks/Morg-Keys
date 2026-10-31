@@ -218,7 +218,7 @@ if (ePreVisualizacao(location)) {
     sel = null;
     document.body.classList.remove('sending');
     cursor = 0;
-    loadAll(); // apps.txt e layout.json podem ter mudado (Alt+Esc, G; outra app)
+    loadAll(); // apps.txt e layout.json podem ter mudado (o arranque; outra app)
     $('filter').focus();
     document.body.classList.remove('open');
     void document.body.offsetWidth;

@@ -10,7 +10,6 @@
   guide-ensure-hidden -> arranque: garante que o guia pré-carregado fica escondido
   bar toggle      -> Alt+Shift+Espaço: esconde/mostra a barra do Zebar
   restore-min     -> Alt+Shift+M: restaura a janela minimizada mais recente
-  layout-save     -> grava em que workspace está cada janela (camada Alt+Esc, G)
   layout-restore  -> no arranque do GlazeWM: abre as apps e repõe o arranjo
   boot            -> arranque do PC: ecrã de arranque + barra + GlazeWM + apps + programas
                      .bat de arranque.txt (tarefa agendada)
@@ -51,7 +50,7 @@ import morg_inicio  # noqa: F401 — o 1.º: guarda a hora para a medição do a
 from morg_acoes_windows import after_exit, lock, on_exit, power, quick_settings
 from morg_acordado import awake_hold, awake_off, awake_status, awake_toggle
 from morg_animacao import animacao_preview, animacao_set, animacao_tap
-from morg_arranjo import layout_restore, layout_save
+from morg_arranjo import layout_restore
 from morg_arranque import boot
 from morg_atalhos import apps_apply, apps_edit
 from morg_ecra_arranque import splash_ready
@@ -78,7 +77,6 @@ COMANDOS = {
     ("guide-ensure-hidden",): guide_ensure_hidden,
     ("bar", "toggle"): bar_toggle,
     ("restore-min",): restore_minimized,
-    ("layout-save",): layout_save,
     ("layout-restore",): layout_restore,
     ("boot",): boot,
     ("splash-ready",): splash_ready,

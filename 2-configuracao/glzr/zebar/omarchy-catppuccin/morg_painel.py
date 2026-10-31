@@ -177,7 +177,7 @@ _PANEL_PUSHED = []  # esta mudança guardou um passo de desfazer (para lhe junta
 
 def _files_hash():
     """Impressão digital de apps.txt + layout.json: o Desfazer só repõe se ninguém
-    (Alt+Esc G, Alt+Shift+R, o arranque) mexeu neles depois da mudança do painel."""
+    (Alt+Shift+R, o arranque) mexeu neles depois da mudança do painel."""
     return hashlib.sha256(((_read_or_none(APPS_FILE) or "") + "\0" + (_read_or_none(LAYOUT_FILE) or "")).encode("utf-8")).hexdigest()
 
 
@@ -252,7 +252,7 @@ def _panel_mudar_workspace(kind, op, apps_before, layout_before):
         if not isinstance(i, int) or not 0 <= i < len(windows):
             return "Essa app já não está nesse workspace."
         # O painel diz o que julga estar nesse índice: se não bater (pedidos em
-        # fila, Alt+Esc G entretanto), não mexe na entrada errada.
+        # fila, o arranque entretanto), não mexe na entrada errada.
         if "expect_ws" in op and (windows[i].get("workspace") != op["expect_ws"]
                                   or _entry_label(windows[i]) != op.get("expect_label")):
             return "O painel estava desatualizado: veja de novo e repita."

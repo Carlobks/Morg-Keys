@@ -37,8 +37,6 @@ MUTANTES = [
     ('late = time.monotonic() - start > wait * 2 / 3', 'late = True'),
     ('if p in running and p not in have_windows and not entry["launch"].get("args"):', 'if False:'),
     ('or _norm(process) in running or', 'or'),
-    ('same = [e for e in prev if e.get("title_hash") == w["title_hash"]]', 'same = []'),
-    ('            prev.remove(e)\n', '            pass\n'),
     ('wait = max(wait_s, 40 if r.launched else 0)', 'wait = wait_s'),
     ('            count[_norm(e["process"])] -= 1', '            pass'),
     ('drop |= {i for i, k, _ in entries if k == src}', 'pass'),

@@ -76,7 +76,6 @@ export const SECTIONS = [
       ['Energia', 'P', 0xf0241],
       ['Bloquear', 'L', 0xf033e],
       ['Apps e arranque (enviar apps para teclas e workspaces)', 'C', 0xf030c],
-      ['Gravar arranjo dos workspaces', 'G', 0xf0193],
       ['Animação do arranque: tocar troca · segurar mostra', 'E', 0xf03d8],
       ['Sair do GlazeWM', 'Q', 0xf0206],
       ['Reiniciar (pede confirmação)', 'R', 0xf0709],

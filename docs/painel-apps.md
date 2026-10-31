@@ -7,7 +7,7 @@ Data: 2026-10-22. Estado: construído; verificação estática e de lógica feit
 Configurar, **sem abrir ficheiros de texto nem correr comandos**:
 
 - os atalhos das apps (hoje: `apps.txt` + `Alt+Shift+R`);
-- que apps abrem em cada workspace no arranque (hoje: `layout.json`, gravado com `Alt+Esc, G`).
+- que apps abrem em cada workspace no arranque (`layout.json`, gravado só pelo painel).
 
 Tudo por **escolher e enviar** (rato ou só teclado), num painel leve no mesmo estilo do guia (`Alt+K`) e do painel do sistema (`Alt+Esc`).
 
@@ -17,7 +17,7 @@ Tudo por **escolher e enviar** (rato ou só teclado), num painel leve no mesmo e
 |---|---|
 | Origem das apps | Lista **dentro do painel** com as apps do menu Iniciar e uma pesquisa (o WebView2 não recebe o caminho de ícones arrastados do Explorador). |
 | Atalhos | **Teclado desenhado**: larga-se a app numa tecla → `Alt+Shift+tecla`. |
-| Arranque | **10 caixas de workspace**; larga-se a app numa caixa → abre lá no arranque. O `Alt+Esc, G` continua (grava o arranjo atual e substitui o do painel). |
+| Arranque | **10 caixas de workspace**; larga-se a app numa caixa → abre lá no arranque. O antigo "gravar arranjo" saiu a 2026-10-31: o painel é o único sítio do arranque. |
 | Abrir | `Alt+Esc, C` (deixa de abrir o `apps.txt` no editor). |
 | Aplicar | **Logo a cada envio**, com botão **Desfazer**. |
 | Interação (2026-10-22) | **Sem arrastar**: escolhe-se uma app (rato, ou ↑ ↓ e Enter) e aparece "Enviar … para" com os destinos acesos; clica-se no destino ou carrega-se a letra (tecla) / número (workspace), Del tira, Esc cancela. Motivo: o Tauri do Zebar não deixa o arrastar HTML5 funcionar no Windows. |
@@ -49,7 +49,7 @@ Tudo por **escolher e enviar** (rato ou só teclado), num painel leve no mesmo e
 - `panel apps`: lista do menu Iniciar (`Get-StartApps`), guardada também em cache para o `apps-apply` ser rápido.
 - `panel do <b64>`: uma operação (`key`, `unkey`, `ws-add`, `ws-del`, `ws-move`). Guarda um passo de desfazer, aplica (`apps-apply` sem janelas de erro) e devolve o novo estado.
 - `panel undo`: repõe o passo anterior (até 20).
-- `layout.json` ganha, por entrada, `label` e `launch` (como abrir). Entradas do painel cujo processo não se sabe à partida aprendem-no no primeiro arranque (a janela nova que aparece depois de abrir a app). `layout-save` (`Alt+Esc, G`) mantém `label`/`launch` das apps que já conhecia.
+- `layout.json` ganha, por entrada, `label` e `launch` (como abrir). Entradas do painel cujo processo não se sabe à partida aprendem-no no primeiro arranque (a janela nova que aparece depois de abrir a app, de um processo que ainda não corria).
 
 ### Ligações
 - `zpack.json`: widget `apps` + permissões; `settings.json`: pré-carregar `apps`.

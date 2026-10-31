@@ -111,7 +111,7 @@ export function listaHtml(state, startApps, extraSites, sel, filtro) {
   };
 }
 
-// As caixas dos workspaces: 1–10 sempre; outros (ex.: o scratchpad S, gravado com Alt+Esc G) só se tiverem apps.
+// As caixas dos workspaces: 1–10 sempre; outros (ex.: o scratchpad S, de um layout.json antigo) só se tiverem apps.
 export function workspacesHtml(state, sel) {
   const names = [...Array.from({ length: 10 }, (_, i) => String(i + 1)),
                  ...[...new Set(state.workspaces.map(w => w.workspace))].filter(w => !/^([1-9]|10)$/.test(w))];

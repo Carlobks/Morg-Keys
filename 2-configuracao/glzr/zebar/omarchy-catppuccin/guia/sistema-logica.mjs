@@ -23,7 +23,6 @@ export const GROUPS = [
   ] },
   { title: 'Personalizar', color: 'var(--mauve)', items: [
     ['C', 0xf030c, 'Apps e arranque'],
-    ['G', 0xf0193, 'Gravar arranjo'],
     ['E', 0xf03d8, 'Animação: <b id="anim">…</b>', true],
   ] },
   { title: 'Sessão', color: 'var(--red)', wide: true, items: [

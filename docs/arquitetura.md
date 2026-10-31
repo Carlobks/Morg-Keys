@@ -46,7 +46,7 @@ Tudo vive em `%USERPROFILE%\.glzr\`. O pacote guarda os modelos em `2-configurac
 | ↳ `morg_glaze.py` | CLI do GlazeWM (`_glaze`, `_workspaces`), árvore de janelas, restaurar minimizadas. |
 | ↳ `morg_acordado.py` · `morg_acoes_windows.py` | Não suspender · Win+A, bloquear, energia, saída do GlazeWM. |
 | ↳ `morg_janelas_zebar.py` | Guia (Alt+K), barra (mostrar/esconder) e camada Alt+Esc. |
-| ↳ `morg_arranjo.py` | `layout.json` (`LAYOUT_FILE`, `LAUNCH`, `APP_LABELS`), `layout-save`, `_restore`, `layout-restore`. |
+| ↳ `morg_arranjo.py` | `layout.json` (`LAYOUT_FILE`, `LAUNCH`, `APP_LABELS`), `_restore`, `layout-restore`. |
 | ↳ `morg_atalhos.py` · `morg_painel.py` | `apps.txt` → `config.yaml` (`APPS_FILE`, `GLAZE_CONFIG`) · painel Alt+Esc, C. |
 | ↳ `morg_config_arranque.py` · `morg_ecra_arranque.py` · `morg_cortina.py` · `morg_animacao.py` · `morg_arranque.py` | `arranque.txt` e `ANIMACOES` · splash e `progress.json` · cortina preta nativa · Alt+Esc, E · o `boot` (`BOOT_QUIET_S = 3`, `BOOT_CAP_S = 60`). |
 | ↳ `claude_usage.py` | Lê `~/.claude/rate_limits.json` e devolve JSON `{now, captured_at, five_hour, seven_day}` à barra. |
@@ -68,7 +68,7 @@ Tudo vive em `%USERPROFILE%\.glzr\`. O pacote guarda os modelos em `2-configurac
 | `zebar\omarchy-catppuccin\guia\arranque.txt` | **Escolhas do arranque, editáveis pelo utilizador** (visível em `Documentos\Guia de Atalhos`). `animacao = cafe`, `nome = …` (saudação), `claude = mostrar \| esconder` e uma linha `bat = CAMINHO \| ENDEREÇO \| NOME` por programa; endereço e nome opcionais. Lido por `_arranque_cfg()` em cada arranque. O modelo do pacote é este mesmo ficheiro, com `{{ANIMACAO}}` e `{{NOME}}` (trocados pelo instalador) e sem `.bat`. |
 | `zebar\omarchy-catppuccin\bat_tray.py` | Corre um `.bat` escondido (`cmd /c`, na pasta do `.bat`, sem consola, saída em `~\.glzr\arranque\<nome>.log`), com ícone na bandeja. Um processo por `.bat` (mutex `Local\MorgBatTray_<sha1 do caminho>`). |
 | `arranque\` (em `~\.glzr`) | Registos (`<nome>.log`) dos programas `.bat`. Também é um bom sítio para guardar os próprios `.bat` (ex.: `iniciar.bat` com `cd /d "<pasta do projeto>"` + `npm run dev`), apontados no `arranque.txt`. |
-| `layout.json` | Que app abre em que workspace no arranque. Cada entrada: `workspace`, `process`, `title_hash` (gravados com `Alt+Esc, G`) e, nas que vêm do painel, `label`, `value` (a app escolhida) e `launch` (`{file, args}` para ShellExecute). Uma app do menu Iniciar cujo processo não se sabe à partida fica sem `process` até ao primeiro arranque, que o aprende. **Não** vai no pacote. |
+| `layout.json` | Que app abre em que workspace no arranque. Cada entrada: `workspace`, `process`, `title_hash` (as entradas antigas, de antes do painel, só têm estes) e, nas que vêm do painel, `label`, `value` (a app escolhida) e `launch` (`{file, args}` para ShellExecute). Uma app do menu Iniciar cujo processo não se sabe à partida fica sem `process` até ao primeiro arranque, que o aprende. **Não** vai no pacote. |
 | `instalacao.json`, `instalacao.log` | Escritos pelo instalador; o desinstalador usa o `.json` para repor o que estava. |
 | `~\.claude\statusline.py` | statusLine do Claude Code. Escreve `rate_limits.json` de forma atómica. |
 
@@ -95,14 +95,15 @@ O registo do último arranque fica em `zebar\omarchy-catppuccin\.layout-restore.
 - **Café (não suspender).** `awake toggle` lança `awake-hold`, um processo `pythonw` que chama `SetThreadExecutionState(ES_CONTINUOUS|ES_SYSTEM_REQUIRED|ES_DISPLAY_REQUIRED)` e espera pelo evento `Local\OmarchyAwakeStop`. Está "ligado" se o mutex `Local\OmarchyAwakeAlive` existir. Ao sair do GlazeWM, `after-exit` desliga-o.
 - **Som e Wi-Fi na barra.** Clicar no som envia `Win+A` por `SendInput` (`quick`). O Wi-Fi abre `ms-availablenetworks:`.
 - **Minimizadas.** A barra lista as janelas minimizadas (dados do provider `glazewm` do Zebar); um clique faz `toggle-minimized` + foco. `Alt+Shift+M` corre `restore-min`.
-- **Disposição.** `layout-save` (`Alt+Esc, G`) grava `layout.json`. `layout-restore` (nos `startup_commands`, quando não há `boot`) e o `boot` repõem. Os dicionários `LAUNCH` e `APP_LABELS` em `morg_arranjo.py` dizem como abrir e como chamar cada processo conhecido.
+- **Disposição.** O painel (`Alt+Esc, C`) é o único que grava o `layout.json` (o antigo "gravar arranjo" saiu
+  a 2026-10-31: reescrevia o ficheiro só com as janelas abertas e apagava o que o painel tinha posto). `layout-restore` (nos `startup_commands`, quando não há `boot`) e o `boot` repõem. Os dicionários `LAUNCH` e `APP_LABELS` em `morg_arranjo.py` dizem como abrir e como chamar cada processo conhecido.
 - **Painel Apps e arranque** (`Alt+Esc, C`). O `bar_helper.py panel` mostra o widget `apps` com foco (como o guia); a página pede tudo ao helper com `py.exe` e recebe JSON em ASCII:
   - `panel state`: atalhos (`apps.txt`), teclas bloqueadas (`_fixed_bindings` do `config.yaml`) e entradas do `layout.json`;
   - `panel apps`: lista do menu Iniciar (`Get-StartApps`, ~1,2 s), guardada em `.start-apps.json` (6 h) para o `apps-apply` do painel não a pedir de novo;
   - `panel do <base64url de um JSON>`: `key` (com `from` = mover), `unkey`, `ws-add`, `ws-move`, `ws-del`. Antes de cada uma guarda um passo em `.panel-undo.json` (até 20). As mudanças de tecla reescrevem só a linha dessa tecla no `apps.txt` e correm `_apps_apply_core`; com erro repõem o ficheiro e devolvem a mensagem (nada muda);
   - `panel undo`: repõe `apps.txt`/`layout.json` do último passo e volta a aplicar.
 
-  No arranque, `_restore` abre as entradas com `launch` por ShellExecute (`_shell_open`): uma por janela em falta. As que não têm `process` ficam com a primeira janela nova que aparecer (até 20 s), e o processo aprendido é gravado. `layout-save` (`Alt+Esc, G`) substitui o arranjo, mas mantém `launch`/`label`/`value` das apps que já conhecia (uma entrada antiga por janela).
+  No arranque, `_restore` abre as entradas com `launch` por ShellExecute (`_shell_open`): uma por janela em falta. As que não têm `process` ficam com a primeira janela nova que aparecer (até 20 s), (nunca de um processo que já corria antes de a abrir), e o processo aprendido é gravado.
 - **Apps (`apps.txt` → atalhos).** `apps-apply` (`Alt+Shift+R`) segue estes passos:
   1. Lê `apps.txt`.
   2. Valida cada linha: tem de começar por `Alt`, sem `Ctrl`, sem teclas repetidas, sem colidir com atalhos fixos do `config.yaml`.

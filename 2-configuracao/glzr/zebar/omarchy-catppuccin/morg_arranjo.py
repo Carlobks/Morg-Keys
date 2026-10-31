@@ -1,4 +1,4 @@
-"""Arranjo dos workspaces: layout.json, Alt+Esc G (gravar) e restauro das apps no arranque."""
+"""Arranjo dos workspaces: o layout.json do painel (Alt+Esc, C) e o restauro das apps no arranque."""
 
 import hashlib
 import json
@@ -9,7 +9,7 @@ from pathlib import Path
 
 from morg_glaze import _glaze, _windows_by_workspace, _workspaces
 from morg_processos import CREATE_NO_WINDOW, HERE, _shell_open
-from morg_win32 import SYNCHRONIZE, kernel32, user32
+from morg_win32 import SYNCHRONIZE, kernel32
 
 LAYOUT_FILE = Path.home() / ".glzr" / "layout.json"
 RESTORE_LOG = HERE / ".layout-restore.log"
@@ -31,38 +31,6 @@ def _title_hash(title):
     """Impressão digital do título: chega para reconhecer a janela sem guardar
     o título em claro (pode ter nomes de documentos ou assuntos de emails)."""
     return hashlib.sha256((title or "").encode("utf-8")).hexdigest()[:16]
-
-
-
-def layout_save():
-    """Grava em que workspace está cada janela agora (escrita atómica).
-
-    Se o GlazeWM não responder, não grava nada e dá um som de erro — nunca
-    substitui um arranjo bom por um vazio.
-    """
-    workspaces = _workspaces()
-    windows = [
-        {"workspace": ws, "process": w["processName"], "title_hash": _title_hash(w.get("title"))}
-        for ws, w in _windows_by_workspace(workspaces or [])
-    ]
-    if not workspaces or not windows:
-        user32.MessageBeep(0x10)  # MB_ICONHAND: erro
-        return
-    # Mantém o "como abrir" e o nome das apps que o painel (Alt+Esc, C) já conhecia.
-    known = {}
-    for e in (_load_layout() or {}).get("windows", []):
-        if e.get("launch") and e.get("process"):
-            known.setdefault(e["process"], []).append(e)
-    for w in windows:
-        prev = known.get(w["process"])
-        if prev:  # uma entrada antiga por janela: 2 janelas do Chrome não herdam o mesmo site
-            same = [e for e in prev if e.get("title_hash") == w["title_hash"]]
-            e = same[0] if same else prev[0]
-            prev.remove(e)
-            w.update({k: e[k] for k in ("launch", "label", "value") if k in e})
-    focused = next((w["name"] for w in workspaces if w.get("hasFocus")), None)
-    _save_layout({"saved_at": int(time.time()), "focused": focused, "windows": windows})
-    user32.MessageBeep(0)  # confirmação discreta
 
 
 BOOT_MUTEX = "Local\\MorgBootRunning"
@@ -176,7 +144,7 @@ def _restore_esperar_janela_nova(r, entry, before, others, poll):
 
 def _restore_abrir_antigas(r, running, have_windows):
     """Devolve as entradas antigas (sem "launch")."""
-    # 2.º Entradas gravadas com Alt+Esc, G (sem "launch"): uma abertura por processo, pela tabela LAUNCH.
+    # 2.º Entradas antigas, de antes do painel (sem "launch"): uma abertura por processo, pela tabela LAUNCH.
     legacy = [e for e in r.entries if not e.get("launch") and e.get("process")]
     for process in dict.fromkeys(e["process"] for e in legacy):
         if _norm(process) in have_windows or _norm(process) in running or process not in LAUNCH:

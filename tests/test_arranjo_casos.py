@@ -72,16 +72,6 @@ class CasosDoRestauro(unittest.TestCase):
             log("olá")
             log("de novo")
 
-    def test_layout_save_ignora_entradas_antigas_sem_como_abrir(self):
-        with SistemaFalso(workspaces_com_foco_no_1()) as s:
-            s.escrever("LAYOUT_FILE", json.dumps({"windows": [
-                {"workspace": "3", "process": "chrome", "title_hash": "a"},
-                {"workspace": "4", "title_hash": "b", "launch": {"file": "y"}}]}))
-            s.glaze.janela("chrome", "Gmail", "2")
-            s.bh.layout_save()
-            self.assertEqual(json.loads(s.ler("LAYOUT_FILE"))["windows"],
-                             [{"workspace": "2", "process": "chrome", "title_hash": s.bh._title_hash("Gmail")}])
-
 
 class ReporNoReinicioDoGlaze(unittest.TestCase):
     """layout_restore: o startup_command do GlazeWM (sem o boot)."""

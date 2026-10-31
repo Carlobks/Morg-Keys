@@ -17,7 +17,7 @@ test('gruposHTML: um <section> por grupo, o largo marcado, a cor e as teclas esc
   assert.match(html, /<span class="lb">Menor &#60;<\/span><kbd>&#60;<\/kbd>/);
   assert.match(html, /<section class="group wide" style="--c:var\(--red\)">/);
   assert.match(html, /<span class="lb">Animação: <b id="anim">…<\/b><\/span><kbd>E<\/kbd>/);  // já é HTML
-  assert.equal(gruposHTML(GROUPS).match(/<li>/g).length, 15);
+  assert.equal(gruposHTML(GROUPS).match(/<li>/g).length, 14);
 });
 
 test('GROUPS: cada tecla do painel existe na camada "sistema" do config.yaml do GlazeWM', () => {

@@ -1,4 +1,4 @@
-"""Caracterização do arranjo dos workspaces: `_restore` (arranque) e `layout_save` (Alt+Esc, G).
+"""Caracterização do arranjo dos workspaces: `_restore` (arranque).
 
 Fase 1 da experiência 0001: fixa o comportamento de 2026-10-23. GlazeWM, relógio e abridor falsos
 (sistema_falso): abrir uma app faz aparecer a janela dela no workspace focado, como no PC real.
@@ -25,7 +25,7 @@ def entrada_do_painel(ws, ficheiro, processo=None, label=None):
 
 
 class RestaurarEntradasAntigas(unittest.TestCase):
-    """Entradas gravadas com Alt+Esc, G (sem "launch"): abrem-se pela tabela LAUNCH."""
+    """Entradas antigas, de antes do painel (sem "launch"): abrem-se pela tabela LAUNCH."""
 
     def test_abre_a_app_que_falta_e_poe_a_janela_no_workspace(self):
         with SistemaFalso(workspaces_com_foco_no_1()) as s:
@@ -180,7 +180,7 @@ class RestaurarEntradasDoPainel(unittest.TestCase):
             s.abridor.app("chrome", "chrome", "Gmail")
             s.glaze.janela("chrome", "Docs", "1")
             layout = {"windows": [
-                {"workspace": "2", "process": "chrome", "title_hash": s.bh._title_hash("Docs")},  # Alt+Esc, G
+                {"workspace": "2", "process": "chrome", "title_hash": s.bh._title_hash("Docs")},  # entrada antiga
                 {**entrada_do_painel("4", "chrome", "chrome", "Gmail"),
                  "launch": {"file": "chrome", "args": "--app=https://mail"}},
             ]}
@@ -201,55 +201,6 @@ class RestaurarEntradasDoPainel(unittest.TestCase):
             entrada["launch"]["args"] = "--app=https://mail.google.com"
             self.assertEqual(s.bh._restore({"windows": [entrada]}, s.log), [])
             self.assertEqual(s.abridor.abertos, [("chrome", "--app=https://mail.google.com")])
-
-
-class GravarArranjo(unittest.TestCase):
-
-    def test_glaze_desligado_nao_grava_e_avisa(self):
-        with SistemaFalso() as s:
-            s.glaze.ligado = False
-            s.bh.layout_save()
-            self.assertIsNone(s.ler("LAYOUT_FILE"))
-            self.assertEqual(s.bipes, [0x10])
-
-    def test_grava_janelas_e_workspace_focado(self):
-        with SistemaFalso(workspaces_com_foco_no_1()) as s:
-            s.glaze.janela("chrome", "Gmail", "2")
-            s.bh.layout_save()
-            gravado = json.loads(s.ler("LAYOUT_FILE"))
-            self.assertEqual(gravado["focused"], "1")
-            self.assertEqual(gravado["windows"], [{"workspace": "2", "process": "chrome",
-                                                   "title_hash": s.bh._title_hash("Gmail")}])
-            self.assertEqual(s.bipes, [0])
-
-    def test_herda_o_como_abrir_pelo_titulo_uma_entrada_por_janela(self):
-        with SistemaFalso(workspaces_com_foco_no_1()) as s:
-            h = s.bh._title_hash
-            antigo = {"windows": [
-                {"workspace": "3", "process": "chrome", "title_hash": h("Docs"), "label": "Docs",
-                 "value": "web: https://docs", "launch": {"file": "chrome", "args": "--app=https://docs"}},
-                {"workspace": "4", "process": "chrome", "title_hash": h("Gmail"), "label": "Gmail",
-                 "value": "web: https://mail", "launch": {"file": "chrome", "args": "--app=https://mail"}},
-            ]}
-            s.escrever("LAYOUT_FILE", json.dumps(antigo))
-            s.glaze.janela("chrome", "Gmail", "7")
-            s.glaze.janela("chrome", "Sem título conhecido", "8")
-            s.bh.layout_save()
-            janelas = json.loads(s.ler("LAYOUT_FILE"))["windows"]
-            self.assertEqual([(j["workspace"], j.get("label")) for j in janelas], [("7", "Gmail"), ("8", "Docs")])
-
-    def test_duas_janelas_sem_titulo_conhecido_nao_herdam_a_mesma_entrada(self):
-        with SistemaFalso(workspaces_com_foco_no_1()) as s:
-            antigo = {"windows": [
-                {"workspace": "3", "process": "chrome", "title_hash": "a", "label": "Docs", "launch": {"file": "x"}},
-                {"workspace": "4", "process": "chrome", "title_hash": "b", "label": "Gmail", "launch": {"file": "y"}},
-            ]}
-            s.escrever("LAYOUT_FILE", json.dumps(antigo))
-            s.glaze.janela("chrome", "Primeira", "7")
-            s.glaze.janela("chrome", "Segunda", "8")
-            s.bh.layout_save()
-            janelas = json.loads(s.ler("LAYOUT_FILE"))["windows"]
-            self.assertEqual([j.get("label") for j in janelas], ["Docs", "Gmail"])
 
 
 if __name__ == "__main__":

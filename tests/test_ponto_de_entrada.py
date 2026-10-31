@@ -34,7 +34,7 @@ class ListaDeComandos(unittest.TestCase):
     DIRETOS: ClassVar[dict] = {
         ("awake-hold",): "awake_hold", ("quick",): "quick_settings", ("guide",): "guide",
         ("guide-hide",): "guide_hide", ("guide-ensure-hidden",): "guide_ensure_hidden", ("bar", "toggle"): "bar_toggle",
-        ("restore-min",): "restore_minimized", ("layout-save",): "layout_save", ("layout-restore",): "layout_restore",
+        ("restore-min",): "restore_minimized", ("layout-restore",): "layout_restore",
         ("boot",): "boot", ("splash-ready",): "splash_ready", ("apps-apply",): "apps_apply",
         ("apps-edit",): "apps_edit", ("panel",): "panel_show", ("panel-hide",): "panel_hide",
         ("layer-show",): "layer_show", ("layer-hide",): "layer_hide", ("on-exit",): "on_exit",
