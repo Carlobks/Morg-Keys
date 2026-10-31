@@ -261,8 +261,17 @@ páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
   - O instalador renomeia a `~\.glzr` antiga e escreve tudo de novo, por isso não fica uma pasta `comum/` velha.
   - *Prova:* teste vermelho (5 nomes) → verde; `testar.ps1` verde (370 testes; Pester 100 %).
   - Um erro meu: estimei 5 trocas no `testar.ps1` e eram 6. O `assert` parou antes de gravar.
-- [ ] **ML11a Cobertura das ferramentas:** `statusline.py`, hooks e portões dentro dos 100 %.
-  - *Prova:* relatório da cobertura.
+- [x] **ML11a Cobertura das ferramentas** (2026-10-31, `f039a5c`):
+  - o `--source` do `testar.ps1` passou a ter `.claude\hooks` e `2-configuracao\claude` (os portões já lá estavam);
+  - `correr_como_script()` em `tests/carregar_por_caminho.py`: corre o script como `__main__` neste processo,
+    para contar na cobertura (os testes em subprocesso provam o `py -I` real, mas não contam);
+  - `tests/test_hooks_como_script.py` (10 testes: os 4 hooks pelo `main()`) e `tests/test_statusline.py`
+    (8 testes, com o `rate_limits.json` numa pasta temporária, nunca no `~/.claude` real);
+  - **Achado:** o teste das mensagens com várias linhas da guarda passava pela regra "sem caminhos", cujo texto
+    também tem "-F", e nunca chegava à recusa certa. Agora leva caminhos e procura "várias linhas".
+  - *Prova:* vermelho com "FALHOU: Cobertura Python", 95 % (statusline 0 %, hooks 54–92 %) → verde com 388
+    testes Python a 100 % (2186 linhas, 736 ramos); JS 45; Pester 72 a 100 % fora das excluídas.
+  - O `main()` da statusline continua com 43 linhas (catraca das antigas): encolhê-lo é estrutura, fica à parte.
 - [ ] **ML11b Cobertura das páginas:** lógica de `bar.html`, `splash.html` e `sistema.html` em `.mjs` testados (uma página por commit); a cola fica em `validacao-manual.md`.
   - *Prova:* cobertura JS 100 %; o teu teste real das páginas.
 - [ ] **ML12 Telas:** `prefers-reduced-motion`, `tabular-nums`, teste de contraste dos tokens, ADR do `rem`.

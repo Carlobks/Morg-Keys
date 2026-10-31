@@ -25,8 +25,10 @@ Plano do Claude). Ponto de partida: `docs/morg-laws/verificacao-01-2026-10-30.md
 | ML8 | `88ca6ef`, `2d083fd` | `.gitattributes` explícito; fins de linha normalizados; estragos 70/70 |
 | ML9 | `627f2bb` | catracas: alarmes, 35 linhas por função, PSScriptAnalyzer, estragos; ADR 0008 |
 | ML10 | `8c5a363` | `partilhado/paineis.mjs`, `tests/*.Preparacao.ps1`; `tests/test_nomes.py` |
+| ML11a | `f039a5c` | hooks do Claude e `statusline.py` nos 100 %; `correr_como_script()` |
 
-Última suíte: 370 testes Python a 100 % (1911 linhas, 626 ramos), 45 JS, 72 Pester a 100 %; ~21 s por commit.
+Última suíte: 388 testes Python a 100 % (2186 linhas, 736 ramos: pack, portões, hooks e statusLine), 45 JS,
+72 Pester a 100 % fora das funções excluídas; ~21 s por commit.
 
 ## Decisões e porquê
 
@@ -66,6 +68,9 @@ Técnicas (tomadas durante as fases, com o motivo medido):
 - **ADR 0008 para as regras do Biome desligadas:** a experiência 0001 fica com o número livre seguinte.
 - **`partilhado/paineis.mjs` e ADR do `bar_helper` dispensada:** a regra é sobre nomes *soltos*.
 - **`Sem-changelog:` só na ML13:** sem `changelog.d/` o portão recusaria todos os feat/fix.
+- **Hooks e statusLine corridos em processo (`runpy`) além do subprocesso:** o subprocesso prova o `py -I` real
+  mas não conta na cobertura; correr os dois é o padrão já usado nos portões.
+- **`main()` da statusline com 43 linhas fica:** encolhê-lo é mudança de estrutura, num commit à parte.
 
 ## Descartado
 
@@ -76,9 +81,9 @@ Técnicas (tomadas durante as fases, com o motivo medido):
 
 ## Próximos passos
 
-1. **ML11a:** `2-configuracao/claude/statusline.py`, `.claude/hooks/` e `scripts/portoes/` dentro dos 100 % (o
-   `--source` do `testar.ps1` só tem o pack e os portões).
-2. ML11b (lógica das páginas em `.mjs`, uma página por commit), ML12 (telas), ML13 (changelog).
+1. **ML11b:** a lógica dos `<script>` de `bar.html`, `splash.html` e `sistema.html` em `.mjs` testados, uma
+   página por commit (estrutura à parte do comportamento); a cola com o DOM em `docs/validacao-manual.md`.
+2. ML12 (telas), ML13 (changelog).
 3. ML14: CI (só se prova depois de um push, com o OK do dono). ML15: 2.ª verificação numa sessão nova, neutra.
 4. Depois: a F1 da auditoria (arranque robusto); a experiência 0001 (fases 4–6); jogos; A38.
 
