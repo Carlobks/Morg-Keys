@@ -8,13 +8,17 @@ dados do painel em base64 não entram. A conta falsa é a "Ana".
 
 import importlib.util
 import json
+import sys
 import tempfile
 import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from unittest import mock
 
 from sistema_falso import PASTA_PACK
 
+if str(PASTA_PACK) not in sys.path:  # o módulo importa o morg_win32, da mesma pasta
+    sys.path.insert(0, str(PASTA_PACK))
 _especificacao = importlib.util.spec_from_file_location("morg_relatorio_erros", PASTA_PACK / "morg_relatorio_erros.py")
 relatorio = importlib.util.module_from_spec(_especificacao)
 _especificacao.loader.exec_module(relatorio)
@@ -128,6 +132,127 @@ class PopupECopias(unittest.TestCase):
             self.assertEqual(len(nomes), 10)
             self.assertEqual(nomes[0], "erro-20261031-201505.md")  # os 2 mais antigos saíram
             self.assertEqual(ultimo.read_text(encoding="utf-8"), "relatório 11")
+
+
+class TratarErro(unittest.TestCase):
+    """O erro que chega ao topo do bar_helper.py: cópia sempre; popup (se ligado); com "Sim", "Guardar como"."""
+
+    def setUp(self):
+        pasta = tempfile.TemporaryDirectory()
+        self.addCleanup(pasta.cleanup)
+        self.pasta = Path(pasta.name)
+        self.arranque = self.pasta / "arranque.txt"
+        self.arranque.write_text("nome = Ana Silva\n", encoding="utf-8")
+        for nome, valor in (("PASTA_DOS_ERROS", self.pasta / "erros"), ("ARRANQUE", self.arranque),
+                            ("INSTALACAO", self.pasta / "instalacao.json"),
+                            ("REGISTO_DO_ARRANQUE", self.pasta / ".layout-restore.log")):
+            trocar = mock.patch.object(relatorio, nome, valor)
+            trocar.start()
+            self.addCleanup(trocar.stop)
+        self.perguntas, self.escolhas = [], []
+
+    def tratar(self, resposta=True, destino=None):
+        def perguntar(resumo):
+            self.perguntas.append(resumo)
+            return resposta
+
+        def escolher(nome, pasta):
+            self.escolhas.append((nome, pasta))
+            return destino
+
+        with mock.patch.dict("os.environ", {"USERNAME": "Ana"}):
+            return relatorio.tratar_erro(ValueError("Ana Silva rebentou"), ["bar_helper.py", "boot"], AGORA,
+                                         perguntar=perguntar, escolher=escolher)
+
+    def test_com_sim_guarda_onde_quem_usa_escolheu(self):
+        destino = self.pasta / "para-a-issue.md"
+        copia = self.tratar(destino=destino)
+        self.assertEqual(self.perguntas, ["boot: ValueError"])
+        self.assertEqual(self.escolhas, [(copia.name, Path.home() / "Documents")])
+        self.assertEqual(destino.read_text(encoding="utf-8"), copia.read_text(encoding="utf-8"))
+        self.assertIn("<utilizador> rebentou", copia.read_text(encoding="utf-8"))
+
+    def test_com_nao_ou_cancelar_so_fica_a_copia(self):
+        self.tratar(resposta=False)
+        self.assertEqual(self.escolhas, [])
+        copia = self.tratar(destino=None)  # "Guardar como" cancelado
+        self.assertTrue(copia.exists())
+
+    def test_popup_desligado_nao_pergunta_mas_guarda(self):
+        self.arranque.write_text("erros = esconder\n", encoding="utf-8")
+        copia = self.tratar()
+        self.assertEqual(self.perguntas, [])
+        self.assertTrue(copia.exists())
+
+    def test_nomes_da_pessoa_vem_da_conta_e_do_arranque(self):
+        with mock.patch.dict("os.environ", {"USERNAME": "ana"}):
+            self.assertEqual(relatorio.nomes_da_pessoa(), ["ana", "Ana Silva"])
+        self.arranque.unlink()
+        with mock.patch.dict("os.environ", {}, clear=True):
+            self.assertEqual(relatorio.nomes_da_pessoa(), [])
+
+
+class ColaComOWindows(unittest.TestCase):
+    """O popup (MessageBoxW) e o "Guardar como" (GetSaveFileNameW), com o Windows simulado."""
+
+    def test_popup_sim_e_nao(self):
+        for resposta, esperado in ((6, True), (7, False)):  # IDYES, IDNO
+            janela = mock.Mock(**{"MessageBoxW.return_value": resposta})
+            with self.subTest(resposta=resposta), mock.patch.object(relatorio, "user32", janela):
+                self.assertEqual(relatorio.perguntar_se_guarda("boot: ValueError"), esperado)
+                _, texto, titulo, estilo = janela.MessageBoxW.call_args.args
+                self.assertIn("boot: ValueError", texto)
+                self.assertEqual(titulo, "Morg Keys: erro")
+                self.assertEqual(estilo, 0x4 | 0x10 | 0x40000)  # Sim/Não, ícone de erro, por cima de tudo
+
+    def test_guardar_como_escolhido_ou_cancelado(self):
+        for devolve, esperado in ((1, Path("erro-1.md")), (0, None)):
+            dialogo = mock.Mock(**{"GetSaveFileNameW.return_value": devolve})
+            with self.subTest(devolve=devolve), mock.patch.object(relatorio, "comdlg32", dialogo):
+                self.assertEqual(relatorio.pedir_destino("erro-1.md", Path("C:/Docs")), esperado)
+                estrutura = dialogo.GetSaveFileNameW.call_args.args[0]._obj
+                self.assertEqual(estrutura.lpstrInitialDir, str(Path("C:/Docs")))
+                self.assertEqual(estrutura.lpstrDefExt, "md")
+                self.assertTrue(estrutura.Flags & 0x2)  # OFN_OVERWRITEPROMPT: pergunta antes de substituir
+
+
+class Instalar(unittest.TestCase):
+    """bar_helper.py instala o gancho: os erros que chegam ao topo viram relatório; os rebentamentos em C vão
+    para um ficheiro (faulthandler)."""
+
+    def instalar(self, tratar):
+        ganchos = {}
+        pasta = tempfile.TemporaryDirectory()  # antes de simular o os.open, que o tempfile também usa
+        self.addCleanup(pasta.cleanup)
+        with mock.patch("sys.excepthook", None), mock.patch.object(relatorio, "faulthandler") as falta, \
+                mock.patch.object(relatorio.os, "open", return_value=7), \
+                mock.patch.object(relatorio, "PASTA_DOS_ERROS", Path(pasta.name)):
+            relatorio.instalar(["bar_helper.py", "boot"], tratar)
+            ganchos["gancho"] = __import__("sys").excepthook
+            falta.enable.assert_called_once_with(file=7)
+        return ganchos["gancho"]
+
+    def test_o_erro_vira_relatorio_e_continua_a_aparecer_no_stderr(self):
+        tratados = []
+        gancho = self.instalar(lambda erro, argv: tratados.append((type(erro), argv)))
+        with mock.patch("sys.__excepthook__") as normal:
+            gancho(ValueError, ValueError("x"), None)
+            gancho(KeyboardInterrupt, KeyboardInterrupt(), None)  # Ctrl+C não é um erro
+        self.assertEqual(tratados, [(ValueError, ["bar_helper.py", "boot"])])
+        self.assertEqual(normal.call_count, 2)
+
+    def test_se_o_relatorio_falhar_o_erro_original_aparece_na_mesma(self):
+        def falha(erro, argv):
+            raise OSError("disco cheio")
+
+        gancho = self.instalar(falha)
+        with mock.patch("sys.__excepthook__") as normal:
+            gancho(ValueError, ValueError("x"), None)
+        normal.assert_called_once()
+
+    def test_erro_de_teste(self):
+        with self.assertRaises(RuntimeError):
+            relatorio.erro_de_teste()
 
 
 if __name__ == "__main__":

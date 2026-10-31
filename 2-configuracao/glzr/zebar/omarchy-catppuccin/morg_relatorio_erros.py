@@ -11,11 +11,23 @@ A limpeza (RFC 9457, RGPD) troca a pasta pessoal por ~ e os nomes da pessoa por 
 texto; o popup e o guardar são a cola com o Windows.
 """
 
+import ctypes
+import faulthandler
 import json
+import os
 import platform
 import re
+import sys
 import traceback
+from ctypes import wintypes
+from datetime import datetime
 from pathlib import Path
+
+from morg_win32 import user32
+
+comdlg32 = ctypes.WinDLL("comdlg32")
+MB_YESNO, MB_ICONERROR, MB_TOPMOST, IDYES = 0x4, 0x10, 0x40000, 6
+OFN_OVERWRITEPROMPT, OFN_NOCHANGEDIR, OFN_PATHMUSTEXIST = 0x2, 0x8, 0x800
 
 INSTALACAO = Path.home() / ".glzr" / "instalacao.json"
 REGISTO_DO_ARRANQUE = Path(__file__).resolve().parent / ".layout-restore.log"
@@ -100,17 +112,28 @@ def ultimas_linhas(ficheiro, quantas=LINHAS_DO_REGISTO):
         return ""
 
 
-def popup_ligado(arranque=ARRANQUE):
-    """O popup do erro está ligado por omissão; "erros = esconder" no arranque.txt desliga-o."""
+def valor_do_arranque(chave, arranque):
+    """O valor de "chave = valor" no arranque.txt (a primeira linha que não seja comentário); None se não houver."""
     try:
         linhas = arranque.read_text(encoding="utf-8-sig").splitlines()
     except (OSError, ValueError):
-        return True
+        return None
     for linha in linhas:
-        chave, igual, valor = linha.partition("=")
-        if igual and chave.strip().lower() == "erros":
-            return valor.strip().lower() not in ESCONDER
-    return True
+        nome, igual, valor = linha.partition("=")
+        if igual and nome.strip().lower() == chave:
+            return valor.strip()
+    return None
+
+
+def popup_ligado(arranque=ARRANQUE):
+    """O popup do erro está ligado por omissão; "erros = esconder" no arranque.txt desliga-o."""
+    valor = valor_do_arranque("erros", arranque)
+    return valor is None or valor.lower() not in ESCONDER
+
+
+def nomes_da_pessoa():
+    """Os nomes que a limpeza tira: a conta do Windows e o "nome =" da saudação do arranque.txt."""
+    return [n for n in (os.environ.get("USERNAME", ""), valor_do_arranque("nome", ARRANQUE) or "") if n]
 
 
 def guardar_copia(texto, agora, pasta=PASTA_DOS_ERROS, maximo=MAXIMO_DE_COPIAS):
@@ -132,3 +155,72 @@ def montar_relatorio(erro, argv, agora, *, versao, registo, casa, nomes):
         python=platform.python_version(), comando=" ".join(argumentos), tipo=type(erro).__name__, mensagem=erro,
         pilha="".join(traceback.format_exception(erro)).rstrip(), registo=registo or "(vazio)")
     return limpar(texto, casa, nomes)
+
+
+def tratar_erro(erro, argv, agora=None, *, perguntar=None, escolher=None):
+    """Um erro que chegou ao topo do bar_helper.py: guarda sempre a cópia e, com o popup ligado, pergunta se
+    quem usa quer guardar o relatório onde escolher. Devolve o caminho da cópia."""
+    agora = agora or datetime.now().astimezone()
+    texto = montar_relatorio(erro, argv, agora, versao=versao_instalada(INSTALACAO),
+                             registo=ultimas_linhas(REGISTO_DO_ARRANQUE), casa=str(Path.home()),
+                             nomes=nomes_da_pessoa())
+    copia = guardar_copia(texto, agora, PASTA_DOS_ERROS)
+    resumo = re.search(r"\*\*Resumo:\*\* `(.*)`", texto).group(1)
+    if popup_ligado(ARRANQUE) and (perguntar or perguntar_se_guarda)(resumo):
+        destino = (escolher or pedir_destino)(copia.name, Path.home() / "Documents")
+        if destino:
+            destino.write_text(texto, encoding="utf-8")
+    return copia
+
+
+# --- Cola com o Windows (testada com o Windows simulado; passo manual em docs/validacao-manual.md) ----------------
+class _OPENFILENAMEW(ctypes.Structure):
+    _fields_ = [("lStructSize", wintypes.DWORD), ("hwndOwner", wintypes.HWND), ("hInstance", wintypes.HINSTANCE),
+                ("lpstrFilter", wintypes.LPCWSTR), ("lpstrCustomFilter", wintypes.LPWSTR),
+                ("nMaxCustFilter", wintypes.DWORD), ("nFilterIndex", wintypes.DWORD), ("lpstrFile", wintypes.LPWSTR),
+                ("nMaxFile", wintypes.DWORD), ("lpstrFileTitle", wintypes.LPWSTR), ("nMaxFileTitle", wintypes.DWORD),
+                ("lpstrInitialDir", wintypes.LPCWSTR), ("lpstrTitle", wintypes.LPCWSTR), ("Flags", wintypes.DWORD),
+                ("nFileOffset", wintypes.WORD), ("nFileExtension", wintypes.WORD), ("lpstrDefExt", wintypes.LPCWSTR),
+                ("lCustData", wintypes.LPARAM), ("lpfnHook", ctypes.c_void_p), ("lpTemplateName", wintypes.LPCWSTR),
+                ("pvReserved", ctypes.c_void_p), ("dwReserved", wintypes.DWORD), ("FlagsEx", wintypes.DWORD)]
+
+
+def perguntar_se_guarda(resumo):
+    """Popup nativo (aparece mesmo com o Zebar em baixo): True se quem usa quer guardar o relatório."""
+    texto = (f"O Morg Keys encontrou um erro:\n\n{resumo}\n\nGuardar o relatório para o juntar a uma issue no GitHub?"
+             "\n\nFica também uma cópia em .glzr\\erros, na pasta pessoal.")
+    return user32.MessageBoxW(None, texto, "Morg Keys: erro", MB_YESNO | MB_ICONERROR | MB_TOPMOST) == IDYES
+
+
+def pedir_destino(nome_sugerido, pasta_inicial):
+    """A janela "Guardar como" do Windows: o caminho escolhido, ou None se quem usa cancelar."""
+    ficheiro = ctypes.create_unicode_buffer(nome_sugerido, 1024)
+    filtro = ctypes.create_unicode_buffer("Markdown (*.md)\0*.md\0Todos os ficheiros\0*.*\0\0", 64)  # com os \0
+    pedido = _OPENFILENAMEW(lStructSize=ctypes.sizeof(_OPENFILENAMEW), nMaxFile=1024, lpstrDefExt="md",
+                            lpstrInitialDir=str(pasta_inicial), lpstrTitle="Guardar o relatório de erro",
+                            Flags=OFN_OVERWRITEPROMPT | OFN_NOCHANGEDIR | OFN_PATHMUSTEXIST)
+    pedido.lpstrFile = ctypes.cast(ficheiro, wintypes.LPWSTR)
+    pedido.lpstrFilter = ctypes.cast(filtro, wintypes.LPCWSTR)
+    return Path(ficheiro.value) if comdlg32.GetSaveFileNameW(ctypes.byref(pedido)) else None
+
+
+def instalar(argv, tratar=tratar_erro):
+    """Chamado pelo bar_helper.py: os erros que chegam ao topo viram relatório (sys.excepthook, sem apanhar tudo
+    num except) e os rebentamentos em C, como no ctypes, ficam em rebentamentos.log (faulthandler)."""
+    PASTA_DOS_ERROS.mkdir(parents=True, exist_ok=True)
+    faulthandler.enable(file=os.open(PASTA_DOS_ERROS / "rebentamentos.log", os.O_WRONLY | os.O_APPEND | os.O_CREAT))
+
+    def gancho(tipo, erro, pilha):
+        if not issubclass(tipo, KeyboardInterrupt):
+            try:
+                tratar(erro, argv)
+            except (OSError, ValueError, AttributeError):  # o relatório nunca esconde o erro original
+                pass
+        sys.__excepthook__(tipo, erro, pilha)
+
+    sys.excepthook = gancho
+
+
+def erro_de_teste():
+    """bar_helper.py erro-de-teste: provoca um erro de propósito, para ver o popup e o relatório."""
+    raise RuntimeError("erro de teste pedido por quem usa (bar_helper.py erro-de-teste)")

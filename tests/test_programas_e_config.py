@@ -40,8 +40,13 @@ def self_raises():
 class ScriptsComoPrograma(unittest.TestCase):
 
     def test_bar_helper(self):
-        codigo, saida = correr_como_programa("bar_helper.py", ["bar_helper.py", "panel", "xyz"])
+        # Como programa, o bar_helper.py instala o relatório de erros (P3): aqui corre no processo dos testes, por
+        # isso o gancho é simulado; senão ficava no sys.excepthook dos testes e abria ~/.glzr/erros no PC real.
+        import morg_relatorio_erros  # já carregado pelo bar_helper; a reexecução importa daqui o instalar
+        with mock.patch.object(morg_relatorio_erros, "instalar") as instalar:
+            codigo, saida = correr_como_programa("bar_helper.py", ["bar_helper.py", "panel", "xyz"])
         self.assertEqual((codigo, json.loads(saida)), (0, {"ok": False, "error": "Pedido desconhecido."}))
+        instalar.assert_called_once_with(["bar_helper.py", "panel", "xyz"])
 
     def test_claude_usage(self):
         with tempfile.TemporaryDirectory() as casa:

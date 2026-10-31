@@ -8,10 +8,12 @@ todos os `import morg_…` falham e nenhum atalho funciona. Usa-se um pedido que
 import contextlib
 import io
 import json
+import os
 import subprocess
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 from typing import ClassVar
 from unittest import mock
 
@@ -22,8 +24,12 @@ class PontoDeEntrada(unittest.TestCase):
 
     def test_corre_com_py_isolado_noutra_pasta(self):
         with tempfile.TemporaryDirectory() as outra_pasta:
+            # A pasta pessoal também é temporária: como programa, o bar_helper.py instala o relatório de erros,
+            # que abre ~/.glzr/erros (P3); o teste não pode escrever no PC real.
+            casa = {**os.environ, "USERPROFILE": outra_pasta, "HOME": outra_pasta}
             resultado = subprocess.run([sys.executable, "-I", str(PASTA_PACK / "bar_helper.py"), "panel", "xyz"],
-                                       cwd=outra_pasta, capture_output=True, text=True, timeout=60, check=False)
+                                       cwd=outra_pasta, capture_output=True, text=True, timeout=60, check=False, env=casa)
+            self.assertTrue((Path(outra_pasta) / ".glzr" / "erros" / "rebentamentos.log").exists())
         self.assertEqual(resultado.returncode, 0, resultado.stderr)
         self.assertEqual(json.loads(resultado.stdout), {"ok": False, "error": "Pedido desconhecido."})
 
@@ -38,7 +44,7 @@ class ListaDeComandos(unittest.TestCase):
         ("boot",): "boot", ("splash-ready",): "splash_ready", ("apps-apply",): "apps_apply",
         ("apps-edit",): "apps_edit", ("panel",): "panel_show", ("panel-hide",): "panel_hide",
         ("layer-show",): "layer_show", ("layer-hide",): "layer_hide", ("on-exit",): "on_exit",
-        ("after-exit",): "after_exit", ("lock",): "lock",
+        ("after-exit",): "after_exit", ("lock",): "lock", ("erro-de-teste",): "erro_de_teste",
     }
     # Comandos que passam argumentos ou imprimem: (argv, função, argumentos esperados, imprime o resultado).
     COM_ARGUMENTOS: ClassVar[list] = [

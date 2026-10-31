@@ -31,6 +31,7 @@
   after-exit      -> (interno) espera o GlazeWM terminar, desliga o "não
                      suspender" e volta a mostrar janelas escondidas
   lock            -> bloqueia o PC
+  erro-de-teste   -> provoca um erro de propósito, para ver o popup e o relatório de erros
   power reboot    -> pede confirmação e reinicia
   power shutdown  -> pede confirmação e desliga
 
@@ -64,6 +65,7 @@ from morg_janelas_zebar import (
     layer_show,
 )
 from morg_painel import panel_cli, panel_hide, panel_show
+from morg_relatorio_erros import erro_de_teste, instalar
 
 # Comandos sem argumentos variáveis: palavras do comando -> função.
 COMANDOS = {
@@ -90,6 +92,7 @@ COMANDOS = {
     ("on-exit",): on_exit,
     ("after-exit",): after_exit,
     ("lock",): lock,
+    ("erro-de-teste",): erro_de_teste,
 }
 
 
@@ -126,4 +129,5 @@ def _animacao(cmd):
 
 
 if __name__ == "__main__":
+    instalar(sys.argv)  # um erro que chegue ao topo vira relatório (popup desligável no arranque.txt)
     sys.exit(main(sys.argv))
