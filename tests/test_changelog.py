@@ -43,9 +43,40 @@ class Fragmento(unittest.TestCase):
                 changelog.ler_fragmento(texto)
             self.assertIn(motivo, str(erro.exception))
 
+    def test_linha_incompativel_vira_o_primeiro_item(self):
+        texto = "Categoria: Alterado\nIncompatível: o arranque.txt muda de formato\n\n- Formato novo.\n"
+        self.assertEqual(changelog.ler_fragmento(texto),
+                         ("Alterado", ["- **Incompatível:** o arranque.txt muda de formato", "- Formato novo."]))
+        with self.assertRaises(ValueError):  # sem o motivo não conta, e falta a linha em branco
+            changelog.ler_fragmento("Categoria: Alterado\nIncompatível: \n\n- x\n")
+
     def test_as_categorias_seguem_a_ordem_do_keep_a_changelog(self):
         self.assertEqual(changelog.CATEGORIAS,
                          ("Adicionado", "Alterado", "Obsoleto", "Removido", "Corrigido", "Segurança"))
+
+
+class ProximaVersao(unittest.TestCase):
+    """SemVer pelas categorias (ADR 0011): Removido ou Incompatível sobe o MAIOR (no 0.x, o MENOR); Adicionado,
+    Alterado ou Obsoleto, o MENOR; Corrigido ou Segurança, a CORREÇÃO."""
+
+    def test_cada_categoria_sobe_a_parte_certa(self):
+        casos = [
+            ("1.4.2", ["Corrigido"], False, "1.4.3"),
+            ("1.4.2", ["Segurança", "Corrigido"], False, "1.4.3"),
+            ("1.4.2", ["Adicionado", "Corrigido"], False, "1.5.0"),
+            ("1.4.2", ["Alterado"], False, "1.5.0"),
+            ("1.4.2", ["Obsoleto"], False, "1.5.0"),
+            ("1.4.2", ["Removido", "Corrigido"], False, "2.0.0"),
+            ("1.4.2", ["Alterado"], True, "2.0.0"),
+            ("0.3.1", ["Removido"], False, "0.4.0"),  # no 0.x o incompatível sobe só o MENOR
+            ("0.3.1", ["Alterado"], True, "0.4.0"),
+            ("0.3.1", ["Corrigido"], False, "0.3.2"),
+            ("0.0.0", ["Adicionado", "Removido"], False, "0.1.0"),  # o 1.º lançamento
+            ("9.9.9", ["Corrigido"], False, "9.9.10"),  # números, não texto
+        ]
+        for atual, categorias, incompativel, esperada in casos:
+            with self.subTest(atual=atual, categorias=categorias, incompativel=incompativel):
+                self.assertEqual(changelog.proxima_versao(atual, categorias, incompativel), esperada)
 
 
 class Pasta(unittest.TestCase):
@@ -113,11 +144,46 @@ class Pasta(unittest.TestCase):
         self.assertIn("2026-10-31-a.md", texto)
         self.assertEqual((self.raiz / "CHANGELOG.md").read_bytes().decode(), INICIO)
 
+    def test_sem_numero_calcula_a_versao_e_escreve_o_version(self):
+        (self.raiz / "CHANGELOG.md").write_bytes(INICIO.encode())
+        (self.raiz / "VERSION").write_bytes(b"0.3.1\n")
+        self.escrever("2026-10-31-a.md", "Categoria: Corrigido\n\n- Correção.\n")
+        self.escrever("2026-10-31-b.md", "Categoria: Alterado\nIncompatível: o atalho X muda\n\n- Muda.\n")
+        codigo, texto = changelog.juntar(self.raiz, None, date(2026, 10, 31), rascunho=True)
+        self.assertEqual((codigo, texto.splitlines()[0]), (0, "## [0.4.0] - 2026-10-31"))
+        self.assertEqual((self.raiz / "VERSION").read_bytes(), b"0.3.1\n")  # o rascunho não grava
+        self.assertEqual(changelog.juntar(self.raiz, None, date(2026, 10, 31))[0], 0)
+        self.assertEqual((self.raiz / "VERSION").read_bytes(), b"0.4.0\n")
+        self.assertIn("### Alterado\n\n- **Incompatível:** o atalho X muda\n- Muda.\n",
+                      (self.raiz / "CHANGELOG.md").read_bytes().decode())
+
+    def test_sem_version_e_o_primeiro_lancamento(self):
+        (self.raiz / "CHANGELOG.md").write_bytes(INICIO.encode())
+        self.escrever("2026-10-31-a.md", "Categoria: Adicionado\n\n- Novo.\n")
+        self.assertTrue(changelog.juntar(self.raiz, None, date(2026, 10, 31))[1].startswith("## [0.1.0]"))
+        self.assertEqual((self.raiz / "VERSION").read_bytes(), b"0.1.0\n")
+
+    def test_numero_a_mao_tem_de_subir_e_version_mal_escrito_para(self):
+        (self.raiz / "CHANGELOG.md").write_bytes(INICIO.encode())
+        (self.raiz / "VERSION").write_bytes(b"0.4.0\n")
+        self.escrever("2026-10-31-a.md", "Categoria: Corrigido\n\n- Correção.\n")
+        for versao in ("0.4.0", "0.3.9", "1.0", "01.0.0", "v1.0.0"):
+            with self.subTest(versao=versao):
+                codigo, texto = changelog.juntar(self.raiz, versao, date(2026, 10, 31))
+                self.assertEqual(codigo, 1)
+                self.assertIn("maior do que a atual (0.4.0)", texto)
+        self.assertEqual(changelog.juntar(self.raiz, "1.0.0", date(2026, 10, 31), rascunho=True)[0], 0)
+        (self.raiz / "VERSION").write_bytes(b"quatro\n")
+        self.assertEqual(changelog.juntar(self.raiz, None, date(2026, 10, 31)),
+                         (1, "VERSION mal escrito: 'quatro' (tem de ser MAIOR.MENOR.CORREÇÃO)"))
+        self.assertEqual((self.raiz / "CHANGELOG.md").read_bytes().decode(), INICIO)
+
     def test_main_mostra_o_uso_e_escreve_nos_canais_certos(self):
         (self.raiz / "CHANGELOG.md").write_bytes(INICIO.encode())
         self.escrever("2026-10-31-a.md", "Categoria: Removido\n\n- Saiu.\n")
-        for argv, esperado in ((["j.py"], 2), (["j.py", "0.1.0", "--outra"], 2),
-                               (["j.py", "0.1.0", "--rascunho"], 0), (["j.py", "0.1.0"], 0), (["j.py", "0.2.0"], 1)):
+        for argv, esperado in ((["j.py", "0.1.0", "--outra"], 2), (["j.py", "--rascunho", "0.1.0"], 2),
+                               (["j.py", "0.1.0", "0.2.0"], 2), (["j.py", "--rascunho"], 0),
+                               (["j.py", "0.1.0", "--rascunho"], 0), (["j.py"], 0), (["j.py", "0.2.0"], 1)):
             with self.subTest(argv=argv):
                 codigo, _, erro = self.correr_main(argv)
                 self.assertEqual(codigo, esperado)
@@ -152,11 +218,16 @@ class FragmentosDoRepositorio(unittest.TestCase):
         self.assertTrue(texto.startswith("# Changelog\n"))
         self.assertIn("changelog.d/", texto)
 
-    def test_o_rascunho_corre_como_script(self):
-        with mock.patch("sys.argv", ["juntar_changelog.py", "0.0.0", "--rascunho"]):
+    def test_corre_como_script_sem_mexer_no_repositorio(self):
+        # Aqui o script corre sobre o repositório verdadeiro: só com um argumento que não grava nada. Com o código
+        # antigo, o "--rascunho" sozinho era lido como o número da versão e juntou os fragmentos a sério (A53).
+        antes = sorted(p.name for p in (RAIZ / "changelog.d").iterdir())
+        with mock.patch("sys.argv", ["juntar_changelog.py", "--ajuda"]):
             codigo, saida, erro = correr_como_script(PASTA_CHANGELOG / "juntar_changelog.py", b"")
-        self.assertEqual((codigo, erro), (0, ""))
-        self.assertIn("## [0.0.0]", saida)
+        self.assertEqual((codigo, saida), (2, ""))
+        self.assertIn("juntar_changelog.py [<versão>] [--rascunho]", erro)
+        self.assertEqual(sorted(p.name for p in (RAIZ / "changelog.d").iterdir()), antes)
+        self.assertEqual(changelog.juntar(RAIZ, "--ajuda", date(2026, 10, 31))[0], 1)  # nem como número grava
 
 
 if __name__ == "__main__":
