@@ -42,7 +42,7 @@ try {
 
     # 3. PowerShell: Pester 6, se houver testes, com cobertura do scripts\instalar.ps1 e do scripts\desinstalar.ps1.
     #    Abaixo de 100 % nas funções não excluídas falha. As excluídas (cola com o Windows) e o motivo de cada
-    #    uma estão em $FuncoesExcluidas, no tests\instalar.Comum.ps1 e no tests\desinstalar.Comum.ps1.
+    #    uma estão em $FuncoesExcluidas, no tests\instalar.Preparacao.ps1 e no tests\desinstalar.Preparacao.ps1.
     $TestesPs = @(Get-ChildItem -Path (Join-Path $Raiz 'tests') -Recurse -Filter '*.Tests.ps1' -ErrorAction SilentlyContinue)
     if ($TestesPs.Count -gt 0) {
         Write-Titulo 'PowerShell (Pester + cobertura do instalar.ps1 e do desinstalar.ps1)'
@@ -60,9 +60,9 @@ try {
 
         $Cobertura = $Resultado.CodeCoverage
         foreach ($Script in $Scripts.Keys) {
-            # Funções excluídas deste script: $FuncoesExcluidas em tests\<script sem .ps1>.Comum.ps1 (lido sem o correr).
-            $Comum = Join-Path $Raiz ("tests\" + [IO.Path]::GetFileNameWithoutExtension($Script) + '.Comum.ps1')
-            $Arvore = [System.Management.Automation.Language.Parser]::ParseFile($Comum, [ref]$null, [ref]$null)
+            # Funções excluídas deste script: $FuncoesExcluidas em tests\<script sem .ps1>.Preparacao.ps1 (lido sem o correr).
+            $Preparacao = Join-Path $Raiz ("tests\" + [IO.Path]::GetFileNameWithoutExtension($Script) + '.Preparacao.ps1')
+            $Arvore = [System.Management.Automation.Language.Parser]::ParseFile($Preparacao, [ref]$null, [ref]$null)
             $Lista = $Arvore.Find({ param($n) $n -is [System.Management.Automation.Language.AssignmentStatementAst] -and
                                     $n.Left.VariablePath.UserPath -eq 'FuncoesExcluidas' }, $true)
             $Excluidas = $Lista.Right.Expression.SafeGetValue()

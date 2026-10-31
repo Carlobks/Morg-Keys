@@ -1,5 +1,5 @@
 // Guia de atalhos (Alt+K): a tabela dos atalhos e o HTML que a desenha (sem DOM; testado com node --test).
-import { appLabel, esc } from '../comum/comum.mjs';
+import { appLabel, esc } from '../partilhado/paineis.mjs';
 
 // Uma linha por atalho: [descrição, teclas, ícone opcional]. "|" separa
 // alternativas, "+" separa teclas da mesma combinação. `icon` (da secção

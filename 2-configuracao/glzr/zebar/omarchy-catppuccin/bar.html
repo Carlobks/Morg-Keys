@@ -36,7 +36,7 @@
           <div class="stat clickable" id="audio" style="--c: var(--subtext0)"
                title="Clique: definições rápidas · Roda: volume · Botão direito: silenciar"></div>
           <div class="stat clickable" id="network" style="--c: var(--subtext0)" title="Escolher rede Wi-Fi"></div>
-          <!-- Só aparece em PCs com bateria (comum/bateria.mjs). -->
+          <!-- Só aparece em PCs com bateria (partilhado/bateria.mjs). -->
           <div class="stat" id="battery" style="display: none"></div>
         </div>
       </div>
@@ -46,8 +46,8 @@
       // Cliente do Zebar guardado no pack (vendor/): funciona sem internet.
       // Gerado com esbuild a partir do pacote npm zebar@3.3.1 (= versão instalada).
       import * as zebar from './vendor/zebar-3.3.1.mjs';
-      import { bateria } from './comum/bateria.mjs';
-      import { claudeVista } from './comum/claude.mjs';
+      import { bateria } from './partilhado/bateria.mjs';
+      import { claudeVista } from './partilhado/claude.mjs';
 
       // Scripts Python locais (permitidos no zpack.json). py.exe = lançador
       // oficial do Python: o caminho não muda quando o Python é atualizado.
@@ -321,7 +321,7 @@
       });
 
       // --- Claude: % do plano (5h e semanal) e tempo até a janela de 5h repor ---
-      // O que mostrar (e a dica) decide-se em comum/claude.mjs; aqui só se põe na página.
+      // O que mostrar (e a dica) decide-se em partilhado/claude.mjs; aqui só se põe na página.
       const USAGE_URL = 'https://claude.ai/settings/usage';
 
       function renderClaude(u) {

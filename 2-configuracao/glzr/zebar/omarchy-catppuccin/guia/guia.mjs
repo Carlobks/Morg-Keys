@@ -2,7 +2,7 @@
 // A tabela dos atalhos, o HTML e o filtro estão em guia-logica.mjs (testados com node --test); este ficheiro
 // só liga os eventos da página e por isso fica fora da cobertura (verifica-se à mão com ?preview,
 // docs/validacao-manual.md, "Excluído da cobertura").
-import { comecaAProcurar, drawIcons, ePreVisualizacao, origemDaChavena } from '../comum/comum.mjs';
+import { comecaAProcurar, drawIcons, ePreVisualizacao, origemDaChavena } from '../partilhado/paineis.mjs';
 import { bateNoFiltro, columnsHtml, consultaDoFiltro, parseApps, SECTIONS } from './guia-logica.mjs';
 
 // Cola com o DOM e o Zebar (WebView2), sem página no node --test: fora da cobertura até ao fim.
@@ -72,7 +72,7 @@ if (ePreVisualizacao(location)) {
     hideWindow = () => zebar.shellExec(PYW, ['-I', HELPER, 'guide-hide']).catch(console.error);
 
     // A animação cresce a partir da chávena: a origem da transformação
-    // é a posição da chávena relativa a esta janela (origemDaChavena, em comum.mjs).
+    // é a posição da chávena relativa a esta janela (origemDaChavena, em paineis.mjs).
     const { ox, oy } = origemDaChavena(screen.width, await win.outerPosition(), await win.scaleFactor());
     document.documentElement.style.setProperty('--ox', ox);
     document.documentElement.style.setProperty('--oy', oy);

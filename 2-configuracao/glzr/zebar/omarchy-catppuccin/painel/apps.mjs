@@ -2,7 +2,7 @@
 // O que decidir e desenhar está em apps-logica.mjs (testado com node --test); este ficheiro só liga os
 // eventos da página a essas funções e por isso fica fora da cobertura (verifica-se à mão com ?preview,
 // docs/validacao-manual.md, "Excluído da cobertura").
-import { appLabel, comecaAProcurar, drawIcons as drawIconsComum, ePreVisualizacao, origemDaChavena } from '../comum/comum.mjs';
+import { appLabel, comecaAProcurar, drawIcons as drawIconsPartilhado, ePreVisualizacao, origemDaChavena } from '../partilhado/paineis.mjs';
 import { chamadaDeExemplo } from './apps-exemplo.mjs';
 import {
   b64, destinoDaTecla, enviarParaTecla, enviarParaWorkspace, escolhaDosDados, estadoDaResposta, ico, keyboardHtml,
@@ -13,7 +13,7 @@ import {
 // Cola com o DOM e o Zebar (WebView2), sem página no node --test: fora da cobertura até ao fim.
 /* node:coverage disable */
 const $ = id => document.getElementById(id);
-const drawIcons = (root = document) => drawIconsComum(root, 22);
+const drawIcons = (root = document) => drawIconsPartilhado(root, 22);
 
 // --- Estado ---
 let state = { keys: [], fixed: [], workspaces: [], undo: 0 };

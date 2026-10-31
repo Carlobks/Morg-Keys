@@ -246,8 +246,21 @@ páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
     - a linha de base do PSScriptAnalyzer: "10 avisos, linha de base 9";
     - `testar.ps1` verde (366 testes).
   - O HTML inline ainda não passa pelo Biome (ML11b).
-- [ ] **ML10 Nomes:** renomear `comum.mjs` e `*.Comum.ps1`; teste dos nomes proibidos; ADR do `bar_helper`.
-  - *Prova:* `testar.ps1`; o grep de cada nome novo dá < 5 resultados.
+- [x] **ML10 Nomes** (2026-10-31):
+  - renomeados com `git mv`:
+    - `comum/` → `partilhado/` (bateria e Claude da barra, funções dos painéis);
+    - `comum/comum.mjs` → `partilhado/paineis.mjs`;
+    - `tests/comum.test.mjs` → `tests/paineis.test.mjs`;
+    - `tests/*.Comum.ps1` → `tests/*.Preparacao.ps1`;
+  - referências atualizadas em bytes, com a contagem por ficheiro: 18 ficheiros, incluindo os `includeFiles` do
+    `zpack.json`, o `testar.ps1`, o `estragos.py` e os docs vivos. Os docs históricos (experiência, verificação 01)
+    ficam como estavam;
+  - `tests/test_nomes.py`: nenhum ficheiro ou pasta com um nome genérico solto (o nome inteiro ou uma parte entre pontos).
+  - **ADR do `bar_helper` dispensada:** a regra é sobre nomes *soltos*, e `bar_helper` diz o quê. O teste deixa-o
+    passar, de propósito.
+  - O instalador renomeia a `~\.glzr` antiga e escreve tudo de novo, por isso não fica uma pasta `comum/` velha.
+  - *Prova:* teste vermelho (5 nomes) → verde; `testar.ps1` verde (370 testes; Pester 100 %).
+  - Um erro meu: estimei 5 trocas no `testar.ps1` e eram 6. O `assert` parou antes de gravar.
 - [ ] **ML11a Cobertura das ferramentas:** `statusline.py`, hooks e portões dentro dos 100 %.
   - *Prova:* relatório da cobertura.
 - [ ] **ML11b Cobertura das páginas:** lógica de `bar.html`, `splash.html` e `sistema.html` em `.mjs` testados (uma página por commit); a cola fica em `validacao-manual.md`.

@@ -1,5 +1,5 @@
 // Painel "Apps e arranque": funções puras (sem DOM), testadas com node --test.
-import { appLabel, esc, SPECIAL } from '../comum/comum.mjs';
+import { appLabel, esc, SPECIAL } from '../partilhado/paineis.mjs';
 
 // --- Ícones (Nerd Font nf-md; confirmados na fonte JetBrainsMono NF) ---
 // [palavra no nome, ícone, cor]

@@ -1,10 +1,10 @@
-// Partilhado pelo guia e pelo painel (comum.mjs): pré-visualização, origem da animação, filtro e ícones.
+// Partilhado pelo guia e pelo painel (paineis.mjs): pré-visualização, origem da animação, filtro e ícones.
 // drawIcons corre com um DOM falso mínimo (fontes, canvas para medir e SVG), sem navegador.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import {
   comecaAProcurar, drawIcons, ePreVisualizacao, origemDaChavena,
-} from '../2-configuracao/glzr/zebar/omarchy-catppuccin/comum/comum.mjs';
+} from '../2-configuracao/glzr/zebar/omarchy-catppuccin/partilhado/paineis.mjs';
 
 test('ePreVisualizacao: file: ou ?preview; no Zebar não', () => {
   assert.equal(ePreVisualizacao({ protocol: 'file:', search: '' }), true);

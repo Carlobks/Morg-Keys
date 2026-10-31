@@ -23,7 +23,8 @@ motivo escrito de ficar só em texto. Plano: `docs/morg-laws/plano-01.md` (fases
 | ML6 | `994fac6` | `CLAUDE.md` com 30 regras; mapa das barreiras; 7 skills |
 | ML7 | `5343c18` | testes dos índices, ADR, armadilhas, pesquisa, planos e handoffs |
 | ML8 | `88ca6ef`, `2d083fd` | `.gitattributes` explícito; fins de linha normalizados; estragos 70/70 |
-| ML9 | este commit | catracas: alarmes, 35 linhas por função, PSScriptAnalyzer, estragos; ADR 0008 |
+| ML9 | `627f2bb` | catracas: alarmes, 35 linhas por função, PSScriptAnalyzer, estragos; ADR 0008 |
+| ML10 | este commit | `partilhado/paineis.mjs`, `tests/*.Preparacao.ps1`; `tests/test_nomes.py` |
 
 ## Decisões (do dono, 2026-10-30)
 
@@ -41,8 +42,8 @@ motivo escrito de ficar só em texto. Plano: `docs/morg-laws/plano-01.md` (fases
 
 ## Próximos passos
 
-1. ML10: nomes (`comum/comum.mjs`, `tests/*.Comum.ps1`), teste dos nomes proibidos, ADR do `bar_helper`.
-2. ML11 a ML13: catracas do lint, nomes, cobertura das páginas, telas, changelog.
+1. ML11a: `statusline.py`, hooks do Claude e portões dentro dos 100 % de cobertura.
+2. ML11b a ML13: catracas do lint, nomes, cobertura das páginas, telas, changelog.
 3. ML14: CI (só se prova depois de um push, com o OK do dono). ML15: 2.ª verificação numa sessão nova.
 4. Depois: a F1 da auditoria (arranque robusto).
 

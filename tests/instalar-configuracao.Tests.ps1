@@ -1,8 +1,8 @@
 ﻿# Instalador (scripts\instalar.ps1), 2.ª parte: cópia para o perfil (no TestDrive), personalizações,
 # atalho em Documentos, apps, statusLine, ambiente de trabalho, tarefa agendada e a ordem dos passos.
-# Preparação (bombas, pastas no TestDrive, funções excluídas da cobertura) em instalar.Comum.ps1.
+# Preparação (bombas, pastas no TestDrive, funções excluídas da cobertura) em instalar.Preparacao.ps1.
 
-BeforeAll { . (Join-Path $PSScriptRoot 'instalar.Comum.ps1') }
+BeforeAll { . (Join-Path $PSScriptRoot 'instalar.Preparacao.ps1') }
 
 Describe 'Fechar o ambiente antigo e guardar a cópia' {
   BeforeEach {

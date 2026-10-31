@@ -1,7 +1,7 @@
 ﻿# Instalador (scripts\instalar.ps1), 1.ª parte: registo, verificações, programas, fonte e escolhas do arranque.
-# Preparação (bombas, pastas no TestDrive, funções excluídas da cobertura) em instalar.Comum.ps1.
+# Preparação (bombas, pastas no TestDrive, funções excluídas da cobertura) em instalar.Preparacao.ps1.
 
-BeforeAll { . (Join-Path $PSScriptRoot 'instalar.Comum.ps1') }
+BeforeAll { . (Join-Path $PSScriptRoot 'instalar.Preparacao.ps1') }
 
 Describe 'Registo e paragem' {
   BeforeEach { Limpar }

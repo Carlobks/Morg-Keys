@@ -1,7 +1,7 @@
 ﻿# Desinstalador (scripts\desinstalar.ps1): tarefa, fechar o ambiente, ambiente de trabalho, statusLine e ficheiros.
-# Preparação (bombas, pastas no TestDrive, funções excluídas da cobertura) em desinstalar.Comum.ps1.
+# Preparação (bombas, pastas no TestDrive, funções excluídas da cobertura) em desinstalar.Preparacao.ps1.
 
-BeforeAll { . (Join-Path $PSScriptRoot 'desinstalar.Comum.ps1') }
+BeforeAll { . (Join-Path $PSScriptRoot 'desinstalar.Preparacao.ps1') }
 
 Describe 'Estado da instalação' {
   BeforeEach { Limpar }

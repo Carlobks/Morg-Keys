@@ -83,7 +83,7 @@ MUTANTES = [
     ('candidatos.append(Path(os.environ["APPDATA"]) / "npm" / "claude.cmd")', 'pass'),
     ('if p is None or p.suffix.lower() == ".exe":', 'if p is None:'),
     ('__doc__.encode(codificacao, "replace")', '__doc__.encode(codificacao, "strict")'),
-    # bateria na barra (comum/bateria.mjs)
+    # bateria na barra (partilhado/bateria.mjs)
     ('const passo = Math.round(pct / 10);', 'const passo = Math.floor(pct / 10);'),
     ('pct < BAIXA ? COR.baixa', 'pct < AVISO ? COR.baixa'),
     ('const cor = carregar ? COR.carregar', 'const cor = false ? COR.carregar'),
@@ -97,7 +97,7 @@ MUTANTES = [
     ('frases[(dia - 1) % len(frases)]', 'frases[dia % len(frases)]'),
     ('elif key == "nome":', 'elif key == "nomes":'),
 ]
-FICHEIROS = [*PACK.glob("*.py"), *PACK.glob("comum/*.mjs"), *PACK.glob("painel/*.mjs"), *PACK.glob("guia/*.mjs")]
+FICHEIROS = [*PACK.glob("*.py"), *PACK.glob("partilhado/*.mjs"), *PACK.glob("painel/*.mjs"), *PACK.glob("guia/*.mjs")]
 TESTES_PY = ["py", "-I", "-m", "unittest", "discover", "-s", "tests"]
 TESTES_JS = ["node", "--test", *map(str, pathlib.Path("tests").glob("*.test.mjs"))]
 

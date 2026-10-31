@@ -1,4 +1,4 @@
-﻿# Preparação comum dos testes do desinstalador (tests\desinstalar.Tests.ps1), como o instalar.Comum.ps1.
+﻿# Preparação comum dos testes do desinstalador (tests\desinstalar.Tests.ps1), como o instalar.Preparacao.ps1.
 # Nunca desinstala nada: o ficheiro é carregado com ". desinstalar.ps1", as pastas apontam para o TestDrive
 # e a cola com o Windows ($FuncoesExcluidas) e os cmdlets que mexem no sistema são bombas.
 # O scripts\testar.ps1 lê $FuncoesExcluidas daqui e exige 100 % de cobertura no resto do desinstalar.ps1.

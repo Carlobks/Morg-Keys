@@ -24,7 +24,7 @@ tenha aqui uma linha, e que cada caminho citado exista.
 | SEM SILENCIAR ALARME | teste | `tests/test_alarmes.py` (motivo, contagem, só regras ligadas), `RUF100` no `ruff.toml`; regras desligadas do Biome na ADR 0008 |
 | BUG TRAZ TESTE | git | `.githooks/commit-msg` → `scripts/portoes/mensagem_commit.py` (fix sem `tests/` exige `Sem-teste:`) |
 | PROVAR MEDINDO | git; texto | `.githooks/pre-commit` corre os testes; dizer o que não se verificou é texto |
-| NOMES PESQUISÁVEIS | por fazer (ML10) | teste dos nomes proibidos nos ficheiros |
+| NOMES PESQUISÁVEIS | teste; texto | `tests/test_nomes.py` (nenhum ficheiro ou pasta com nome genérico solto); os nomes dentro do código são juízo da revisão |
 | TEXTO VIRA BARREIRA | teste | `tests/test_regras.py` (este mapa) |
 | SEM DADOS REAIS | teste + git | `tests/test_dados_pessoais.py`; `.githooks/pre-commit` e `commit-msg` com a lista negra |
 | SEM SEGREDOS | permissão + git + teste | `.claude/settings.json` (deny), `.githooks/pre-push` (gitleaks), `tests/test_permissoes.py` |

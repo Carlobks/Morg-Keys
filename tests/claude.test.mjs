@@ -1,7 +1,7 @@
-// Quota do Claude na barra (comum/claude.mjs): valores, sem valores (só o ✻), esbatido e esconder.
+// Quota do Claude na barra (partilhado/claude.mjs): valores, sem valores (só o ✻), esbatido e esconder.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { claudeVista, fmtUntil, level, STALE_AFTER_S } from '../2-configuracao/glzr/zebar/omarchy-catppuccin/comum/claude.mjs';
+import { claudeVista, fmtUntil, level, STALE_AFTER_S } from '../2-configuracao/glzr/zebar/omarchy-catppuccin/partilhado/claude.mjs';
 
 const AGORA = 1_800_000_000;
 

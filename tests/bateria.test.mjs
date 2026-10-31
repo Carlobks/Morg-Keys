@@ -1,9 +1,9 @@
-// Bateria na barra (comum/bateria.mjs): ícone de 10 em 10 %, cores, dica e PC sem bateria.
+// Bateria na barra (partilhado/bateria.mjs): ícone de 10 em 10 %, cores, dica e PC sem bateria.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import {
   AVISO, BAIXA, bateria, COR, DESCONHECIDA, duracao,
-} from '../2-configuracao/glzr/zebar/omarchy-catppuccin/comum/bateria.mjs';
+} from '../2-configuracao/glzr/zebar/omarchy-catppuccin/partilhado/bateria.mjs';
 
 test('sem bateria (sem saída do provider ou sem percentagem): nada a mostrar', () => {
   assert.equal(bateria(undefined), null);

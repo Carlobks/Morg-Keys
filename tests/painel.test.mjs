@@ -1,7 +1,7 @@
-// Painel "Apps e arranque" (Alt+Esc, C): funções puras de comum.mjs, apps-logica.mjs e apps-exemplo.mjs.
+// Painel "Apps e arranque" (Alt+Esc, C): funções puras de paineis.mjs, apps-logica.mjs e apps-exemplo.mjs.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { appLabel, esc } from '../2-configuracao/glzr/zebar/omarchy-catppuccin/comum/comum.mjs';
+import { appLabel, esc } from '../2-configuracao/glzr/zebar/omarchy-catppuccin/partilhado/paineis.mjs';
 import { chamadaDeExemplo } from '../2-configuracao/glzr/zebar/omarchy-catppuccin/painel/apps-exemplo.mjs';
 import {
   b64, iconFor, keyboardHtml, keyHtml, keyId, keyLong, unb64,
