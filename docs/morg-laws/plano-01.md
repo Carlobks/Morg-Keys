@@ -365,7 +365,21 @@ páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
   - *Não provado:* os `estragos` no GitHub. O `workflow_dispatch` e o agendamento só correm quando o workflow
     estiver no ramo por omissão (`main`).
   - O ramo `ci/teste-ml14` continua no GitHub. Apagá-lo pede o OK do dono.
-- [ ] **ML15 2.ª verificação Morg Laws:**
+- [~] **ML15 2.ª verificação Morg Laws** (2026-10-31, sessão nova e neutra, `3e85bd9` e `17aa84f`):
+  - **44 regras aplicáveis: 29 cumpridas, 11 em parte, 1 falha e 3 por validar.** Na 1.ª eram 17, 11, 9 e 4.
+    Nada do que a 1.ª mediu piorou.
+  - Provas: `testar.ps1` verde (424 testes Python a 100 %), estragos **80/80** e gitleaks com 92 commits, sem
+    achados.
+  - A meta (0 falhas e 0 parciais fora da secção D) **não foi atingida**.
+    - A falha é o K3: falta `disableBypassPermissionsMode`.
+    - Achados médios:
+      - M1: o caminho pessoal em 4 commits já publicados (secção D7: não se reescreve);
+      - M2: `cat .env` pelo terminal;
+      - M3: `curl | sh` sem pergunta;
+      - M4: os estragos no disco partilhado.
+    - Achados baixos: B2–B10.
+  - Falta: a decisão do dono sobre os achados; depois, o pedido do push.
+  - Lista original da fase:
   - auditoria numa sessão nova, com um pedido neutro (sem as conclusões);
   - comparar as contagens com a 1.ª;
   - `docs/morg-laws/verificacao-02-*.md`;
