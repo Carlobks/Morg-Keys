@@ -112,7 +112,8 @@ Técnicas (tomadas durante as fases, com o motivo medido):
    P3 (relatório de erros) feito: `c876696`, `7b1f8e2`, `65db12c`, `d2869eb` e o fecho (plano em
    `docs/planos/0002-relatorio-de-erros.md`). Por enviar; teste real do dono (`bar_helper.py erro-de-teste`) depois
    de reinstalar com o OK. Fica por fazer: o instalador gravar a versão no `instalacao.json` e criar a etiqueta
-   "erro" no GitHub. Próximo em `docs/pendentes.md`: as frases do arranque.
+   "erro" no GitHub. Depois, a pedido do dono: `Alt+Esc, V` liga e desliga o aviso (`79ab3cf`, plano
+   `docs/planos/0003-tecla-do-aviso-de-erros.md`). Próximo em `docs/pendentes.md`: as frases do arranque.
    Nota: o teste das 35 linhas só vê ficheiros que o git conhece; um ficheiro novo só é medido depois do `git add`.
 2. Teste real da ML12 com o dono (animações desligadas no Windows, texto apagado, escala a 125 %).
 3. O CI corre em cada push: um vermelho no GitHub lê-se com `gh run view <id> --log-failed`.
