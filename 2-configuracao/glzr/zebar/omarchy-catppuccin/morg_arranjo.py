@@ -132,15 +132,19 @@ def _restore(layout, log, on_launched=None, on_placed=None, wait_s=10, poll=0.25
 def _restore_aprender_processos(r, poll):
     # 1.º Apps do painel cujo processo ainda não se sabe: abrem-se ANTES de tudo o
     # resto, uma de cada vez, e ficam com a primeira janela nova que apareça e que
-    # não seja de um processo de outra entrada (senão "aprendiam" a janela errada).
+    # não seja de um processo de outra entrada (senão "aprendiam" a janela errada)
+    # nem de um processo que já corria antes de a abrir (o Claude do arranque do
+    # Windows ia parar ao workspace de outra app: P2, 2026-10-31).
     others = {_norm(e.get("process")) for e in r.entries if e.get("process")}
     learned = False
     for entry in [e for e in r.entries if e.get("launch") and not e.get("process")]:
         before = {w["id"] for _, w in _windows_by_workspace(_workspaces() or [])}
+        ja_corriam = {_norm(p) for p in _running_images()}
         if not _shell_open(entry["launch"], r.log):
             continue
         r.launched = True
-        if _restore_esperar_janela_nova(r, entry, before, others, poll):
+        if _restore_esperar_janela_nova(r, entry, before, others | ja_corriam, poll):
+            others.add(_norm(entry["process"]))  # a cópia acima não volta: a entrada seguinte também o evita
             learned = True
         else:
             r.log(f"{_entry_label(entry)}: nenhuma janela nova em 12 s")

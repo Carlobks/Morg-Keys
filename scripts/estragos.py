@@ -31,6 +31,9 @@ MUTANTES = [
     ('if last.get("after") and last["after"] != _files_hash():', 'if False:'),
     ('json.dumps(stack[-PANEL_UNDO_MAX:])', 'json.dumps(stack)'),
     (' and _norm(w["processName"]) not in others]', ']'),
+    # P2: a app do painel não aprende a janela de um processo que já corria (o Claude do arranque do Windows)
+    ('others | ja_corriam, poll)', 'others, poll)'),
+    ('ja_corriam = {_norm(p) for p in _running_images()}', 'ja_corriam = set()'),
     ('late = time.monotonic() - start > wait * 2 / 3', 'late = True'),
     ('if p in running and p not in have_windows and not entry["launch"].get("args"):', 'if False:'),
     ('or _norm(process) in running or', 'or'),

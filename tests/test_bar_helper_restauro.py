@@ -144,6 +144,19 @@ class RestaurarEntradasDoPainel(unittest.TestCase):
             self.assertNotIn("_placed", gravado["windows"][0])
             self.assertIn("aprendi Notas = Notas; ficou no 3", s.registo)
 
+    def test_nao_aprende_a_janela_de_uma_app_que_ja_corria(self):
+        # Regressão (P2, 2026-10-31): o Claude, aberto pelo arranque do Windows, mostrou a janela durante a espera
+        # por uma app do painel; ela "aprendeu" o processo claude e o Claude foi parar ao workspace 5.
+        with SistemaFalso(workspaces_com_foco_no_1(), processos_a_correr=("claude",)) as s:
+            s.abridor.app("shell:AppsFolder\\Notas", "Notas", "Notas", atraso=2)
+            s.abridor.aparece_sozinha("claude", "Claude", atraso=1)
+            layout = {"windows": [entrada_do_painel("5", "shell:AppsFolder\\Notas", label="Notas")]}
+            self.assertEqual(s.bh._restore(layout, s.log, wait_s=3), [])
+            self.assertEqual(json.loads(s.ler("LAYOUT_FILE"))["windows"][0]["process"], "Notas")
+            claude = next(j["id"] for _, j in s.bh._windows_by_workspace(s.bh._workspaces()) if j["processName"] == "claude")
+            self.assertEqual(s.glaze.onde_esta(claude), "1")  # o Claude fica onde abriu
+            self.assertIn("aprendi Notas = Notas; ficou no 5", s.registo)
+
     def test_sem_janela_nova_em_12_s_desiste(self):
         with SistemaFalso(workspaces_com_foco_no_1()) as s:
             s.abridor.app("shell:AppsFolder\\Lenta", "Lenta", atraso=30)
