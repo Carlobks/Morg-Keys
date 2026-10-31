@@ -46,4 +46,5 @@ tenha aqui uma linha, e que cada caminho citado exista.
 | PESQUISA ANTES DE IMPLEMENTAR | texto; teste | pesquisar antes é texto; `tests/test_docs_indices.py` exige cada pesquisa no índice, com data |
 | FORMATO DOS COMMITS | git | `.githooks/commit-msg` → `scripts/portoes/mensagem_commit.py` |
 | CHANGELOG POR FRAGMENTO | git + teste | `.githooks/commit-msg` → `scripts/portoes/mensagem_commit.py`; `tests/test_changelog.py` confere cada fragmento |
+| VERSÃO SÓ NO LANÇAMENTO | git + teste | `.githooks/commit-msg` → `scripts/portoes/versao_lancada.py` (o `VERSION` só muda com a secção nova; uma versão lançada não muda sem `Changelog-corrigido:`); `tests/test_versao.py` (o `VERSION` igual à versão mais recente, as versões só descem, cada tag `v*` com secção) |
 | REPOSITÓRIO PARA O PC | texto | o script que copiava do PC para o repositório foi retirado: só há um sentido |

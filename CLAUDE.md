@@ -75,6 +75,7 @@ Cada regra abaixo tem a barreira que a obriga em `docs/regras-e-barreiras.md`; o
   porquê; mensagem num ficheiro (`-F`), com `Co-Authored-By` do modelo. · *A mensagem é tão pública como o código.*
 - **CHANGELOG POR FRAGMENTO:** um feat ou fix no que se instala leva `changelog.d/AAAA-MM-DD-assunto.md` ou
   `Sem-changelog: <motivo>`. · *Quem instala precisa de saber o que mudou; um ficheiro único colide.*
+- **VERSÃO SÓ NO LANÇAMENTO:** o `VERSION` sobe só pelo `juntar_changelog.py` (SemVer, ADR 0011). · *À mão, diverge do changelog e do relatório.*
 - **REPOSITÓRIO PARA O PC:** editar no repositório e reinstalar; nunca copiar do `~\.glzr` para o repositório.
   · *Um só sentido: o que se copia de volta leva o que os testes nunca viram.*
 

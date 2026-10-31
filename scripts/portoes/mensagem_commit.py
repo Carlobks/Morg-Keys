@@ -6,7 +6,9 @@
 - um feat ou fix que mexa no que se instala (2-configuracao/, instalador, desinstalador) leva um fragmento
   changelog.d/*.md ou a linha `Sem-changelog: <motivo>` (formato em scripts/changelog/juntar_changelog.py);
 - um commit que tira ou muda linhas de um teste que já existia (tests/) leva `Teste-mudado: <motivo>`
-  (regra NUNCA ENFRAQUECER UM TESTE; acrescentar casos não pede nada).
+  (regra NUNCA ENFRAQUECER UM TESTE; acrescentar casos não pede nada);
+- uma versão lançada do CHANGELOG.md não muda sem `Changelog-corrigido: <motivo>`, e o VERSION só muda no
+  lançamento (versao_lancada.py, ADR 0011).
 Os títulos que o próprio git escreve (Merge …, Revert "…") passam. As linhas com # são do git e não contam.
 Uso: py -I scripts/portoes/mensagem_commit.py <ficheiro da mensagem>   Sai com 1 se recusar.
 """
@@ -19,6 +21,7 @@ from pathlib import Path
 # Com `py -I` a pasta do script não entra no sys.path: sem isto o import seguinte falhava.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import lista_negra
+import versao_lancada
 
 TIPOS = ("feat", "fix", "docs", "test", "refactor", "chore", "build", "ci", "perf", "style")
 EXIGEM_CORPO = ("feat", "fix", "refactor")
@@ -26,7 +29,7 @@ MAXIMO_DO_TITULO = 72
 TITULO = re.compile(r"^(?P<tipo>[a-z]+)(?:\([a-z0-9-]+\))?: \S")
 TITULOS_DO_GIT = ("Merge ", 'Revert "')
 # Linhas finais de metadados: não contam como corpo.
-RODAPE = re.compile(r"^(?:Co-Authored-By|Signed-off-by|Sem-teste|Sem-changelog|Teste-mudado):", re.IGNORECASE)
+RODAPE = re.compile(r"^(?:Co-Authored-By|Signed-off-by|Sem-teste|Sem-changelog|Teste-mudado|Changelog-corrigido):", re.IGNORECASE)
 TESTE_MUDADO = re.compile(r"^Teste-mudado: *\S", re.MULTILINE)
 SEM_TESTE = re.compile(r"^Sem-teste: *\S", re.MULTILINE)
 SEM_CHANGELOG = re.compile(r"^Sem-changelog: *\S", re.MULTILINE)
@@ -108,7 +111,8 @@ def testes_com_linhas_tiradas(correr=None):
 
 def main(argv):
     texto = Path(argv[1]).read_bytes().decode("utf-8", errors="replace")
-    motivos = erros(texto, ficheiros_do_commit(), testes_com_linhas_tiradas())
+    ficheiros = ficheiros_do_commit()
+    motivos = erros(texto, ficheiros, testes_com_linhas_tiradas()) + versao_lancada.erros_do_commit(texto, ficheiros)
     for motivo in motivos:
         lista_negra.escrever_erro(motivo)
     if motivos:
