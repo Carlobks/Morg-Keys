@@ -97,7 +97,10 @@ Com teste vermelho primeiro:
   - o `AjustarAmbienteDeTrabalho` grava `versao` no `instalacao.json`;
   - testes Pester: com e sem `VERSION`, com e sem git (simulado), e o `instalacao.json` com `versao`. A cobertura
     do Pester inclui o ficheiro novo. O `desinstalar.ps1` não muda (ignora as chaves que não conhece).
-- [ ] **P3c.6 Lançar a 0.1.0** (só local):
+- [x] **P3c.6 Lançar a 0.1.0** (`0e7064d` e a tag anotada `v0.1.0`, só local, com o OK do dono; o instalador passa a gravar
+  `0.1.0+exp-a.0e7064d`. **Não feito:** os links de comparação no fim do `CHANGELOG.md`: cada lançamento acrescentaria
+  uma linha depois das versões lançadas, e o portão `versao_lancada.py` recusá-lo-ia; o histórico fica nas tags. O
+  teste das várias linhas passou a saltar o `VERSION`, que tem uma linha por definição) (só local):
   - `juntar_changelog.py --rascunho` para veres a secção. Depois, com o teu OK, a corrida a sério: o `VERSION` passa
     a `0.1.0`, os fragmentos de `changelog.d/` passam para o `CHANGELOG.md`, e cria-se a tag anotada `v0.1.0`;
   - links de comparação no fim do `CHANGELOG.md`;

@@ -35,7 +35,7 @@ Plano do Claude). Ponto de partida: `docs/morg-laws/verificacao-01-2026-10-30.md
 | P2 (depois do plano) | `8f190c8`, `9735b3b` | bug do painel Apps e arranque: a app não aprende a janela de um processo que já corria; o Alt+Esc G saiu (decisão do dono) |
 | P3 (depois do plano) | `c876696` … `d2869eb` | relatório de erros: popup desligável, "Guardar como", cópias em `~\.glzr\erros`, formulário de issue; A50 |
 | P3b | `79ab3cf`, `4b256d4` | `Alt+Esc, V` liga e desliga o aviso; hInstance inteiro na cortina (A52) |
-| P3c | `be5d5cd` … `ebe79ce` | "Windows 11 (build …)" no relatório; versão SemVer (ADR 0011): `juntar_changelog.py` calcula-a e escreve o `VERSION`, portão `versao_lancada.py`, `tests/test_versao.py`, o instalador grava `<versão>+<ramo>.<commit>`; regra VERSÃO SÓ NO LANÇAMENTO; A53 |
+| P3c | `be5d5cd` … `0e7064d` | "Windows 11 (build …)" no relatório; versão SemVer (ADR 0011): `juntar_changelog.py` calcula-a e escreve o `VERSION`, portão `versao_lancada.py`, `tests/test_versao.py`, o instalador grava `<versão>+<ramo>.<commit>`; regra VERSÃO SÓ NO LANÇAMENTO; A53 |
 
 Estragos: 96/96 (2026-10-31, P3c). Suíte da ML16: 445 testes Python a 100 % (2306 linhas, 782 ramos: pack, portões, hooks, statusLine e changelog), 79 JS a 100 %,
 72 Pester a 100 % fora das funções excluídas; ~21 s por commit.
@@ -124,10 +124,9 @@ Técnicas (tomadas durante as fases, com o motivo medido):
    teste real do relatório (dono, 21:18) funcionou; o `rebentamentos.log` mostrou 3 "access violation" da cortina
    por arranque: hInstance cortado (A52), corrigido em `4b256d4`.
    P3c (plano `docs/planos/0004-versao-e-sistema-no-relatorio.md`): o relatório diz "Windows 11 (build …)" e a
-   versão passa a SemVer (ADR 0011, pesquisa `docs/pesquisa/versoes.md`). **Falta, com o OK do dono, o P3c.6:**
-   lançar a 0.1.0 (`py -I scripts/changelog/juntar_changelog.py`, sem número, que junta os 18 fragmentos e escreve
-   o `VERSION`), a tag anotada `v0.1.0` e os links de comparação no fim do `CHANGELOG.md`. O push da tag pede outro
-   "sim". Até lá o instalador grava `desconhecida+<ramo>.<commit>`.
+   versão passa a SemVer (ADR 0011, pesquisa `docs/pesquisa/versoes.md`). **0.1.0 lançada** a 2026-10-31 com o
+   OK do dono (`0e7064d`, tag anotada `v0.1.0`, só local); o push da tag pede outro "sim". Os links de comparação
+   no fim do changelog ficaram de fora (o portão recusaria a linha nova depois das versões lançadas).
    Por decidir com o dono: o Claude no arranque (ws 1) não é colocado, porque já corria antes de o abrirmos
    (efeito do P2.1). Próximo em `docs/pendentes.md`: as frases do arranque.
    Nota: o teste das 35 linhas só vê ficheiros que o git conhece; um ficheiro novo só é medido depois do `git add`.
