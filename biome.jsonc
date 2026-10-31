@@ -18,7 +18,8 @@
         // ganhar a qualquer outra regra; sem `!important` deixavam de esconder / de mostrar a espera.
         "noImportantStyles": "off",
         // Regra FICHEIROS PEQUENOS do CLAUDE.md: até 35 linhas por função. Nenhuma função dos .mjs passa hoje, por
-        // isso trava logo. O JS dentro dos <script> das páginas ainda não é lido pelo Biome (sai para .mjs na ML11b).
+        // isso trava logo. O JS dentro dos <script> das páginas não é lido por esta configuração: lê-o o
+        // tests/paginas-em-linha.test.mjs (com esta regra e as dos nomes por declarar e por usar, ML11b).
         "noExcessiveLinesPerFunction": { "level": "error", "options": { "maxLines": 35 } }
       }
     }

@@ -30,9 +30,9 @@ tenha aqui uma linha, e que cada caminho citado exista.
 | SEM SEGREDOS | permissão + git + teste | `.claude/settings.json` (deny), `.githooks/pre-push` (gitleaks), `tests/test_permissoes.py` |
 | SÓ O PRÓPRIO TRABALHO | hook | `.claude/hooks/guarda_do_git.py` (`add -A`, `.`, `commit -a`, commit sem caminhos) |
 | UM SÓ COMANDO | git | `.githooks/pre-commit` corre `scripts/testar.ps1` |
-| COBERTURA 100 % | teste | `scripts/testar.ps1` (`--fail-under=100` no pack, portões, hooks e statusLine; `node --test` a 100 %, Pester a 100 %) |
+| COBERTURA 100 % | teste | `scripts/testar.ps1` (`--fail-under=100` no pack, portões, hooks e statusLine; `node --test` a 100 %, Pester a 100 %); a lógica das páginas em `.mjs` e os `<script>` em linha com catraca: `tests/paginas-em-linha.test.mjs` |
 | NUNCA ENFRAQUECER UM TESTE | teste; texto | `tests/test_estragos_minimo.py` (os estragos não encolhem); afrouxar uma asserção é juízo da revisão |
-| FICHEIROS PEQUENOS | hook + teste | `.claude/hooks/limite_de_linhas.py`, `tests/test_ficheiros_texto.py`; 35 linhas por função: `tests/test_tamanho_das_funcoes.py`, `biome.jsonc`, `scripts/testar.ps1` |
+| FICHEIROS PEQUENOS | hook + teste | `.claude/hooks/limite_de_linhas.py`, `tests/test_ficheiros_texto.py`; 35 linhas por função: `tests/test_tamanho_das_funcoes.py`, `biome.jsonc`, `tests/paginas-em-linha.test.mjs`, `scripts/testar.ps1` |
 | PYTHON ISOLADO | teste | `tests/test_ponto_de_entrada.py` corre o ajudante com `-I` noutra pasta |
 | CODIFICAÇÃO | por fazer (F4) | teste do BOM nos `.ps1` (F4 da auditoria) |
 | FINS DE LINHA | por fazer (ML8) | `.gitattributes` explícito e teste |

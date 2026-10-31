@@ -2,7 +2,9 @@
 // podem abrir fora do Zebar (armadilha A2), por isso confirma-se aqui que cada nome importado de um .mjs do
 // pack existe mesmo no módulo. Um import errado deixaria a página em branco.
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -35,3 +37,37 @@ for (const pagina of PAGINAS) {
     }
   });
 }
+
+// Catraca (ML11b): nas páginas fica só a cola com o DOM e o Zebar; a lógica vai para um .mjs testado. O
+// tamanho de cada <script> em linha só desce: ao encolher, baixa-se o número aqui.
+const LINHAS_MAXIMAS = { 'bar.html': 207, 'arranque/splash.html': 188, 'guia/sistema.html': 79 };
+
+test('os <script> em linha não crescem (a lógica nova vai para um .mjs testado)', () => {
+  for (const pagina of PAGINAS) {
+    const linhas = scriptEmLinha(pagina).split('\n').length;
+    assert.ok(linhas <= LINHAS_MAXIMAS[pagina], `${pagina}: ${linhas} linhas, máximo ${LINHAS_MAXIMAS[pagina]}`);
+    assert.equal(linhas, LINHAS_MAXIMAS[pagina], `${pagina} encolheu para ${linhas}: baixe LINHAS_MAXIMAS`);
+  }
+});
+
+// O Biome do projeto não lê o JS dentro do HTML: cada <script> vai para um .mjs numa pasta temporária e passa
+// pelas regras recomendadas, mais nada por declarar (um import esquecido), nada por usar e funções até 35 linhas.
+const BIOME = join(PACK, '..', '..', '..', '..', 'node_modules', '@biomejs', 'biome', 'bin', 'biome');
+const GLOBAIS = ['document', 'window', 'location', 'console', 'getComputedStyle', 'performance', 'fetch', 'CSS',
+  'setTimeout', 'setInterval', 'clearTimeout', 'clearInterval', 'requestAnimationFrame', 'URLSearchParams'];
+const REGRAS = {
+  correctness: { noUndeclaredVariables: 'error', noUnusedVariables: 'error', noUnusedImports: 'error' },
+  complexity: { noExcessiveLinesPerFunction: { level: 'error', options: { maxLines: 35 } } },
+};
+
+test('os <script> em linha passam no Biome', () => {
+  const pasta = mkdtempSync(join(tmpdir(), 'morg-em-linha-'));
+  try {
+    writeFileSync(join(pasta, 'biome.json'), JSON.stringify({ linter: { rules: REGRAS }, javascript: { globals: GLOBAIS } }));
+    for (const pagina of PAGINAS) writeFileSync(join(pasta, `${pagina.replace('/', '_')}.mjs`), scriptEmLinha(pagina));
+    const biome = spawnSync(process.execPath, [BIOME, 'lint', '--error-on-warnings', '.'], { cwd: pasta, encoding: 'utf8' });
+    assert.equal(biome.status, 0, biome.stdout + biome.stderr);
+  } finally {
+    rmSync(pasta, { recursive: true, force: true });
+  }
+});
