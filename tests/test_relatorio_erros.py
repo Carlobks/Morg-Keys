@@ -6,10 +6,12 @@ que quem envia preenche. A limpeza (RFC 9457, RGPD) troca a pasta pessoal por ~ 
 dados do painel em base64 não entram. A conta falsa é a "Ana".
 """
 
+import contextlib
 import importlib.util
 import json
 import sys
 import tempfile
+import types
 import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -61,6 +63,48 @@ class Versao(unittest.TestCase):
             ficheiro.write_text("não é json", encoding="utf-8")
             self.assertEqual(relatorio.versao_instalada(ficheiro), "desconhecida")
             self.assertEqual(relatorio.versao_instalada(Path(pasta) / "nao-existe.json"), "desconhecida")
+
+
+def registo_do_windows_falso(valores):
+    """O winreg com a chave CurrentVersion num dicionário (None: sem acesso); um valor em falta dá OSError."""
+    def abrir(raiz, caminho):
+        if valores is None:
+            raise OSError("sem acesso")
+        return contextlib.nullcontext(valores)
+
+    def ler(chave, nome):
+        if nome not in chave:
+            raise FileNotFoundError(nome)
+        return chave[nome], 1
+
+    return types.SimpleNamespace(HKEY_LOCAL_MACHINE="HKLM", OpenKey=abrir, QueryValueEx=ler)
+
+
+class NomeDoWindows(unittest.TestCase):
+    """O Windows 11 diz-se 10.0 (o platform.platform() do Python 3.11 escreve "Windows-10"); só o build o distingue:
+    a tabela de lançamentos do Windows 11 começa no 22000 (docs/pesquisa/relatorio-de-erros.md)."""
+
+    def test_windows_11_a_partir_do_build_22000(self):
+        self.assertEqual(relatorio.nome_do_windows(26200, 9457, "25H2"), "Windows 11 (build 26200.9457, 25H2)")
+        self.assertEqual(relatorio.nome_do_windows(22000, 194, "21H2"), "Windows 11 (build 22000.194, 21H2)")
+        self.assertEqual(relatorio.nome_do_windows(21999, 1, ""), "Windows 10 (build 21999.1)")
+        self.assertEqual(relatorio.nome_do_windows(19045, 3803, "22H2"), "Windows 10 (build 19045.3803, 22H2)")
+
+    def test_le_o_registo_ou_cai_no_platform(self):
+        valores = {"CurrentBuild": "26200", "UBR": 9457, "DisplayVersion": "25H2"}
+        self.assertEqual(relatorio.windows_instalado(registo_do_windows_falso(valores)),
+                         "Windows 11 (build 26200.9457, 25H2)")
+        self.assertEqual(relatorio.windows_instalado(registo_do_windows_falso({"CurrentBuild": "19041"})),
+                         "Windows 10 (build 19041)")  # um Windows 10 antigo, sem UBR nem DisplayVersion
+        with mock.patch.object(relatorio.platform, "platform", return_value="Windows-10-10.0.26200-SP0"):
+            self.assertEqual(relatorio.windows_instalado(registo_do_windows_falso(None)), "Windows-10-10.0.26200-SP0")
+            self.assertEqual(relatorio.windows_instalado(registo_do_windows_falso({})), "Windows-10-10.0.26200-SP0")
+
+    def test_o_relatorio_usa_o_nome_certo(self):
+        with mock.patch.object(relatorio, "windows_instalado", return_value="Windows 11 (build 26200.9457, 25H2)"):
+            texto = relatorio.montar_relatorio(ValueError("x"), ["bar_helper.py"], AGORA, versao="v", registo="",
+                                               casa=CASA, nomes=[])
+        self.assertIn("- Windows: Windows 11 (build 26200.9457, 25H2)\n", texto)
 
 
 class Registo(unittest.TestCase):

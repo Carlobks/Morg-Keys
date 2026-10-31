@@ -70,3 +70,37 @@ cola o relatório.
 - **O formato do `faulthandler` num erro dentro do ctypes no Windows** não foi provado aqui. Prova-se com um teste
   que provoca um erro falso.
 - **Se o `MessageBoxW` aparece por cima de um jogo em ecrã inteiro.** Fica para o teu teste real.
+
+## Adenda (2026-10-31): o nome do Windows no relatório
+
+**Pergunta:** o 1.º relatório real dizia "Windows-10-10.0.26200" num Windows 11. Porquê, e como se escreve o nome
+certo?
+
+**Fontes (lidas a 2026-10-31):**
+- **Microsoft, [Operating System Version](https://learn.microsoft.com/en-us/windows/win32/sysinfo/operating-system-version)**:
+  a tabela dá o Windows 11 e o Windows 10 com o mesmo número, `10.0`. A página recomenda testar a funcionalidade
+  que se quer usar, e não a versão do sistema.
+- **Microsoft, [Windows 11 release information](https://learn.microsoft.com/en-us/windows/release-health/windows11-release-information)**:
+  a tabela de lançamentos começa no build 22000 (21H2); nenhum build do Windows 11 é mais baixo.
+- **Microsoft Q&A, [How to differentiate between Windows 10 and Windows 11](https://learn.microsoft.com/en-us/answers/questions/605991/how-to-differentiate-between-windows-10-and-window.html)**
+  e **[Win32 API to detect Windows 11](https://learn.microsoft.com/en-us/answers/a/556672)**, e a
+  **[comunidade da Dell](https://www.dell.com/community/Windows-11/Windows-11-some-apps-called-Windows-10/m-p/8077452)**:
+  respostas da comunidade que usam o build 22000 como limite.
+
+**O que se mediu neste PC** (Windows 11 25H2):
+- o `platform.platform()` do Python 3.11.9 dá `Windows-10-10.0.26200-SP0`;
+- o `sys.getwindowsversion()` dá `major=10, minor=0, build=26200`;
+- o registo (`HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion`) dá `ProductName = Windows 10 Pro`,
+  `DisplayVersion = 25H2`, `CurrentBuild = 26200` e `UBR = 9457`.
+
+**O que não se verificou:** se as versões mais novas do Python (3.12 em diante) já escrevem "11". Não importa aqui,
+porque o Morg Keys usa o Python que estiver instalado.
+
+**Conclusão:**
+- o relatório escreve "Windows 11 (build 26200.9457, 25H2)" quando o `CurrentBuild` é 22000 ou mais, e
+  "Windows 10 (build …)" abaixo. Se o registo não se ler, fica o `platform.platform()`;
+- o limite 22000 é um facto da tabela oficial de lançamentos, mas usá-lo para distinguir os dois sistemas é uma
+  **prática da comunidade, não uma recomendação da Microsoft**. Na conversa de 2026-10-31 escrevi que era "a regra
+  que a própria Microsoft recomenda", e isso estava errado;
+- aqui o nome é só um rótulo para quem lê o relatório e não decide nada no código, por isso a recomendação da
+  Microsoft (testar a funcionalidade) não se aplica.

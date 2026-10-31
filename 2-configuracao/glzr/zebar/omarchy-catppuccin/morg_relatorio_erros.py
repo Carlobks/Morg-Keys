@@ -19,6 +19,7 @@ import platform
 import re
 import sys
 import traceback
+import winreg
 from ctypes import wintypes
 from datetime import datetime
 from pathlib import Path
@@ -38,6 +39,8 @@ MAXIMO_DE_COPIAS = 10
 LIMITE_DOS_REBENTAMENTOS = 64 * 1024  # acima disto o rebentamentos.log passa a .antigo.log e começa de novo
 ESCONDER = {"esconder", "ocultar", "nao", "não", "off"}  # as mesmas palavras do "claude =" (claude_usage.py)
 _BASE64 = re.compile(r"[A-Za-z0-9_-]{16,}={0,2}")
+CHAVE_DO_WINDOWS = r"SOFTWARE\Microsoft\Windows NT\CurrentVersion"
+PRIMEIRO_BUILD_DO_WINDOWS_11 = 22000  # o 21H2; a tabela de lançamentos da Microsoft não tem nenhum mais baixo
 # As secções da pesquisa, por ordem (o modelo fica fora da função para ela caber nas 35 linhas).
 MODELO = """# Relatório de erro do Morg Keys
 
@@ -103,6 +106,27 @@ def versao_instalada(ficheiro=INSTALACAO):
         return "desconhecida"
     versao = estado.get("versao") or "desconhecida"
     return f"{versao}, instalado em {estado['instalado_em']}" if estado.get("instalado_em") else versao
+
+
+def nome_do_windows(build, revisao, edicao):
+    """ "Windows 11 (build 26200.9457, 25H2)". O Windows 11 diz-se 10.0, como o 10; só o build os distingue."""
+    numero = 11 if build >= PRIMEIRO_BUILD_DO_WINDOWS_11 else 10
+    detalhe = ", ".join(p for p in (f"build {build}" + (f".{revisao}" if revisao != "" else ""), edicao) if p)
+    return f"Windows {numero} ({detalhe})"
+
+
+def windows_instalado(registo=winreg):
+    """O nome do Windows lido do registo; sem acesso ou sem o build, o platform.platform() (diz "Windows-10")."""
+    try:
+        with registo.OpenKey(registo.HKEY_LOCAL_MACHINE, CHAVE_DO_WINDOWS) as chave:
+            def valor(nome):
+                try:
+                    return registo.QueryValueEx(chave, nome)[0]
+                except OSError:  # o UBR e o DisplayVersion não existem nos Windows 10 antigos
+                    return ""
+            return nome_do_windows(int(valor("CurrentBuild")), valor("UBR"), valor("DisplayVersion"))
+    except (OSError, ValueError):
+        return platform.platform()
 
 
 def ultimas_linhas(ficheiro, quantas=LINHAS_DO_REGISTO):
@@ -175,7 +199,7 @@ def montar_relatorio(erro, argv, agora, *, versao, registo, casa, nomes):
     argumentos = argumentos_visiveis(argv[1:])
     texto = MODELO.format(
         resumo=f"{' '.join(argumentos[:2]) or '(sem subcomando)'}: {type(erro).__name__}",
-        hora=agora.isoformat(timespec="seconds"), versao=versao, windows=platform.platform(),
+        hora=agora.isoformat(timespec="seconds"), versao=versao, windows=windows_instalado(),
         python=platform.python_version(), comando=" ".join(argumentos), tipo=type(erro).__name__, mensagem=erro,
         pilha="".join(traceback.format_exception(erro)).rstrip(), registo=registo or "(vazio)")
     return limpar(texto, casa, nomes)
