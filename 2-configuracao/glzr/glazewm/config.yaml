@@ -205,6 +205,9 @@ binding_modes:
       # segurar E mostra-a ao largar (o bar_helper.py sai da camada nessa altura).
       - commands: ['shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" animacao tap']
         bindings: ['e']
+      # Aviso de erros (relatório de erros): liga ou desliga o popup; fica na camada, como o E.
+      - commands: ['shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" erros toggle']
+        bindings: ['v']
       # Reiniciar / desligar pedem confirmação (o botão por omissão é "Não").
       - commands: ['wm-disable-binding-mode --name sistema', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layer-hide', 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" power reboot']
         bindings: ['r']

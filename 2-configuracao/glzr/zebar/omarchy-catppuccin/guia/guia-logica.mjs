@@ -77,6 +77,7 @@ export const SECTIONS = [
       ['Bloquear', 'L', 0xf033e],
       ['Apps e arranque (enviar apps para teclas e workspaces)', 'C', 0xf030c],
       ['Animação do arranque: tocar troca · segurar mostra', 'E', 0xf03d8],
+      ['Aviso de erros: liga ou desliga o popup do relatório', 'V', 0xf0028],
       ['Sair do GlazeWM', 'Q', 0xf0206],
       ['Reiniciar (pede confirmação)', 'R', 0xf0709],
       ['Desligar (pede confirmação)', 'O', 0xf0425],

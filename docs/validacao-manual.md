@@ -16,7 +16,7 @@ O que os testes automáticos não cobrem e como se verifica à mão (com o passo
 6. Pôr apps no arranque pelo painel (`Alt+Esc, C`), reiniciar: as apps abrem nos seus workspaces.
 7. `Alt+Esc, Q` (sair do GlazeWM): todas as janelas ficam visíveis. Para voltar, correr a tarefa `Start-ScheduledTask "GlazeWM (arranque)"`.
 8. Com Claude Code: depois de uma resposta, a barra mostra `5h …% · sem …%`.
-9. Relatório de erros: correr `C:\Windows\pyw.exe -I "%USERPROFILE%\.glzr\zebar\omarchy-catppuccin\bar_helper.py" erro-de-teste`. Aparece o aviso "Morg Keys: erro" com o resumo; "Sim" abre o "Guardar como" em Documentos; o ficheiro guardado não tem o nome da conta nem o caminho pessoal. Fica também uma cópia em `.glzr\erros`. Com `erros = esconder` no `arranque.txt`, não há aviso, mas a cópia aparece.
+9. Relatório de erros: correr `C:\Windows\pyw.exe -I "%USERPROFILE%\.glzr\zebar\omarchy-catppuccin\bar_helper.py" erro-de-teste`. Aparece o aviso "Morg Keys: erro" com o resumo; "Sim" abre o "Guardar como" em Documentos; o ficheiro guardado não tem o nome da conta nem o caminho pessoal. Fica também uma cópia em `.glzr\erros`. Com `erros = esconder` no `arranque.txt`, não há aviso, mas a cópia aparece. `Alt+Esc`, `V`: a linha "Aviso de erros" do painel passa a "desligado" (e volta a "ligado" com outro `V`), e o `arranque.txt` muda com ela.
 
 Registos: `~\.glzr\instalacao.log`, `glazewm\errors.log`, `zebar\errors.log`, `zebar\omarchy-catppuccin\.layout-restore.log`, `.uncloak.log` e `arranque\<nome>.log` (um por `.bat`).
 

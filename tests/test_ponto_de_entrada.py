@@ -45,6 +45,7 @@ class ListaDeComandos(unittest.TestCase):
         ("apps-edit",): "apps_edit", ("panel",): "panel_show", ("panel-hide",): "panel_hide",
         ("layer-show",): "layer_show", ("layer-hide",): "layer_hide", ("on-exit",): "on_exit",
         ("after-exit",): "after_exit", ("lock",): "lock", ("erro-de-teste",): "erro_de_teste",
+        ("erros", "toggle"): "alternar_aviso",
     }
     # Comandos que passam argumentos ou imprimem: (argv, função, argumentos esperados, imprime o resultado).
     COM_ARGUMENTOS: ClassVar[list] = [

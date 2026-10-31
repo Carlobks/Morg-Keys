@@ -122,6 +122,24 @@ class PopupECopias(unittest.TestCase):
                     arranque.write_text(texto, encoding="utf-8-sig")
                     self.assertEqual(relatorio.popup_ligado(arranque), ligado)
 
+    def test_alternar_o_aviso_pelo_alt_esc_v(self):
+        # Alt+Esc, V (P3b): troca "erros = mostrar" <-> "esconder" e mantém o resto do arranque.txt.
+        with tempfile.TemporaryDirectory() as pasta:
+            arranque = Path(pasta) / "arranque.txt"
+            arranque.write_text("# erros = esconder\nnome = Ana\nerros = mostrar\nclaude = mostrar\n", encoding="utf-8-sig")
+            self.assertEqual(relatorio.alternar_aviso(arranque), "desligado")
+            self.assertEqual(arranque.read_text(encoding="utf-8-sig"),
+                             "# erros = esconder\nnome = Ana\nerros = esconder\nclaude = mostrar\n")
+            self.assertEqual(relatorio.alternar_aviso(arranque), "ligado")
+            self.assertIn("\nerros = mostrar\n", arranque.read_text(encoding="utf-8-sig"))
+            arranque.write_text("nome = Ana\n", encoding="utf-8")  # sem a linha: estava ligado, passa a desligado
+            self.assertEqual(relatorio.alternar_aviso(arranque), "desligado")
+            self.assertEqual(arranque.read_text(encoding="utf-8"), "nome = Ana\nerros = esconder\n")
+            arranque.unlink()  # sem ficheiro: cria-o
+            self.assertEqual(relatorio.alternar_aviso(arranque), "desligado")
+            with mock.patch.object(relatorio, "ARRANQUE", arranque):  # o Alt+Esc, V chama-o sem argumentos
+                self.assertEqual(relatorio.alternar_aviso(), "ligado")
+
     def test_guarda_uma_copia_e_so_os_ultimos(self):
         with tempfile.TemporaryDirectory() as pasta:
             erros = Path(pasta) / "erros"

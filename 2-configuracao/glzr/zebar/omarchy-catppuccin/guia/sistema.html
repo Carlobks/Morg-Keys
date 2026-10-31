@@ -65,8 +65,8 @@
         box-shadow: 0 2px 0 color-mix(in srgb, var(--c) 35%, transparent), inset 0 1px 0 rgba(255,255,255,.04);
       }
       footer { margin-top: auto; padding-top: 10px; font-size: 11.5px; color: var(--overlay2); text-align: center; }
-      #anim { font-weight: 700; color: var(--mauve); display: inline-block; }
-      #anim.bump { animation: bump 260ms ease-out; }
+      #anim, #erros { font-weight: 700; color: var(--mauve); display: inline-block; }
+      #anim.bump, #erros.bump { animation: bump 260ms ease-out; }
       @keyframes bump { 40% { transform: scale(1.18); } }
       footer kbd { --c: var(--subtext0); display: inline-grid; font-size: 11px; height: 20px; min-width: 0; margin: 0 2px; vertical-align: middle; }
 
@@ -92,25 +92,25 @@
         <span class="hint">carregue numa letra</span>
       </header>
       <div class="groups" id="groups"></div>
-      <footer><kbd>E</kbd> tocar troca a animação · segurar mostra-a &nbsp;·&nbsp; <kbd>Esc</kbd> fecha</footer>
+      <footer><kbd>E</kbd> tocar troca a animação · segurar mostra-a &nbsp;·&nbsp; <kbd>V</kbd> aviso de erros &nbsp;·&nbsp; <kbd>Esc</kbd> fecha</footer>
     </div>
 
     <script type="module">
       // Cola com o DOM e o Zebar (docs/validacao-manual.md). Os grupos, o seu HTML, o nome da animação e a
       // camada ativa decidem-se em sistema-logica.mjs, testado com node --test.
-      import { animacaoDoArranque, camadaAtiva, GROUPS, gruposHTML } from './sistema-logica.mjs';
+      import { camadaAtiva, GROUPS, gruposHTML, rotulosDoArranque } from './sistema-logica.mjs';
 
       document.getElementById('groups').innerHTML = gruposHTML(GROUPS);
       drawIcons();
 
-      // Animação escolhida (arranque.txt, nesta mesma pasta): lida enquanto o
-      // painel está aberto, para se ver a troca a cada toque no E.
+      // Animação e aviso de erros (arranque.txt, nesta mesma pasta): lidos enquanto o
+      // painel está aberto, para se ver a troca a cada toque no E ou no V.
       async function refreshAnim() {
         try {
           const res = await fetch(`./arranque.txt?t=${Date.now()}`, { cache: 'no-store' });
-          const label = animacaoDoArranque(await res.text());
-          const el = document.getElementById('anim');
-          if (el.textContent !== label) {
+          for (const [id, label] of rotulosDoArranque(await res.text())) {
+            const el = document.getElementById(id);
+            if (el.textContent === label) continue;
             el.textContent = label;
             el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
           }

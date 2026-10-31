@@ -41,6 +41,10 @@ MUTANTES = [
     ('return valor is None or valor.lower() not in ESCONDER', 'return True'),
     ('for antiga in sorted(pasta.glob("erro-*.md"))[:-maximo]:', 'for antiga in []:'),
     ('if not issubclass(tipo, KeyboardInterrupt):', 'if True:'),
+    # P3b: Alt+Esc, V liga e desliga o aviso
+    ('ligar = not popup_ligado(arranque)', 'ligar = popup_ligado(arranque)'),
+    ("return line && ESCONDER.has(line.split('=')[1].trim().toLowerCase()) ? 'desligado' : 'ligado';",
+     "return line ? 'desligado' : 'ligado';"),
     ('late = time.monotonic() - start > wait * 2 / 3', 'late = True'),
     ('if p in running and p not in have_windows and not entry["launch"].get("args"):', 'if False:'),
     ('or _norm(process) in running or', 'or'),

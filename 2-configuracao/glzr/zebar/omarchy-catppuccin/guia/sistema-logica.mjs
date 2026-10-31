@@ -1,5 +1,5 @@
 // Lógica do painel do sistema (guia/sistema.html, Alt+Esc) sem DOM: os grupos e o seu HTML, o nome da
-// animação lido do arranque.txt e se a camada "sistema" está ativa. Testa-se com node --test
+// animação e o estado do aviso de erros lidos do arranque.txt e se a camada "sistema" está ativa. Testa-se com node --test
 // (tests/sistema-logica.test.mjs); a cola com o DOM e o Zebar fica no sistema.html (docs/validacao-manual.md).
 import { esc } from '../partilhado/paineis.mjs';
 
@@ -24,6 +24,7 @@ export const GROUPS = [
   { title: 'Personalizar', color: 'var(--mauve)', items: [
     ['C', 0xf030c, 'Apps e arranque'],
     ['E', 0xf03d8, 'Animação: <b id="anim">…</b>', true],
+    ['V', 0xf0028, 'Aviso de erros: <b id="erros">…</b>', true],
   ] },
   { title: 'Sessão', color: 'var(--red)', wide: true, items: [
     ['Q', 0xf0206, 'Sair do GlazeWM'],
@@ -50,6 +51,16 @@ export function animacaoDoArranque(texto) {
   const key = (line?.split('=')[1] ?? 'cafe').trim().toLowerCase().replace('é', 'e');
   return NOMES[key] ?? key;
 }
+
+// Aviso de erros (arranque.txt, "erros = mostrar | esconder"): as mesmas palavras do morg_relatorio_erros.py.
+const ESCONDER = new Set(['esconder', 'ocultar', 'nao', 'não', 'off']);
+export function avisoDeErros(texto) {
+  const line = texto.split(/\r?\n/).find(l => /^\s*erros\s*=/i.test(l));
+  return line && ESCONDER.has(line.split('=')[1].trim().toLowerCase()) ? 'desligado' : 'ligado';
+}
+
+// Os rótulos lidos do arranque.txt, com o id do elemento de cada um (o painel atualiza-os juntos).
+export const rotulosDoArranque = texto => [['anim', animacaoDoArranque(texto)], ['erros', avisoDeErros(texto)]];
 
 // O painel mostra-se enquanto o GlazeWM estiver na camada "sistema".
 export const camadaAtiva = bindingModes => (bindingModes ?? []).some(m => m.name === 'sistema');

@@ -131,6 +131,29 @@ def popup_ligado(arranque=ARRANQUE):
     return valor is None or valor.lower() not in ESCONDER
 
 
+def alternar_aviso(arranque=None):
+    """Alt+Esc, V: liga ou desliga o popup do erro no arranque.txt, mantendo o resto do ficheiro (como o
+    _set_animacao). Devolve o estado novo: "ligado" ou "desligado"."""
+    arranque = arranque or ARRANQUE
+    ligar = not popup_ligado(arranque)
+    try:
+        linhas = arranque.read_text(encoding="utf-8-sig").splitlines()
+    except (OSError, ValueError):
+        linhas = []
+    nova = f"erros = {'mostrar' if ligar else 'esconder'}"
+    for i, linha in enumerate(linhas):
+        nome, igual, _ = linha.partition("=")
+        if igual and nome.strip().lower() == "erros":
+            linhas[i] = nova
+            break
+    else:
+        linhas.append(nova)
+    temporario = arranque.with_suffix(".tmp")
+    temporario.write_text("\n".join(linhas) + "\n", encoding="utf-8")
+    os.replace(temporario, arranque)
+    return "ligado" if ligar else "desligado"
+
+
 def nomes_da_pessoa():
     """Os nomes que a limpeza tira: a conta do Windows e o "nome =" da saudação do arranque.txt."""
     return [n for n in (os.environ.get("USERNAME", ""), valor_do_arranque("nome", ARRANQUE) or "") if n]

@@ -19,6 +19,7 @@ claude = mostrar
 # ERROS: quando um ajudante do Morg Keys falha, aparece um aviso com o resumo e a pergunta
 #   "Guardar o relatório?" (para juntar a uma issue no GitHub).   mostrar  ou  esconder
 #   Com esconder não há aviso, mas o relatório fica na mesma em .glzr\erros (os últimos 10).
+#   Também se liga e desliga com Alt+Esc, V.
 erros = mostrar
 #
 # PROGRAMAS .bat a correr ESCONDIDOS ao iniciar o PC (um por linha).

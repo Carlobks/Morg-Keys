@@ -10,7 +10,7 @@ import unittest
 
 from carregar_por_caminho import RAIZ
 
-MINIMO = 86
+MINIMO = 88
 
 
 def estragos():
