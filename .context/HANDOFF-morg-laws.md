@@ -29,8 +29,9 @@ Plano do Claude). Ponto de partida: `docs/morg-laws/verificacao-01-2026-10-30.md
 | ML11b | `13579f9`, `4c7b6a9`, `27c66fd`, `090c765`, `e98ea02` | lógica das 3 páginas em `*-logica.mjs`; catraca e Biome nos scripts em linha |
 | ML12 | `83dc898`, `d790cb6` | sem animações quando o Windows as desliga; tabular-nums; contraste 4,5:1; ADR 0009 |
 | ML13 | `07afb3a`, `86ec68b` | `changelog.d/`, `juntar_changelog.py`, `Sem-changelog:` no `commit-msg`; 10 fragmentos atrasados |
+| ML14 (local) | `1dcb1dc` | `.github/workflows/ci.yml` (testar, gitleaks, estragos semanais), `MORG_PY`, A47; falta a prova real com push |
 
-Última suíte: 416 testes Python a 100 % (2269 linhas, 770 ramos: pack, portões, hooks, statusLine e changelog), 79 JS a 100 %,
+Última suíte: 424 testes Python a 100 % (2269 linhas, 770 ramos: pack, portões, hooks, statusLine e changelog), 79 JS a 100 %,
 72 Pester a 100 % fora das funções excluídas; ~21 s por commit.
 
 ## Decisões e porquê
@@ -87,6 +88,9 @@ Técnicas (tomadas durante as fases, com o motivo medido):
   sem a categoria no nome (um nome errado mudava-a sem ninguém notar). Categorias do Keep a Changelog.
 - **`scripts/changelog/` numa pasta própria:** o `--source` da cobertura aceita pastas; `scripts/` levaria o
   `estragos.py`. Os scripts que escrevem na consola escrevem bytes UTF-8 (A16): o "✻" rebentava o print.
+- **CI só com SHAs e versões fixas (ML14):** uma action com menos de 2 semanas fica de fora (setup-python
+  v7.0.0 e não v7.1.0). O gitleaks no CI é o binário oficial com o sha256 no workflow, sem action de terceiros.
+- **O `testar.ps1` falha fechado sem o Python (A47):** `Get-Command $Py` antes de contar com o `$LASTEXITCODE`.
 
 ## Descartado
 
@@ -97,8 +101,8 @@ Técnicas (tomadas durante as fases, com o motivo medido):
 
 ## Próximos passos
 
-1. **ML14:** CI no `windows-latest` (`MORG_PY` no `testar.ps1`, actions fixadas por SHA); só se prova com um
-   push, com o OK do dono.
+1. **ML14, prova real:** com o OK do dono, enviar para um ramo de teste e ver as tarefas `testar` e `segredos`
+   verdes (e correr os `estragos` à mão pelo workflow_dispatch). O YAML ainda não foi lido pelo GitHub.
 2. Teste real da ML12 com o dono (animações desligadas no Windows, texto apagado, escala a 125 %).
 3. ML15: 2.ª verificação numa sessão nova, neutra; depois o pedido do push.
 4. Depois do plano: a ordem está em `docs/pendentes.md` (bug do painel Apps e arranque, relatório de erros,

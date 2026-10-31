@@ -340,9 +340,25 @@ páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
       - aceite com `Sem-changelog:`.
     - O `pre-commit` não correu no clone, porque lá não há `node_modules` para o Biome.
   - *Não feito:* estragos novos para o portão e o juntar (o mínimo de 80 mantém-se).
-- [ ] **ML14 CI:** workflows e `MORG_PY` no `testar.ps1`.
-  - *Prova local:* `testar.ps1` com `MORG_PY`.
-  - *Prova real:* só depois do teu OK para o push (pode ir para um ramo de teste).
+- [~] **ML14 CI** (2026-10-31; a parte local está feita, falta a prova real):
+  - `.github/workflows/ci.yml` com três tarefas:
+    - `testar`: o `testar.ps1` no `windows-latest`, em cada push e PR;
+    - `segredos`: o gitleaks 8.30.1 em todo o histórico, com o sha256 conferido;
+    - `estragos`: à segunda-feira, ou à mão.
+  - Segurança e versões:
+    - as actions estão fixadas por SHA, com a versão em comentário (checkout v7.0.1, setup-python v7.0.0,
+      setup-node v7.1.0);
+    - `contents: read` e `persist-credentials: false`;
+    - versões fixas, as desta máquina.
+  - O `testar.ps1` e o `estragos.py` aceitam `MORG_PY`. O mapa das barreiras e o README citam o CI.
+  - **Achado (A47):** com um `MORG_PY` errado, o `testar.ps1` dizia "OK", porque o `& $Py` falha sem mexer no
+    `$LASTEXITCODE`. Agora falha fechado. Teste vermelho (saía 0), depois verde.
+  - *Prova local:*
+    - `tests/test_ci.py` (8 testes) vermelho, depois verde;
+    - `testar.ps1` verde com `MORG_PY` no `python.exe` real (423 testes Python a 100 %, 72 Pester);
+    - `testar.ps1` verde normal (424).
+  - *Por provar:* o YAML ainda não foi lido pelo GitHub (não há um validador local). A prova real só vem com um
+    push e o teu OK (pode ser num ramo de teste).
 - [ ] **ML15 2.ª verificação Morg Laws:**
   - auditoria numa sessão nova, com um pedido neutro (sem as conclusões);
   - comparar as contagens com a 1.ª;
