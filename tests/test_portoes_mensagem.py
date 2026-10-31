@@ -124,6 +124,32 @@ class SemChangelog(unittest.TestCase):
         self.assertEqual(mensagem.erros("feat(portoes): y" + CORPO, ["scripts/portoes/a.py"]), [])
 
 
+class TesteMudado(unittest.TestCase):
+    """B10 da 2.ª verificação (ML16, Akita #38): tirar ou mudar linhas de um teste que já existia pede o porquê."""
+
+    def test_tirar_linhas_de_um_teste_sem_motivo_e_recusado(self):
+        erros = mensagem.erros("test(x): y\n", ["tests/a.py"], ["tests/a.py"])
+        self.assertEqual(len(erros), 1)
+        self.assertIn("Teste-mudado:", erros[0])
+        self.assertIn("tests/a.py", erros[0])
+
+    def test_com_motivo_passa_e_sem_motivo_nao_conta(self):
+        self.assertEqual(mensagem.erros("test(x): y\n\nTeste-mudado: o nome da função mudou\n", ["tests/a.py"],
+                                        ["tests/a.py"]), [])
+        self.assertEqual(len(mensagem.erros("test(x): y\n\nTeste-mudado:\n", ["tests/a.py"], ["tests/a.py"])), 1)
+
+    def test_acrescentar_casos_nao_pede_nada(self):
+        self.assertEqual(mensagem.erros("test(x): y\n", ["tests/a.py"], []), [])
+        self.assertEqual(mensagem.erros("test(x): y\n", ["tests/a.py"]), [])
+
+    def test_le_do_indice_os_testes_com_linhas_tiradas(self):
+        saida = "3\t1\ttests/a.py\n2\t0\ttests/b.py\n-\t-\ttests/c.png\n0\t4\ttests/d e.py\n"
+        correr = mock.Mock(return_value=SimpleNamespace(stdout=saida))
+        self.assertEqual(mensagem.testes_com_linhas_tiradas(correr), ["tests/a.py", "tests/c.png", "tests/d e.py"])
+        self.assertEqual(correr.call_args.args[0],
+                         ["git", "diff", "--cached", "--numstat", "--diff-filter=M", "--", "tests/"])
+
+
 class PontoDeEntrada(unittest.TestCase):
 
     def setUp(self):
@@ -139,7 +165,8 @@ class PontoDeEntrada(unittest.TestCase):
     def correr_main(self, texto):
         self.ficheiro.write_bytes(texto.encode("utf-8"))
         falso = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
-        with mock.patch.object(mensagem, "ficheiros_do_commit", return_value=["a.py"]), mock.patch("sys.stderr", falso):
+        with mock.patch.object(mensagem, "ficheiros_do_commit", return_value=["a.py"]), mock.patch("sys.stderr", falso), \
+                mock.patch.object(mensagem, "testes_com_linhas_tiradas", return_value=[]):
             codigo = mensagem.main(["mensagem_commit.py", str(self.ficheiro)])
         falso.flush()
         return codigo, falso.buffer.getvalue().decode("utf-8")
