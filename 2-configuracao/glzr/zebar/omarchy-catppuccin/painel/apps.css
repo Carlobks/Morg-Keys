@@ -31,6 +31,7 @@ html, body {
   background: transparent;
   font-family: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
   color: var(--text);
+  font-variant-numeric: tabular-nums;
   overflow: hidden;
   user-select: none;
 }
@@ -293,3 +294,16 @@ footer b { color: var(--subtext0); font-weight: 600; }
 #status.ok { color: var(--green); }
 #status.err { color: var(--red); }
 .hidden { display: none !important; }
+
+/* Animações desligadas no Windows (Acessibilidade > Efeitos visuais > Efeitos de animação): sai o movimento e
+   fica o estado final (as animações usam fill-mode both) e o sinal (o arco de "a carregar" fica parado).
+   0,01 ms e não "none": os eventos transitionend e animationend continuam a disparar. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+}

@@ -18,7 +18,7 @@
       html, body {
         margin: 0; height: 100%; background: transparent; overflow: hidden;
         font-family: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
-        color: var(--text); user-select: none;
+        color: var(--text); user-select: none; font-variant-numeric: tabular-nums;
       }
       .card {
         height: 100%;
@@ -69,6 +69,19 @@
       #anim.bump { animation: bump 260ms ease-out; }
       @keyframes bump { 40% { transform: scale(1.18); } }
       footer kbd { --c: var(--subtext0); display: inline-grid; font-size: 11px; height: 20px; min-width: 0; margin: 0 2px; vertical-align: middle; }
+
+      /* Animações desligadas no Windows (Acessibilidade > Efeitos visuais > Efeitos de animação): sai o movimento e
+         fica o estado final (as animações usam fill-mode both) e o sinal (o arco de "a carregar" fica parado).
+         0,01 ms e não "none": os eventos transitionend e animationend continuam a disparar. */
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-delay: 0ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          transition-delay: 0ms !important;
+        }
+      }
     </style>
   </head>
   <body>

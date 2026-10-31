@@ -90,6 +90,21 @@
       .it.fail .st::after { content: '!'; left: 0; right: 0; top: 2px; text-align: center; transform: none;
                             border: 0; font: 700 13px 'JetBrainsMono NF', monospace; color: #6c7086; }
       @keyframes spin { to { transform: rotate(360deg); } }
+
+      /* Animações desligadas no Windows (Acessibilidade > Efeitos visuais > Efeitos de animação): sai o movimento e
+         fica o estado final (as animações usam fill-mode both) e o sinal (o arco de "a carregar" fica parado).
+         0,01 ms e não "none": os eventos transitionend e animationend continuam a disparar. */
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-delay: 0ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          transition-delay: 0ms !important;
+        }
+        /* O brilho que atravessa a chávena é movido pelo JavaScript (sweep): sem movimento ficaria parado. */
+        #cshine { display: none !important; }
+      }
     </style>
   </head>
   <body>
