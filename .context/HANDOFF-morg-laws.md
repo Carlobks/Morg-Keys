@@ -26,8 +26,9 @@ Plano do Claude). Ponto de partida: `docs/morg-laws/verificacao-01-2026-10-30.md
 | ML9 | `627f2bb` | catracas: alarmes, 35 linhas por função, PSScriptAnalyzer, estragos; ADR 0008 |
 | ML10 | `8c5a363` | `partilhado/paineis.mjs`, `tests/*.Preparacao.ps1`; `tests/test_nomes.py` |
 | ML11a | `f039a5c` | hooks do Claude e `statusline.py` nos 100 %; `correr_como_script()` |
+| ML11b | `13579f9`, `4c7b6a9`, `27c66fd`, `090c765`, `e98ea02` | lógica das 3 páginas em `*-logica.mjs`; catraca e Biome nos scripts em linha |
 
-Última suíte: 388 testes Python a 100 % (2186 linhas, 736 ramos: pack, portões, hooks e statusLine), 45 JS,
+Última suíte: 388 testes Python a 100 % (2186 linhas, 736 ramos: pack, portões, hooks e statusLine), 79 JS a 100 %,
 72 Pester a 100 % fora das funções excluídas; ~21 s por commit.
 
 ## Decisões e porquê
@@ -71,6 +72,11 @@ Técnicas (tomadas durante as fases, com o motivo medido):
 - **Hooks e statusLine corridos em processo (`runpy`) além do subprocesso:** o subprocesso prova o `py -I` real
   mas não conta na cobertura; correr os dois é o padrão já usado nos portões.
 - **`main()` da statusline com 43 linhas fica:** encolhê-lo é mudança de estrutura, num commit à parte.
+- **`{{HOME}}` fica no HTML das páginas:** o instalador só troca marcadores em .html/.css/.json/.py/.ps1/.txt/.yaml;
+  num `.mjs` o caminho ficaria por trocar.
+- **Biome dos scripts em linha dentro de um teste (pasta temporária):** o `biome.jsonc` do projeto não lê o JS
+  dentro do HTML; o suporte de HTML do Biome é experimental.
+- **O `esc` da barra fica próprio:** aceita `null` (texto vazio); o do `paineis.mjs` escreveria "null".
 
 ## Descartado
 
@@ -81,9 +87,9 @@ Técnicas (tomadas durante as fases, com o motivo medido):
 
 ## Próximos passos
 
-1. **ML11b:** a lógica dos `<script>` de `bar.html`, `splash.html` e `sistema.html` em `.mjs` testados, uma
-   página por commit (estrutura à parte do comportamento); a cola com o DOM em `docs/validacao-manual.md`.
-2. ML12 (telas), ML13 (changelog).
+1. **ML12:** `prefers-reduced-motion` no splash e no painel do sistema, `tabular-nums` na hora e na bateria, teste
+   de contraste dos tokens Catppuccin e ADR do `rem`.
+2. ML13 (changelog). O teste real das 3 páginas (ML11b) fica com o dono, depois de reinstalar.
 3. ML14: CI (só se prova depois de um push, com o OK do dono). ML15: 2.ª verificação numa sessão nova, neutra.
 4. Depois: a F1 da auditoria (arranque robusto); a experiência 0001 (fases 4–6); jogos; A38.
 

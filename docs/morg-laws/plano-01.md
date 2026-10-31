@@ -272,8 +272,29 @@ páginas em `.mjs`. Ficam lá, marcados "→ plano Morg Laws".
   - *Prova:* vermelho com "FALHOU: Cobertura Python", 95 % (statusline 0 %, hooks 54–92 %) → verde com 388
     testes Python a 100 % (2186 linhas, 736 ramos); JS 45; Pester 72 a 100 % fora das excluídas.
   - O `main()` da statusline continua com 43 linhas (catraca das antigas): encolhê-lo é estrutura, fica à parte.
-- [ ] **ML11b Cobertura das páginas:** lógica de `bar.html`, `splash.html` e `sistema.html` em `.mjs` testados (uma página por commit); a cola fica em `validacao-manual.md`.
-  - *Prova:* cobertura JS 100 %; o teu teste real das páginas.
+- [x] **ML11b Cobertura das páginas** (2026-10-31):
+  - a lógica saiu dos `<script>` em linha, sem mudar o comportamento, uma página por commit:
+    - `bar.html` → `bar-logica.mjs` (`13579f9`): 306 → 209 linhas;
+    - `arranque/splash.html` → `arranque/splash-logica.mjs` (`4c7b6a9`): 218 → 190;
+    - `guia/sistema.html` → `guia/sistema-logica.mjs` (`27c66fd`): 118 → 81;
+  - no HTML fica só a cola (canvas e SVG dos ícones, providers, `shellExec`, eventos, temporizadores). Os
+    caminhos com `{{HOME}}` ficam lá, porque o instalador não troca marcadores nos `.mjs`. O `zpack.json` inclui
+    os módulos novos;
+  - testes: `bar-logica` 15, `splash-logica` 9 e `sistema-logica` 4. Um deles confirma que cada tecla do painel
+    tem ação na camada `sistema` do `config.yaml`;
+  - barreira (`090c765`), em `tests/paginas-em-linha.test.mjs`:
+    - cada nome importado pelos scripts em linha existe no módulo;
+    - catraca do tamanho de cada script em linha (207, 188 e 79 linhas);
+    - o Biome passa a ler o JS em linha, com nomes por declarar e por usar e funções até 35 linhas. Até aqui não o
+      lia;
+  - estragos (`e98ea02`): o `estragos.py` passa a ver os `.mjs` da raiz e de `arranque/`, com mais 10 estragos
+    e o mínimo a 80. Resultado: **80/80 apanhados**;
+  - `docs/validacao-manual.md`: o passo à mão de cada página.
+  - *Prova:*
+    - cobertura JS 100 % (79 testes);
+    - o teste dos imports, a catraca e o Biome vistos a falhar com estragos temporários;
+    - `testar.ps1` verde.
+  - *Por validar:* as três páginas no Zebar (Regra n.º 1). Fica para o teu teste real, depois de reinstalar.
 - [ ] **ML12 Telas:** `prefers-reduced-motion`, `tabular-nums`, teste de contraste dos tokens, ADR do `rem`.
   - *Prova:* teste; o teu teste com "Mostrar animações" desligado no Windows.
 - [ ] **ML13 Changelog:** `changelog.d/`, regra no `commit-msg`, fragmentos atrasados e `juntar_changelog.py`.
