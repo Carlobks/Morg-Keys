@@ -172,5 +172,19 @@ class Algarismos(unittest.TestCase):
                 self.assertIn("font-variant-numeric: tabular-nums", css)
 
 
+class RotulosDosIcones(unittest.TestCase):
+    """B7 da 2.ª verificação (ML16): um botão só com o ✕ tinha o nome só no `title`, que os leitores de ecrã e os
+    ecrãs de toque não garantem. Cada um leva `aria-label`; o rótulo visível decide-se no teste real do dono."""
+
+    def test_cada_botao_so_com_icone_tem_aria_label(self):
+        ficheiros = [p for p in [*PACK.rglob("*.html"), *PACK.rglob("*.mjs")] if "vendor" not in p.parts]
+        botoes = [(p.name, b) for p in ficheiros
+                  for b in re.findall(r"<button\b[^>]*>\s*✕\s*</button>", p.read_text(encoding="utf-8"))]
+        self.assertGreaterEqual(len(botoes), 4)
+        for nome, botao in botoes:
+            with self.subTest(ficheiro=nome, botao=botao[:60]):
+                self.assertRegex(botao, r'aria-label="[^"]+"')
+
+
 if __name__ == "__main__":
     unittest.main()

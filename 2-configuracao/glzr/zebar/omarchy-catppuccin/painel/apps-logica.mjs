@@ -59,10 +59,10 @@ export function keyHtml(id, cap, wide, state, sel) {
   const cls = ['key', wide && 'wide', fixed ? 'fixed' : has ? 'has' : 'free', isSel && 'sel'].filter(Boolean).join(' ');
   const what = fixed ? '<span class="ico" data-icon="983870" style="--ic:var(--overlay0)"></span><span>sistema</span>'
     : has ? `${ico(has.value)}<span>${esc(appLabel(has.value))}</span>` : '';
-  const data = has && !fixed ? ` data-kind="key" data-value="${esc(has.value)}" data-label="${esc(appLabel(has.value))}"` : '';
-  return `<div class="${cls}" data-key="${id}"${data} title="${esc(has ? `${cap}: ${appLabel(has.value)}` : fixed ? `${cap}: usado pelo sistema` : `${cap}: livre`)}">` +
+  const atributosDaTecla = has && !fixed ? ` data-kind="key" data-value="${esc(has.value)}" data-label="${esc(appLabel(has.value))}"` : '';
+  return `<div class="${cls}" data-key="${id}"${atributosDaTecla} title="${esc(has ? `${cap}: ${appLabel(has.value)}` : fixed ? `${cap}: usado pelo sistema` : `${cap}: livre`)}">` +
     `<span class="cap">${esc(cap)}</span><span class="what">${what}</span>` +
-    `${has && !fixed ? `<button class="x" data-unkey="${id}" title="Tirar o atalho">✕</button>` : ''}</div>`;
+    `${has && !fixed ? `<button class="x" data-unkey="${id}" title="Tirar o atalho" aria-label="Tirar o atalho">✕</button>` : ''}</div>`;
 }
 
 // Teclado inteiro: 3 filas de letras + Alt Enter, Alt Shift Enter e os atalhos do apps.txt que não
@@ -123,7 +123,7 @@ export function workspacesHtml(state, sel) {
         const value = w.value || w.process || w.label;
         const isSel = sel?.kind === 'ws' && sel.index === w.index;
         return `<div class="chip${isSel ? ' sel' : ''}" data-kind="ws" data-index="${w.index}" data-ws="${esc(ws)}" data-value="${esc(w.value || '')}" data-label="${esc(w.label)}" title="${esc(w.label)}">` +
-          `${ico(value)}<span>${esc(w.label)}</span><button class="x" data-wsdel="${w.index}" title="Não abrir no arranque">✕</button></div>`;
+          `${ico(value)}<span>${esc(w.label)}</span><button class="x" data-wsdel="${w.index}" title="Não abrir no arranque" aria-label="Não abrir no arranque">✕</button></div>`;
       }).join('') : '<div class="hint">vazio</div>') +
       '</div>';
   }).join('');

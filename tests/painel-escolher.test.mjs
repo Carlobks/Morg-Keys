@@ -52,7 +52,7 @@ test('workspacesHtml: 1–10 sempre, outros só com apps; contagem; chip escolhi
   assert.match(html, /<div class="box" data-ws="1"><div class="head"><kbd>1<\/kbd><span><\/span><\/div><div class="hint">vazio<\/div>/);
   assert.match(html, /<div class="chip sel" data-kind="ws" data-index="1" data-ws="2" data-value="web: https:\/\/web.whatsapp.com"/);
   assert.match(html, /<div class="chip" data-kind="ws" data-index="2" data-ws="S" data-value="" data-label="Terminal"/);
-  assert.match(html, /data-wsdel="0" title="Não abrir no arranque">✕<\/button>/);
+  assert.match(html, /data-wsdel="0" title="Não abrir no arranque" aria-label="Não abrir no arranque">✕<\/button>/);
   assert.doesNotMatch(workspacesHtml(ESTADO, { kind: 'key', index: 1 }), /chip sel/);
   // Sem app nem processo (entrada antiga): o ícone vem do nome.
   assert.match(workspacesHtml({ workspaces: [{ index: 0, workspace: '1', label: 'Spotify' }] }, null),
