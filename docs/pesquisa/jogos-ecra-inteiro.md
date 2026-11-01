@@ -72,8 +72,15 @@ Para cada jogo (um em ecrã inteiro exclusivo e um sem bordas), anotar o que aco
 3. sem pausa, com uma regra `ignore` só para o processo do jogo: funciona? (testa H1);
 4. sem pausa e sem `ignore`, com `corner_style` desligado: funciona? (testa H2).
 
+## Requisito do dono (2026-11-01)
+
+"Eu gosto de poder usar os atalhos quando o jogo está aberto; o meu único problema é ele ficar minimizado." Por
+isso **a pausa (`wm-toggle-pause`) fica de fora**: desliga os atalhos. O caminho a validar é o `ignore`, que tira o
+jogo da arrumação do GlazeWM e deixa os atalhos a funcionar (o comportamento descrito na #858). O passo 2 do
+"Como validar" deixa de ser preciso.
+
 ## Conclusão (provisória)
 
-Nada decidido antes da validação. Se a pausa resolver, a solução mínima é um **"modo jogo"**: um atalho que pausa o
-GlazeWM e esconde a barra, e que volta atrás com o mesmo atalho. Se o `ignore` resolver, pode juntar-se uma lista
-automática por classe de janela dos motores mais comuns (por validar quais), para não ter de configurar cada jogo.
+Nada decidido antes da validação. Se o `ignore` resolver, a solução tem de ser automática: uma lista de jogos (como
+o `apps.txt`) que gera as regras, ou uma regra por classe de janela dos motores mais comuns (por validar quais),
+para não ter de configurar cada jogo à mão.
