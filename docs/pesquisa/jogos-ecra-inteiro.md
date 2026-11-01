@@ -114,6 +114,23 @@ jogo da arrumação do GlazeWM e deixa os atalhos a funcionar (o comportamento d
 O atalho da 5 (`Alt+Shift+I`) **abre um painel** que mostra o que já foi adicionado e **pergunta o que se vai
 adicionar** antes de o fazer, para não adicionar sem querer.
 
+## 1.º teste real com o `ignore` (dono, 2026-11-01)
+
+- **Funcionou:** o BG3 abriu em ecrã inteiro, e os atalhos funcionaram com o jogo aberto.
+- **Falhou:** ao trocar de workspace, o jogo minimizou-se; ao voltar, não estava em ecrã inteiro nem na barra do
+  Zebar (a barra só mostra as janelas que o GlazeWM arruma). Pela barra do Windows, voltou logo em ecrã inteiro.
+- **Explicação, validada na documentação da Microsoft**
+  ([DXGI overview](https://learn.microsoft.com/en-us/windows/win32/direct3ddxgi/d3d10-graphics-programming-guide-dxgi),
+  "Debugging in full-screen mode", lida a 2026-11-01): um jogo em ecrã inteiro **exclusivo** larga esse modo
+  sempre que a janela dele fica tapada por outra. Com um só ecrã, mostrar outro workspace tapa-o, por isso o jogo
+  minimiza-se. Não é o GlazeWM; é o próprio DirectX. Com o `ignore`, o GlazeWM também não o volta a mostrar ao
+  regressar ao workspace, porque não o arruma.
+- **O que falta validar:** com o jogo em **"janela sem bordas"** e o GlazeWM a arrumá-lo em estado de ecrã inteiro
+  (regra `set-fullscreen` em vez de `ignore`), o GlazeWM esconde-o (cloak) ao sair do workspace e mostra-o ao
+  voltar, sem o DirectX largar nada. É o comportamento que o dono quer, por confirmar.
+- **Conflito:** o `Alt+Shift+I` já abre o Microsoft Edge no `apps.txt` do dono; o atalho do painel dos jogos tem de
+  ser outro.
+
 ## Conclusão (provisória)
 
 Nada decidido antes da validação. Se o `ignore` resolver, a solução tem de ser automática: uma lista de jogos (como
