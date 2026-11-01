@@ -36,3 +36,11 @@ Feitos a 2026-10-31: o plano Morg Laws (`morg-laws/plano-01.md`) e o bug do pain
 
 7. **Os ~5 s de papel de parede ao entrar (A38).** Diagnóstico com o WPR (como administrador, 1 reinício; passos em
     `pesquisa/arranque-windows.md` §2). Se a causa tiver correção limpa, fase própria.
+
+8. **App da Store já aberta quando entra no painel (caso raro, decidido pelo dono a 2026-11-01: fica para depois).**
+   Uma app da Store posta no painel entra no `layout.json` sem processo; o restauro aprende-o pela primeira janela
+   nova que aparecer. Se a app já estiver aberta (ex.: reinstalar com o Claude aberto, 2026-10-31 22:50), não
+   aparece janela nova, a correção do P2.1 ignora a que já existia, e a app só é colocada no próximo arranque em
+   que esteja fechada (ao ligar o PC, 2026-11-01 05:48: "aprendi Claude = claude; ficou no 1"). Depois de aprendido,
+   o processo fica no `layout.json` e uma reinstalação mantém-no. Correção possível: ligar a janela à app pelo
+   AppUserModelID da Store (`Claude_pzs8sxrjxfjjc!Claude`), com pesquisa antes.
