@@ -79,6 +79,41 @@ isso **a pausa (`wm-toggle-pause`) fica de fora**: desliga os atalhos. O caminho
 jogo da arrumação do GlazeWM e deixa os atalhos a funcionar (o comportamento descrito na #858). O passo 2 do
 "Como validar" deixa de ser preciso.
 
+## O que se mediu com um jogo aberto (2026-11-01, Baldur's Gate 3)
+
+`glazewm query windows` (só leitura), com o jogo aberto em ecrã inteiro e "travado em modo janela":
+- processo `bg3_dx11`, classe `SDL_app`, estado `minimized`, título `Baldur's Gate 3 (1894x979) - (DX11)`;
+- o executável fica em `…\Steam\steamapps\common\Baldurs Gate 3\bin\`, lançado pelo `LariLauncher` (mesma pasta);
+- **1894×979 é o tamanho da área do mosaico** (1896×1018), não o do ecrã (1920×1080, 1536×864 a 125 %): o GlazeWM
+  arrumou a janela ao abrir e o jogo adotou esse tamanho. Confirma a H1 quanto ao tamanho; a minimização fica
+  por explicar;
+- o **cliente da Steam** (`steamwebhelper`) também tem a classe `SDL_app`: uma regra por essa classe apanhá-lo-ia;
+- o GlazeWM 3.10.1 só reconhece uma janela nas regras por **processo, classe ou título** (`WindowMatchConfig` em
+  `packages/wm-common/src/parsed_config.rs`); as regras correm em `manage`, `focus` e `title_change`; não há
+  forma de usar a pasta do executável;
+- `glazewm sub --events window_managed` avisa de cada janela nova que o GlazeWM passa a arrumar;
+- bibliotecas neste PC: só a da Steam (`steamapps\libraryfolders.vdf`); em `steamapps\common` há também
+  ferramentas (Godot Engine, wallpaper_engine, PalServer, Steamworks Shared).
+- **Não validado:** a afirmação de que os jogos SDL se minimizam ao perder o foco. O cabeçalho atual do SDL2 diz
+  que `SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS` é falso por omissão, e não se sabe que versão do SDL o BG3 usa.
+
+## Correções possíveis (por validar)
+
+1. Uma regra `ignore` por processo (`bg3_dx11`): certa, mas jogo a jogo.
+2. Uma regra por classe dos motores comuns (`SDL_app`, `UnityWndClass`, `UnrealWindow`): parcial, e a `SDL_app`
+   apanha a Steam.
+3. Uma lista automática dos `.exe` das bibliotecas de jogos (Steam primeiro), gerada ao instalar e no
+   `Alt+Shift+R`: a regra existe antes de o jogo abrir. Pede exceções para as ferramentas.
+4. Um ajudante que reage ao `window_managed` e ignora as janelas de `.exe` nas pastas de jogos: atua depois de o
+   GlazeWM já ter arrumado a janela (o que estragou o tamanho do BG3).
+5. Um atalho para ignorar a janela em foco e guardá-la na lista de jogos.
+6. As apps normais em ecrã inteiro (F11, vídeos): o GlazeWM 3.10 deteta-as; a #833 aponta os cantos arredondados.
+   Pede um teste próprio.
+
+**Decisão do dono (2026-11-01):** provar primeiro com a correção 1, só para o BG3. Se resultar, fazer a 3 com a 5.
+O atalho da 5 (`Alt+Shift+I`) **abre um painel** que mostra o que já foi adicionado e **pergunta o que se vai
+adicionar** antes de o fazer, para não adicionar sem querer.
+
 ## Conclusão (provisória)
 
 Nada decidido antes da validação. Se o `ignore` resolver, a solução tem de ser automática: uma lista de jogos (como
