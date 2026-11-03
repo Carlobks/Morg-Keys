@@ -25,6 +25,9 @@
   panel           -> Alt+Esc, C: mostra o painel "Apps e arranque" (painel/apps.html)
   panel-hide      -> esconde esse painel
   panel state|apps|undo|do <b64> -> pedidos da página do painel (respondem em JSON)
+  limites         -> clique no ✻ da barra: mostra o modal dos limites do Claude
+  limites-hide    -> esconde esse modal
+  limites state|set <b64> -> pedidos da página do modal (respondem em JSON)
   layer-show      -> mostra o painel de letras da camada Alt+Esc
   layer-hide      -> esconde esse painel
   on-exit         -> saída do GlazeWM: lança "after-exit" fora do job e sai
@@ -65,6 +68,7 @@ from morg_janelas_zebar import (
     layer_hide,
     layer_show,
 )
+from morg_limites import limites_cli, limites_hide, limites_show
 from morg_painel import panel_cli, panel_hide, panel_show
 from morg_relatorio_erros import alternar_aviso, erro_de_teste, instalar
 
@@ -88,6 +92,8 @@ COMANDOS = {
     ("apps-edit",): apps_edit,
     ("panel",): panel_show,
     ("panel-hide",): panel_hide,
+    ("limites",): limites_show,
+    ("limites-hide",): limites_hide,
     ("layer-show",): layer_show,
     ("layer-hide",): layer_hide,
     ("on-exit",): on_exit,
@@ -106,6 +112,8 @@ def main(argv):
         _animacao(cmd)
     elif cmd[0] == "panel":
         panel_cli(cmd[1:])
+    elif cmd[0] == "limites":
+        limites_cli(cmd[1:])
     elif len(cmd) == 2 and cmd[0] == "power" and cmd[1] in ("reboot", "shutdown"):
         power(cmd[1])
     else:
