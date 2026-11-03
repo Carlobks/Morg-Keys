@@ -39,8 +39,9 @@ Feitos a 2026-10-31: o plano Morg Laws (`morg-laws/plano-01.md`) e o bug do pain
    o processo fica no `layout.json` e uma reinstalação mantém-no. Correção possível: ligar a janela à app pelo
    AppUserModelID da Store (`Claude_pzs8sxrjxfjjc!Claude`), com pesquisa antes.
 
-9. **A reinstalação esconde as janelas abertas** (bug, 2026-11-01): o instalador mata o ajudante `after-exit`
-   que as volta a mostrar depois de o GlazeWM sair (nenhuma das 11 cópias da `~\.glzr` tem o `.uncloak.log`).
+9. **A reinstalação esconde as janelas abertas** (bug, 2026-11-01): **corrigido a 2026-11-03** (`f94679c`, plano
+   `planos/0005-reinstalar-sem-esconder-janelas.md`): o instalador espera o ajudante `after-exit` em vez de o
+   fechar e, sem ele, corre o `uncloak.ps1`. Falta o teste real do dono.
 
 10. **Arrastar abas do Chrome desorienta a arrumação** (bug, 2026-11-03; pesquisa em `pesquisa/arrastar-janelas.md`):
     a issue #1080 do GlazeWM, por resolver na 3.10.1. Animações suaves: o GlazeWM não as tem.

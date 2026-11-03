@@ -140,11 +140,12 @@ Técnicas (tomadas durante as fases, com o motivo medido):
    - próximo teste: o jogo em "janela sem bordas" com `set-fullscreen` em vez de `ignore`;
    - depois: lista automática dos `.exe` da Steam e um painel com atalho que mostra o que já foi adicionado e
      pergunta antes de adicionar (decisão do dono). **O `Alt+Shift+I` está ocupado** (Edge no `apps.txt` do dono).
-   **P6, a reinstalação esconde as janelas (a seguir; plano aprovado na aba Plano):** o `FecharAmbienteAntigo` mata
-   o ajudante `after-exit` (pythonw com `.glzr`) 2 s depois do `wm-exit`, antes de ele correr o `uncloak.ps1`;
-   nenhuma das 11 cópias da `~\.glzr` tem o `.uncloak.log`. Passos: P6.1 estrutura (o `FecharAmbienteAntigo` para
-   `scripts/instalar-ambiente-antigo.ps1`, porque o `instalar.ps1` tem 499 linhas); P6.2 não matar e esperar o
-   `after-exit` (~45 s), senão correr o `uncloak.ps1`; P6.3 fecho. As apps com bandeja (Claude, Steam) só
+   **P6, a reinstalação esconde as janelas: feita a 2026-11-03** (`0288adc` estrutura, `f94679c` correção, plano
+   `docs/planos/0005-reinstalar-sem-esconder-janelas.md`, A54). O `FecharAmbienteAntigo` (agora em
+   `scripts/instalar-ambiente-antigo.ps1`) fecha os ajudantes menos o `after-exit`, espera até 45 s que ele acabe
+   e, sem ele, corre o `uncloak.ps1`; o `instalacao.log` diz o caminho. **Falta o teste real do dono** (janelas
+   nos workspaces 1 e 2, reinstalar, `.uncloak.log` na cópia antiga). Os estragos do `estragos.py` não cobrem
+   PowerShell: os 4 do `.ps1` foram feitos à mão numa cópia `git worktree` (todos apanhados). As apps com bandeja (Claude, Steam) só
    "sobreviveram" por ficarem em segundo plano; o Chrome fechou.
    **Arrastar abas do Chrome** (pesquisa `docs/pesquisa/arrastar-janelas.md`): issue #1080 do GlazeWM, por resolver
    na 3.10.1; o GlazeWM não tem animações. Falta validar com o dono (com e sem `Alt+Shift+P`).
