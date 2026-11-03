@@ -40,7 +40,7 @@ página, no caso do DOM). Cada exclusão está marcada no código com o motivo e
 | `scripts\instalar.ps1` | `PythonServe`, `CorrerAppsApply`, `CorrerPython` | Correm o `py.exe` real (versão do Python, `apps-apply`, statusLine no `settings.json`). | Com Python ≥ 3.10 o passo dos programas diz "Já está tudo instalado"; o `instalacao.log` tem a saída do `apps-apply` e os atalhos das apps funcionam (§10, passo 5); `~\.claude\settings.json` tem a `statusLine` (§10, passo 8). |
 | `scripts\instalar.ps1` | `AtivarTls12` | Muda o TLS do processo (.NET `ServicePointManager`). | Num PC sem os programas, os instaladores descarregam-se e verificam-se ("descarregado e verificado"). |
 | `scripts\instalar.ps1` | `CarregarGdi`, `RegistarFonteNoWindows`, `AvisarMudancaDeFontes` | `Add-Type` com gdi32/user32: instala a fonte na sessão real e avisa todas as janelas. | Depois de instalar, a barra mostra ícones e não quadrados (§10, passo 2); a fonte aparece em Definições > Tipos de letra. |
-| `scripts\instalar.ps1` | `GlazeSair`, `MatarArvore` | Fecham processos reais (`glazewm.exe command wm-exit`, `taskkill`). | Reinstalar com o ambiente a correr: a pasta `~\.glzr` passa a `~\.glzr.copia-…` sem erro. |
+| `scripts\instalar-ambiente-antigo.ps1` | `GlazeSair`, `MatarArvore` | Fecham processos reais (`glazewm.exe command wm-exit`, `taskkill`). | Reinstalar com o ambiente a correr: a pasta `~\.glzr` passa a `~\.glzr.copia-…` sem erro. |
 | `scripts\instalar.ps1` | `RemoverJuncao` | `cmd /c rmdir` da junction real (A10: nunca `Remove-Item`). | Reinstalar: `Documentos\Guia de Atalhos` continua a abrir a pasta `guia` nova. |
 | `scripts\instalar.ps1` | ponto de entrada (última linha, `Instalar`) | Só corre pelo `INSTALAR.cmd`; os testes carregam o ficheiro com `. instalar.ps1`. | O `INSTALAR.cmd` instala (todos os passos do registo, do "Verificações" ao "Concluído"). |
 | `scripts\instalar-versao.ps1` | `GitDoPacote` | Corre o `git` real (o ramo e o commit da pasta de onde se instala). | Depois de instalar a partir de um clone, o `~\.glzr\instalacao.json` tem `"versao": "<versão>+<ramo>.<commit>"` e o relatório do `erro-de-teste` mostra-a (passo 9); a partir de um ZIP, só a versão. |
@@ -49,5 +49,5 @@ página, no caso do DOM). Cada exclusão está marcada no código com o motivo e
 | `scripts\desinstalar.ps1` | ponto de entrada (última linha, `Desinstalar`) | Só corre pelo `DESINSTALAR.cmd`. | `~\.glzr`, `AppData\Roaming\zebar` e `AppData\Local\com.glzr.zebar` passam a `….removido-<data>`. |
 
 A lista das funções excluídas do instalador, com o motivo, está em `$FuncoesExcluidas` no `tests\instalar.Preparacao.ps1`
-(e no `tests\instalar-versao.Preparacao.ps1`):
+(e nos `tests\instalar-versao.Preparacao.ps1` e `tests\instalar-ambiente-antigo.Preparacao.ps1`):
 o `testar.ps1` lê-a de lá e os testes trocam essas funções por bombas (rebentam se um teste lá chegar sem o prever).

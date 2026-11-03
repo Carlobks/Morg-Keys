@@ -51,8 +51,8 @@ try {
         if ($LASTEXITCODE -ne 0) { $Falhas.Add('JavaScript (testes ou cobertura)') }
     }
 
-    # 3. PowerShell: Pester 6, se houver testes, com cobertura do scripts\instalar.ps1 (e do instalar-versao.ps1, que
-    #    ele carrega) e do scripts\desinstalar.ps1.
+    # 3. PowerShell: Pester 6, se houver testes, com cobertura do scripts\instalar.ps1 (e do instalar-versao.ps1 e do
+    #    instalar-ambiente-antigo.ps1, que ele carrega) e do scripts\desinstalar.ps1.
     #    Abaixo de 100 % nas funções não excluídas falha. As excluídas (cola com o Windows) e o motivo de cada
     #    uma estão em $FuncoesExcluidas, no tests\<script>.Preparacao.ps1 de cada um.
     $TestesPs = @(Get-ChildItem -Path (Join-Path $Raiz 'tests') -Recurse -Filter '*.Tests.ps1' -ErrorAction SilentlyContinue)
@@ -64,7 +64,8 @@ try {
         $Config.Run.PassThru = $true
         $Config.Output.Verbosity = 'Normal'
         $Config.CodeCoverage.Enabled = $true
-        $Scripts = @{ 'instalar.ps1' = 'Instalar'; 'instalar-versao.ps1' = $null; 'desinstalar.ps1' = 'Desinstalar' }   # script -> ponto de entrada
+        $Scripts = @{ 'instalar.ps1' = 'Instalar'; 'instalar-versao.ps1' = $null; 'instalar-ambiente-antigo.ps1' = $null
+                      'desinstalar.ps1' = 'Desinstalar' }   # script -> ponto de entrada
         $Config.CodeCoverage.Path = [string[]]($Scripts.Keys | ForEach-Object { Join-Path $Raiz "scripts\$_" })
         $Config.CodeCoverage.OutputPath = Join-Path $env:TEMP 'morg-keys-cobertura-instalar.xml'
         $Resultado = Invoke-Pester -Configuration $Config

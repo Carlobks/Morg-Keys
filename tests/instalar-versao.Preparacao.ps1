@@ -1,5 +1,5 @@
 ﻿# Preparação dos testes da versão do instalador (tests\instalar-versao.Tests.ps1). Nunca corre o git real.
-# O scripts	estar.ps1 lê $FuncoesExcluidas daqui e exige 100 % de cobertura no resto do instalar-versao.ps1.
+# O scripts\testar.ps1 lê $FuncoesExcluidas daqui e exige 100 % de cobertura no resto do instalar-versao.ps1.
 
 # Funções de cola fora da cobertura: nome -> motivo (também em docs\validacao-manual.md).
 $FuncoesExcluidas = @{

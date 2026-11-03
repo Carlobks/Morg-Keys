@@ -17,8 +17,6 @@ $FuncoesExcluidas = @{
   'CarregarGdi'            = 'Add-Type com DllImport do gdi32 e do user32'
   'RegistarFonteNoWindows' = 'gdi32 AddFontResourceW: instala a fonte na sessão real'
   'AvisarMudancaDeFontes'  = 'user32 SendMessageTimeoutW(WM_FONTCHANGE) a todas as janelas'
-  'GlazeSair'              = 'corre o glazewm.exe real (wm-exit)'
-  'MatarArvore'            = 'taskkill real de um processo e dos filhos'
   'PastaDocumentos'        = '.NET GetFolderPath: a pasta Documentos real'
   'NomeDaConta'            = '.NET UserPrincipal.Current: o nome da conta real do Windows'
   'RemoverJuncao'          = 'cmd /c rmdir real da junction (A10)'
@@ -32,6 +30,7 @@ foreach ($funcao in $FuncoesExcluidas.Keys) {
 }
 Mock Sair { throw 'Sair' }
 Mock GitDoPacote { throw 'o teste tocou no git real: GitDoPacote' }   # do instalar-versao.ps1, carregado pelo instalador
+. (Join-Path $PSScriptRoot 'instalar-ambiente-antigo.Preparacao.ps1')   # bombas da cola do instalar-ambiente-antigo.ps1
 foreach ($cmdlet in 'Read-Host', 'Start-Process', 'Stop-Process', 'Set-ItemProperty', 'New-ItemProperty', 'Get-ItemProperty',
                     'Register-ScheduledTask', 'Unregister-ScheduledTask', 'Start-ScheduledTask', 'Get-ScheduledTask', 'Invoke-WebRequest', 'Unblock-File',
                     'Get-CimInstance', 'Get-AuthenticodeSignature') {

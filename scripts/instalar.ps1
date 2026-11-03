@@ -37,6 +37,7 @@ param(
 )
 $Pacote = Split-Path $PSScriptRoot -Parent
 . (Join-Path $PSScriptRoot 'instalar-versao.ps1')   # VersaoDoPacote (ADR 0011)
+. (Join-Path $PSScriptRoot 'instalar-ambiente-antigo.ps1')   # FecharAmbienteAntigo
 $Casa = $env:USERPROFILE
 $AppData = $env:APPDATA   # o Claude Code instalado pelo npm fica em $AppData\npm\claude.cmd
 $Glzr = Join-Path $Casa '.glzr'
@@ -45,7 +46,6 @@ $Pack = 'zebar\omarchy-catppuccin'   # o único pack do Zebar (barra, guia\, arr
 $utf8 = New-Object Text.UTF8Encoding $false
 $py  = Join-Path $env:windir 'py.exe'
 $pyw = Join-Path $env:windir 'pyw.exe'
-$GlazeCli = "$env:ProgramFiles\glzr.io\GlazeWM\cli\glazewm.exe"
 $DirFontes = Join-Path $env:LOCALAPPDATA 'Microsoft\Windows\Fonts'
 # Instaladores: usa os de 1-instaladores\ se lá estiverem e forem os certos; senão descarrega
 # dos sites oficiais. Nunca corre um ficheiro que não passe na verificação.
@@ -93,8 +93,6 @@ function AvisarMudancaDeFontes {
   $r = [IntPtr]::Zero
   [void][MorgInst.Gdi]::SendMessageTimeoutW([IntPtr]0xffff, 0x001D, [IntPtr]::Zero, [IntPtr]::Zero, 2, 1000, [ref]$r)  # WM_FONTCHANGE
 }
-function GlazeSair { try { & $GlazeCli command wm-exit 2>$null | Out-Null } catch {} }
-function MatarArvore($id) { taskkill /PID $id /T /F 2>$null | Out-Null }
 function PastaDocumentos { [Environment]::GetFolderPath('MyDocuments') }
 function NomeDaConta {  # 1.º nome da conta do Windows (vazio se não houver: contas locais sem nome completo)
   try {
@@ -271,18 +269,6 @@ function EscolherNome($arranqueAntigo, $manter) {
 }
 
 # ---------------------------------------------------------------------------
-function FecharAmbienteAntigo {
-  if (Test-Path $GlazeCli) {
-    # Reinstalação: fecha o que estiver a correr antes de trocar os ficheiros.
-    if (Get-Process glazewm -ErrorAction SilentlyContinue) { GlazeSair; Start-Sleep 2 }
-    Get-Process zebar -ErrorAction SilentlyContinue | Stop-Process -Force
-  }
-  # Ajudantes ainda a correr (café, ícones dos .bat com os seus programas): fecham-se com os
-  # filhos, senão a tarefa lança outra cópia de cada .bat e a pasta pode não se deixar renomear.
-  Get-CimInstance Win32_Process -Filter "Name='pythonw.exe' OR Name='python.exe'" |
-    Where-Object { $_.CommandLine -match '\.glzr' } |
-    ForEach-Object { MatarArvore $_.ProcessId }
-}
 function GuardarCopiaAnterior {
   if (-not (Test-Path $Glzr)) { return $null }
   $copia = "$Glzr.copia-$(Get-Date -Format yyyyMMdd-HHmmss)"
