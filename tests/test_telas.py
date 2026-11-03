@@ -14,7 +14,7 @@ from carregar_por_caminho import RAIZ
 
 PACK = RAIZ / "2-configuracao" / "glzr" / "zebar" / "omarchy-catppuccin"
 FOLHAS_CSS = ["styles.css", "guia/guia.css", "painel/apps.css"]
-PAGINAS_COM_ESTILO = ["arranque/splash.html", "guia/sistema.html"]
+PAGINAS_COM_ESTILO = ["arranque/splash.html", "guia/sistema.html", "limites/limites.html"]
 SEM_MOVIMENTO = ["animation-duration: 0.01ms !important", "animation-delay: 0ms !important",
                  "animation-iteration-count: 1 !important", "transition-duration: 0.01ms !important",
                  "transition-delay: 0ms !important"]

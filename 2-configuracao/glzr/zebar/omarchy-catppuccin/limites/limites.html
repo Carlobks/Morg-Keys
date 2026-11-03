@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt" data-helper="{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Limites do Claude</title>
+    <style>
+      /* Modal dos limites do Claude (clique no ✻ da barra): pôr à mão o % das 5 h, o % da semana e os
+         resets. Tamanho e posição: zpack.json (widget "limites", por baixo da barra, à direita).
+         Pesquisa e desenho: docs/pesquisa/modal-limites.md. */
+      :root {
+        --mauve: #cba6f7; --red: #f38ba8; --text: #cdd6f4; --subtext0: #a6adc8; --overlay2: #9399b2;
+        --surface0: #313244; --surface1: #45475a; --base: #1e1e2e; --crust: #11111b;
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0; height: 100%; background: transparent; overflow: hidden;
+        font-family: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+        color: var(--text); font-variant-numeric: tabular-nums;
+      }
+      body.standalone { background: var(--crust); display: grid; place-items: center; }
+      body.standalone form { width: 300px; height: 260px; }
+      form {
+        height: 100%; margin: 0; padding: 0.75rem 0.875rem;
+        background: var(--base); border: 1px solid var(--surface1); border-radius: 12px;
+        display: flex; flex-direction: column; gap: 0.5rem;
+        opacity: 0; transition: opacity 120ms ease-out;
+      }
+      body.open form { opacity: 1; }
+      h1 { margin: 0; font-size: 0.875rem; font-weight: 600; }
+      #origem { margin: 0; font-size: 0.75rem; color: var(--overlay2); }
+      .grade { display: grid; grid-template-columns: 4.5rem 1fr; gap: 0.25rem 0.5rem; }
+      label { font-size: 0.75rem; color: var(--subtext0); }
+      input {
+        width: 100%; padding: 0.3rem 0.45rem; font: inherit; font-size: 0.875rem;
+        color: var(--text); background: var(--surface0); border: 1px solid var(--surface1); border-radius: 6px;
+      }
+      input::placeholder { color: var(--subtext0); }
+      input:focus { outline: 2px solid var(--mauve); outline-offset: -1px; }
+      input[aria-invalid='true'] { border-color: var(--red); }
+      .erro { min-height: 1rem; margin: 0; font-size: 0.75rem; color: var(--red); grid-column: 1 / -1; }
+      footer { margin-top: auto; display: flex; align-items: center; gap: 0.5rem; }
+      footer a { margin-right: auto; font-size: 0.75rem; color: var(--subtext0); }
+      button {
+        padding: 0.35rem 0.75rem; font: inherit; font-size: 0.8125rem; border-radius: 6px; cursor: pointer;
+        color: var(--text); background: var(--base); border: 1px solid var(--surface1);
+      }
+      button.principal { color: var(--crust); background: var(--mauve); border-color: var(--mauve); font-weight: 600; }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-delay: 0ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          transition-delay: 0ms !important;
+        }
+      }
+    </style>
+    <script type="module" src="./limites.mjs"></script>
+  </head>
+  <body>
+    <form id="form" autocomplete="off">
+      <h1>Limites do Claude</h1>
+      <p id="origem"></p>
+      <div class="grade">
+        <label for="five_pct">5 h: %</label>
+        <label for="five_reset">5 h: repõe</label>
+        <input id="five_pct" name="five_pct" inputmode="numeric" />
+        <input id="five_reset" name="five_reset" />
+        <p class="erro" id="five_erro" role="alert"></p>
+        <label for="week_pct">Semana: %</label>
+        <label for="week_reset">Semana: repõe</label>
+        <input id="week_pct" name="week_pct" inputmode="numeric" />
+        <input id="week_reset" name="week_reset" />
+        <p class="erro" id="week_erro" role="alert"></p>
+      </div>
+      <p class="erro" id="geral" role="alert"></p>
+      <footer>
+        <a href="https://claude.ai/settings/usage" id="uso">Página de uso</a>
+        <button type="button" id="fechar">Fechar</button>
+        <button type="submit" class="principal">Gravar</button>
+      </footer>
+    </form>
+  </body>
+</html>
