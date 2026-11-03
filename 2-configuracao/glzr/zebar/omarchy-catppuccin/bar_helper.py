@@ -47,6 +47,14 @@ from pathlib import Path
 # sem isto os módulos morg_*.py não se importam.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+# Arranque do PC: a cortina preta aparece ANTES de importar os outros módulos. Com o disco a frio cada
+# ficheiro lido é tempo de ambiente de trabalho à vista (docs/pendentes.md, "Fundo à vista no arranque").
+# Só se importa o que a cortina usa; o boot() encontra-a em morg_cortina.CORTINA_CEDO.
+if __name__ == "__main__" and sys.argv[1:] == ["boot"]:
+    from morg_config_arranque import _arranque_cfg
+    from morg_cortina import abrir_cedo
+    abrir_cedo(_arranque_cfg()["animacao"])
+
 from morg_acoes_windows import after_exit, lock, on_exit, power, quick_settings
 from morg_acordado import awake_hold, awake_off, awake_status, awake_toggle
 from morg_animacao import animacao_preview, animacao_set, animacao_tap

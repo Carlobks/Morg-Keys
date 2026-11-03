@@ -1,12 +1,18 @@
 """Cortina preta nativa (Win32, sem navegador) por cima de tudo no início do arranque."""
 
 import ctypes
+import time
 from ctypes import wintypes
 
 from morg_config_arranque import ANIM_CY, ANIMACOES, SPLASH_DIR
 from morg_win32 import HWND, kernel32, user32
 
 COVER_TITLE = "Morg Keys arranque"
+
+# Arranque do PC: o bar_helper.py abre a cortina ANTES de importar os outros módulos (abrir_cedo) e o
+# boot() usa essa. Fora do "boot" ficam None e o boot() abre a sua, como antes.
+CORTINA_CEDO = None
+INICIO_CEDO = None  # time.time() quando o abrir_cedo começou (medição do arranque)
 
 
 
@@ -23,6 +29,7 @@ class _BlackCover:
         self._ready = threading.Event()
         threading.Thread(target=self._run, daemon=True).start()
         self._ready.wait(2)
+        self.visivel_em = time.time()  # medição do arranque
 
     def _run(self):
         WNDPROC = ctypes.WINFUNCTYPE(ctypes.c_ssize_t, HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM)
@@ -104,3 +111,12 @@ class _BlackCover:
             user32.ShowCursor(True)
             user32.PostMessageW(self.hwnd, 0x0010, 0, 0)  # WM_CLOSE
             self.hwnd = None
+
+
+def abrir_cedo(animacao):
+    """Arranque do PC: prioridade normal e cortina já, chamado pelo bar_helper.py antes de importar os
+    outros módulos. Com o disco a frio cada ficheiro lido é tempo de ambiente de trabalho à vista."""
+    global CORTINA_CEDO, INICIO_CEDO
+    INICIO_CEDO = time.time()
+    kernel32.SetPriorityClass(kernel32.GetCurrentProcess(), 0x20)  # NORMAL_PRIORITY_CLASS
+    CORTINA_CEDO = _BlackCover(animacao)

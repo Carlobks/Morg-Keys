@@ -137,6 +137,26 @@ class Arranque(unittest.TestCase):
                           "fim:"]:
                 self.assertIn(frase, registo)
 
+    def test_usa_a_cortina_aberta_cedo_pelo_bar_helper(self):
+        # O bar_helper.py abre a cortina antes de importar o resto (abrir_cedo): o boot usa essa, não abre outra.
+        with ArranqueFalso() as s:
+            cedo = CortinaFalsa("cafe")
+            s.trocar("CORTINA_CEDO", cedo)
+            s.trocar("INICIO_CEDO", 1000.0)
+            s.bh.boot()
+            self.assertEqual(CortinaFalsa.criadas, [cedo])
+            self.assertTrue(cedo.fechada)
+            self.assertEqual(s.medicoes[0][0], 1000.0)  # a medição conta desde o início do abrir_cedo
+
+    def test_abrir_cedo_poe_prioridade_normal_e_abre_a_cortina(self):
+        with ArranqueFalso() as s:
+            s.trocar("CORTINA_CEDO", None)  # o abrir_cedo muda-a; o `with` repõe-na no fim
+            s.trocar("INICIO_CEDO", None)
+            s.bh.abrir_cedo("cafe")
+            self.assertEqual(s.chamadas_k32, ["SetPriorityClass"])
+            self.assertEqual(CortinaFalsa.criadas, [s.bh.CORTINA_CEDO])
+            self.assertIsNotNone(s.bh.INICIO_CEDO)
+
     def test_splash_que_nao_avisa_e_nao_fecha(self):
         with ArranqueFalso(splash_avisa=False, splash_fecha_sozinho=False) as s:
             s.bh.boot()

@@ -17,8 +17,17 @@ Depois da experiência:
    replicar. Verificar: licença (compatível com GPL-3.0?), de onde lê os dados (API oficial, ficheiros locais
    do Claude Code, sessão do claude.ai), se corre no Windows, dependências, e como encaixaria na barra do Zebar
    (o `claude_usage.py` só pode usar a biblioteca padrão do Python).
-3. **Fundo à vista no arranque** (9,3 s = 3,3 s até a tarefa criar o `pythonw` + 5,8 s do Python a frio):
-   decidir fundo preto e/ou cortina sem Python.
+3. **Fundo à vista no arranque** (9,3 s = 3,3 s até a tarefa criar o `pythonw` + 5,8 s do Python a frio).
+   **Investigado em 2026-10-29:** o mesmo código, noutro PC (Windows 11, tarefa com `Priority 4` e sem atraso), dá
+   **1,0 s** (0,04 s até ao `pythonw` + 0,9 s de Python com os 15 módulos). A causa está no PC lento, não no código.
+   Feito: o instalador já não aceita uma tarefa antiga com prioridade ≠ 4 ou com atraso, e a cortina abre antes de
+   importar os outros módulos (`abrir_cedo`). **Falta**, no PC lento, ver qual destas é (só leitura):
+   - tarefa: `schtasks /query /tn "GlazeWM (arranque)" /xml | Select-String 'Priority|Delay|LogonType'` (esperado:
+     `Priority 4`, sem `Delay`);
+   - Python: `py -0p` (o `pyw.exe` usa o marcado com `*`; o da Microsoft Store arranca mais devagar a frio);
+   - medição depois de reiniciar: as linhas `medição:` do `.layout-restore.log`;
+   - carga do arranque do Windows: Gestor de Tarefas > Aplicações de arranque; outro antivírus além do Defender.
+   Se nada disto explicar: decidir fundo preto e/ou cortina sem Python.
 4. **Ícone de bateria na barra**, só se o PC tiver bateria.
 5. **Bug antigo (encontrado na fase 2a):** `bar_helper.py` sem argumentos (ou com um comando desconhecido)
    imprime a ajuda e rebenta num terminal cp1252 por causa do carácter "✕" (`UnicodeEncodeError`). Corrigir

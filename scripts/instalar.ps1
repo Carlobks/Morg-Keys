@@ -12,7 +12,8 @@
   Numa reinstalação mantém o arranque.txt que já existia e não pergunta.
 
   Opções (todas opcionais):
-    -Animacao cafe                           animação do ecrã de arranque (por agora só há esta)
+    -Animacao cafe                           animação do ecrã de arranque (uma das que têm .bmp em
+                                             2-configuracao\glzr\zebar\omarchy-catppuccin\arranque\)
     -Bat "C:\x\iniciar.bat|http://localhost:3000|Nome"   .bat ao iniciar (vários: separe por ;);
                                              endereço e nome são opcionais
     -SemPerguntas                            não pergunta nada (sem .bat, salvo -Bat)
@@ -21,7 +22,7 @@
     -NaoIniciar                              instala mas não arranca já (arranca no próximo início de sessão)
 #>
 param(
-  [ValidateSet('cafe')][string]$Animacao,
+  [string]$Animacao,
   [string[]]$Bat,
   [switch]$SemPerguntas,
   [switch]$ManterIcones,
@@ -175,6 +176,9 @@ function PessoalAntigo($base, $nome) {
   }
   return $null
 }
+# Animações do pacote = os BMP da cortina em arranque\ (cada animação tem o seu: receita 5b).
+$Animacoes = @(Get-ChildItem (Join-Path $Pacote "2-configuracao\glzr\$Pack\arranque") -Filter *.bmp | ForEach-Object BaseName)
+if ($Animacao -and $Animacoes -notcontains $Animacao) { Parar "Animação '$Animacao' não existe no pacote (há: $($Animacoes -join ', '))." }
 $arranqueAntigo = PessoalAntigo $Glzr 'arranque.txt'
 $manterArranque = $arranqueAntigo -and -not $Animacao -and -not $Bat
 $linhasBat = @()
@@ -231,7 +235,20 @@ Get-CimInstance Win32_Process -Filter "Name='pythonw.exe' OR Name='python.exe'" 
 $copia = $null
 if (Test-Path $Glzr) {
   $copia = "$Glzr.copia-$(Get-Date -Format yyyyMMdd-HHmmss)"
-  Rename-Item $Glzr $copia
+  # Um programa ainda a usar ~\.glzr (ex.: um .bat de arranque.txt cujo ícone já fechou, como um
+  # servidor local) impede guardá-la. Não se fecha nada sozinho: avisa e espera que o utilizador o feche.
+  while ($true) {
+    try { Rename-Item $Glzr $copia -ErrorAction Stop; break } catch {}
+    Start-Sleep 2  # os ajudantes fechados acima podem demorar a largar os ficheiros
+    try { Rename-Item $Glzr $copia -ErrorAction Stop; break } catch {}
+    Aviso "Não consigo guardar $Glzr : um programa ainda a está a usar."
+    Get-CimInstance Win32_Process -Filter "Name='cmd.exe'" | Where-Object { $_.CommandLine -match '\.glzr' } |
+      ForEach-Object { Aviso "Programa de arranque.txt ainda aberto: $($_.CommandLine -replace '^.*?\s/c\s+', '') (PID $($_.ProcessId))" }
+    Info 'Feche-o: Gestor de Tarefas > Detalhes > botão direito em cmd.exe > Terminar árvore de processos.'
+    Info 'Também conta uma janela do Explorador ou um terminal aberto dentro dessa pasta. Ou termine a sessão e volte a entrar.'
+    if ($SemPerguntas) { Parar 'Feche-o e corra o INSTALAR.cmd outra vez. Nada foi alterado na configuração.' }
+    if ((Read-Host '    Enter = tentar outra vez · S = sair') -match '^[sS]') { Parar 'Instalação cancelada. Nada foi alterado na configuração.' }
+  }
   Info "A configuração anterior ficou guardada em $copia"
 }
 $homeFwd = $Casa -replace '\\', '/'
@@ -264,7 +281,8 @@ if ($copia) {
   $arr = Join-Path $Glzr "$Pack\guia\arranque.txt"
   if (Test-Path $arr) {
     $t = [IO.File]::ReadAllText($arr, $utf8)
-    $novo = [regex]::Replace($t, '(?m)^(\s*anima(c|ç)(a|ã)o\s*=\s*)(?!\s*cafe\s*$).*$', '${1}cafe')
+    $conhecidas = ($Animacoes | ForEach-Object { [regex]::Escape($_) }) -join '|'
+    $novo = [regex]::Replace($t, '(?m)^(\s*anima(c|ç)(a|ã)o\s*=\s*)(?!\s*(' + $conhecidas + ')\s*$).*$', '${1}cafe')
     if ($novo -ne $t) { [IO.File]::WriteAllText($arr, $novo, $utf8); Info 'arranque.txt: animação antiga trocada por cafe.' }
   }
 }
@@ -356,13 +374,22 @@ try {
     -ErrorAction Stop | Out-Null
   Info "Tarefa 'GlazeWM (arranque)' registada para $quem."
 } catch {
+  $erro = $_
   # Uma tarefa antiga criada com privilégios de administrador não se deixa substituir
-  # sem eles. Se já faz o mesmo (mesmo programa e argumentos), serve tal como está.
+  # sem eles. Se já faz o mesmo (mesmo programa e argumentos) e com as opções de que a
+  # rapidez do arranque depende (prioridade 4, sem atraso no gatilho), serve tal como está.
+  # Com a prioridade por omissão das tarefas (7) ou um atraso, o fundo fica segundos à vista
+  # antes da cortina (docs/pendentes.md, "Fundo à vista no arranque").
   $velha = Get-ScheduledTask -TaskName 'GlazeWM (arranque)' -ErrorAction SilentlyContinue
-  if ($velha -and $velha.Actions[0].Execute -ieq $pyw -and $velha.Actions[0].Arguments -eq "-I `"$helper`" boot") {
+  $mesmaAcao = $velha -and $velha.Actions[0].Execute -ieq $pyw -and $velha.Actions[0].Arguments -eq "-I `"$helper`" boot"
+  $atraso = @($velha.Triggers | Where-Object { $_.Delay } | ForEach-Object { $_.Delay }) -join ', '
+  $apagar = "Abra o PowerShell como administrador, corra  schtasks /Delete /TN `"GlazeWM (arranque)`" /F  e volte a correr o INSTALAR.cmd."
+  if ($mesmaAcao -and $velha.Settings.Priority -eq 4 -and -not $atraso) {
     Aviso 'A tarefa de arranque já existia (criada como administrador) e faz o mesmo: fica a que estava.'
+  } elseif ($mesmaAcao) {
+    Parar "A tarefa de arranque antiga (criada como administrador) tem prioridade $($velha.Settings.Priority)$(if ($atraso) { " e atraso $atraso" }) em vez de 4 sem atraso: o arranque ficaria lento. $apagar"
   } else {
-    Parar "Não consegui criar a tarefa de arranque ($($_.Exception.Message)). Abra o PowerShell como administrador, corra  schtasks /Delete /TN `"GlazeWM (arranque)`" /F  e volte a correr o INSTALAR.cmd."
+    Parar "Não consegui criar a tarefa de arranque ($($erro.Exception.Message)). $apagar"
   }
 }
 

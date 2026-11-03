@@ -6,6 +6,7 @@ import time
 from ctypes import wintypes
 from pathlib import Path
 
+import morg_cortina
 from morg_arranjo import (
     BOOT_MUTEX,
     _entry_label,
@@ -136,12 +137,13 @@ class _EstadoDoArranque:
 
 
 def boot():
-    t_boot = time.time()
+    t_boot = morg_cortina.INICIO_CEDO or time.time()
     kernel32.SetPriorityClass(kernel32.GetCurrentProcess(), 0x20)  # NORMAL_PRIORITY_CLASS
     cfg = _arranque_cfg()
     # Primeiro de tudo: preto (com o 1.º quadro da animação) por cima do ambiente de trabalho.
-    cover = _BlackCover(cfg["animacao"])
-    t_cover = time.time()
+    # Normalmente já foi aberta pelo bar_helper.py (abrir_cedo), antes de importar os outros módulos.
+    cover = morg_cortina.CORTINA_CEDO or _BlackCover(cfg["animacao"])
+    t_cover = getattr(cover, "visivel_em", None) or time.time()
     boot_mutex = kernel32.CreateMutexW(None, True, BOOT_MUTEX)  # o layout-restore do GlazeWM cede a vez
     ready = kernel32.CreateEventW(None, True, False, SPLASH_READY)
     a = _EstadoDoArranque(cfg, cover, _new_log())

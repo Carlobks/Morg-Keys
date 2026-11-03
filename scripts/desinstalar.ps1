@@ -11,7 +11,8 @@ function Passo($m) { Write-Host ""; Write-Host "==> $m" -ForegroundColor Cyan }
 function Info($m)  { Write-Host "    $m" }
 
 $estado = $null
-try { $estado = Get-Content (Join-Path $Glzr 'instalacao.json') -Raw -Encoding UTF8 | ConvertFrom-Json } catch {}
+# Sem instalacao.json (ex.: instalação antiga ou feita à mão) usa os valores por omissão do Windows.
+try { $estado = Get-Content (Join-Path $Glzr 'instalacao.json') -Raw -Encoding UTF8 -ErrorAction Stop | ConvertFrom-Json } catch {}
 
 Passo 'Arranque automático'
 Unregister-ScheduledTask -TaskName 'GlazeWM (arranque)' -Confirm:$false -ErrorAction SilentlyContinue
@@ -34,7 +35,7 @@ Get-CimInstance Win32_Process -Filter "Name='pythonw.exe' OR Name='python.exe'" 
 # Janelas que o GlazeWM tenha deixado escondidas ("cloaked") voltam a aparecer.
 $uncloak = Join-Path $Glzr 'zebar\omarchy-catppuccin\uncloak.ps1'
 if (Test-Path $uncloak) { powershell -NoProfile -ExecutionPolicy Bypass -File $uncloak | Out-Null; Info 'Janelas escondidas repostas.' }
-Info 'Os programas .bat de arranque.txt que estavam a correr continuam; feche-os pelo Gestor de Tarefas se quiser.'
+Info 'Os programas .bat de arranque.txt que estavam a correr continuam (no fim pede para os fechar).'
 
 Passo 'Ambiente de trabalho do Windows'
 $adv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
@@ -76,8 +77,22 @@ if ((Test-Path $juncao) -and ((Get-Item $juncao -Force).Attributes -band [IO.Fil
 }
 if (Test-Path $Glzr) {
   $destino = "$Glzr.removido-$(Get-Date -Format yyyyMMdd-HHmmss)"
-  Rename-Item $Glzr $destino
-  Info "Configuração movida para $destino"
+  # Um programa ainda a usar ~\.glzr (ex.: um .bat de arranque.txt, como um servidor local) impede
+  # movê-la. Não se fecha nada sozinho: avisa e espera que o utilizador o feche.
+  $movida = $false
+  while ($true) {
+    try { Rename-Item $Glzr $destino -ErrorAction Stop; $movida = $true; break } catch {}
+    Start-Sleep 2  # os ajudantes fechados acima podem demorar a largar os ficheiros
+    try { Rename-Item $Glzr $destino -ErrorAction Stop; $movida = $true; break } catch {}
+    Write-Host "    ! Não consigo mover $Glzr : um programa ainda a está a usar." -ForegroundColor Yellow
+    Get-CimInstance Win32_Process -Filter "Name='cmd.exe'" | Where-Object { $_.CommandLine -match '\.glzr' } |
+      ForEach-Object { Write-Host "    ! Programa de arranque.txt ainda aberto: $($_.CommandLine -replace '^.*?\s/c\s+', '') (PID $($_.ProcessId))" -ForegroundColor Yellow }
+    Info 'Feche-o: Gestor de Tarefas > Detalhes > botão direito em cmd.exe > Terminar árvore de processos.'
+    Info 'Também conta uma janela do Explorador ou um terminal aberto dentro dessa pasta. Ou termine a sessão e volte a entrar.'
+    if ((Read-Host '    Enter = tentar outra vez · S = sair') -match '^[sS]') { break }
+  }
+  if ($movida) { Info "Configuração movida para $destino" }
+  else { Info 'A pasta ficou onde estava; o resto ficou desfeito. Corra o DESINSTALAR.cmd outra vez depois de fechar o programa.' }
 }
 if ($estado -and $estado.copia_anterior -and (Test-Path $estado.copia_anterior)) {
   Info "Havia uma configuração anterior em $($estado.copia_anterior) (pode renomeá-la para .glzr para a recuperar)."
