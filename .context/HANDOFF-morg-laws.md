@@ -147,6 +147,22 @@ Técnicas (tomadas durante as fases, com o motivo medido):
    "Funcionou. Está perfeito e foi rápido." Os estragos do `estragos.py` não cobrem
    PowerShell: os 4 do `.ps1` foram feitos à mão numa cópia `git worktree` (todos apanhados). As apps com bandeja (Claude, Steam) só
    "sobreviveram" por ficarem em segundo plano; o Chrome fechou.
+   **P7, modal dos limites do Claude (em curso desde 2026-11-03; plano aprovado na aba Plano):** o clique no ✻ da
+   barra abre um modal pequeno para pôr à mão o % das 5 h, o % da semana e a hora do reset, porque o dono usa a
+   aplicação de ambiente de trabalho e a statusLine do terminal não atualiza o `~/.claude/rate_limits.json`.
+   Decisões do dono (todas a recomendada):
+   - widget novo do Zebar `limites`, pequeno, abaixo da barra e encostado à direita; fecha com Esc, clique fora ou
+     ao gravar, e devolve o foco;
+   - reset das 5 h num só campo: `14:30` (se já passou, amanhã) ou `2h15`/`45m`;
+   - semana: o % e um campo opcional `qui 16:00`; vazio mantém o anterior;
+   - grava no mesmo `rate_limits.json`, com `"origem": "manual"` e `captured_at`; a statusLine põe por cima depois;
+   - a página de uso passa para o botão direito no ✻, e o modal tem um link para ela.
+   Passos: P7.0 pesquisa (`docs/pesquisa/modal-limites.md`), P7.1 `morg_limites.py` e os subcomandos `limites`,
+   `limites-hide`, `limites state` e `limites set <b64>` do `bar_helper.py`, P7.2 a página `limites/` com o
+   `limites-logica.mjs` e o widget no `zpack.json` (`argsRegex` só com os pedidos novos, A9), P7.3 a barra (clique,
+   botão direito, dica do `partilhado/claude.mjs`, reler mais depressa durante 1 min), P7.4 o fecho (estragos,
+   changelog `Adicionado`, plano 0006). Teste real do dono: ✻, `40` / `2h15` / `70`, Enter, a barra muda; Esc fecha
+   sem gravar; o botão direito abre a página de uso.
    **Arrastar abas do Chrome** (pesquisa `docs/pesquisa/arrastar-janelas.md`): issue #1080 do GlazeWM, por resolver
    na 3.10.1; o GlazeWM não tem animações. Falta validar com o dono (com e sem `Alt+Shift+P`).
    **Pedido novo:** atualizar o Morg Keys pelo `Alt+Esc, U` (procura versão nova no GitHub e atualiza); pede
