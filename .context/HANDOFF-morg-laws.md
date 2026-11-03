@@ -127,9 +127,33 @@ Técnicas (tomadas durante as fases, com o motivo medido):
    versão passa a SemVer (ADR 0011, pesquisa `docs/pesquisa/versoes.md`). **0.1.0 lançada** a 2026-10-31 com o
    OK do dono (`0e7064d`, tag anotada `v0.1.0`, só local); o push da tag pede outro "sim". Os links de comparação
    no fim do changelog ficaram de fora (o portão recusaria a linha nova depois das versões lançadas).
-   Por decidir com o dono: o Claude no arranque (ws 1) não é colocado, porque já corria antes de o abrirmos
-   (efeito do P2.1). Próximo em `docs/pendentes.md`: as frases do arranque.
+   Claude no arranque: resolvido sozinho. Ao ligar o PC (2026-11-01 05:48) o restauro aprendeu `claude`; fica o caso
+   raro de uma app da Store já aberta quando entra no painel (pendentes, item 8; decisão do dono: para depois).
+   Push de 2026-10-31 com o OK: `exp/a` até `3f39110` e a tag `v0.1.0`, CI verde. **Por enviar:** `01fc3a1` a
+   `5a44856` (pendentes, pesquisas, regra do BG3).
+   **P4 (frases) adiada pelo dono (2026-11-01).**
+   **P5, jogos em ecrã inteiro (em curso;** pesquisa em `docs/pesquisa/jogos-ecra-inteiro.md`):
+   - requisito do dono: **os atalhos têm de funcionar com o jogo aberto**, por isso a pausa (`wm-toggle-pause`) sai;
+   - BG3 (`bg3_dx11`, classe `SDL_app`; a Steam tem a mesma classe, regra só por processo): `ignore` em `7485633`.
+     Teste do dono: ecrã inteiro e atalhos OK; **ao trocar de workspace minimiza-se** (DXGI larga o exclusivo quando
+     tapado, validado na doc da Microsoft) e não volta sozinho;
+   - próximo teste: o jogo em "janela sem bordas" com `set-fullscreen` em vez de `ignore`;
+   - depois: lista automática dos `.exe` da Steam e um painel com atalho que mostra o que já foi adicionado e
+     pergunta antes de adicionar (decisão do dono). **O `Alt+Shift+I` está ocupado** (Edge no `apps.txt` do dono).
+   **P6, a reinstalação esconde as janelas (a seguir; plano aprovado na aba Plano):** o `FecharAmbienteAntigo` mata
+   o ajudante `after-exit` (pythonw com `.glzr`) 2 s depois do `wm-exit`, antes de ele correr o `uncloak.ps1`;
+   nenhuma das 11 cópias da `~\.glzr` tem o `.uncloak.log`. Passos: P6.1 estrutura (o `FecharAmbienteAntigo` para
+   `scripts/instalar-ambiente-antigo.ps1`, porque o `instalar.ps1` tem 499 linhas); P6.2 não matar e esperar o
+   `after-exit` (~45 s), senão correr o `uncloak.ps1`; P6.3 fecho. As apps com bandeja (Claude, Steam) só
+   "sobreviveram" por ficarem em segundo plano; o Chrome fechou.
+   **Arrastar abas do Chrome** (pesquisa `docs/pesquisa/arrastar-janelas.md`): issue #1080 do GlazeWM, por resolver
+   na 3.10.1; o GlazeWM não tem animações. Falta validar com o dono (com e sem `Alt+Shift+P`).
+   **Pedido novo:** atualizar o Morg Keys pelo `Alt+Esc, U` (procura versão nova no GitHub e atualiza); pede
+   pesquisa e plano próprio, depois do P6 (a atualização reinstala).
    Nota: o teste das 35 linhas só vê ficheiros que o git conhece; um ficheiro novo só é medido depois do `git add`.
+   Nota: o hook `bloquear_arranque` recusa um comando que só **cite** `glazewm`/`zebar` (ex.: num heredoc de
+   mensagem ou num filtro): pôr o texto num ficheiro com o Write. No Bash, o heredoc pode perder as `\\` (virou
+   `\v` num ficheiro): para texto com barras, usar o Edit/Write.
 2. Teste real da ML12 com o dono (animações desligadas no Windows, texto apagado, escala a 125 %).
 3. O CI corre em cada push: um vermelho no GitHub lê-se com `gh run view <id> --log-failed`.
 4. Depois do plano: a ordem está em `docs/pendentes.md` (bug do painel Apps e arranque, relatório de erros,
