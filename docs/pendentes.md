@@ -4,7 +4,7 @@ Trabalho combinado com o utilizador e ainda não feito. Quando um item começa, 
 quando acaba, sai daqui. Ordem registada e confirmada pelo dono a 2026-10-31.
 Feitos a 2026-10-31: o plano Morg Laws (`morg-laws/plano-01.md`) e o bug do painel "Apps e arranque"; o relatório de erros (`planos/0002-relatorio-de-erros.md`).
 
-1. **Frases do arranque** (combinado a 2026-10-31):
+1. **Frases do arranque** (combinado a 2026-10-31; **adiado pelo dono a 2026-11-01**):
    - uma por dia do ano, a repetir desde o início quando acabam;
    - 7 frases novas (fontes: pensador.com e capricho.abril.com.br), como vieram e só com a obra quando a
      personagem não está confirmada;
@@ -22,17 +22,11 @@ Feitos a 2026-10-31: o plano Morg Laws (`morg-laws/plano-01.md`) e o bug do pain
 
 5. **Experiência 0001 — cobertura A contra C**, fases 4–6: `experiencias/0001-cobertura-a-vs-c.md`.
 
-6. **Jogos em ecrã inteiro não funcionam (relatado pelo utilizador, 2026-10-25).** Ao abrir um jogo em ecrã inteiro,
-   o Morg Keys obriga-o a ficar em janela; o jogo recusa e fica minimizado. Hoje, para jogar em ecrã inteiro, é
-   preciso desinstalar o Morg Keys. **Estudar antes de mexer:**
-   - que tipo de ecrã inteiro é: exclusivo (DirectX/Vulkan) ou janela sem bordas;
-   - quem força: as regras `window_rules` / `float` / `fullscreen` do `config.yaml`, o GlazeWM em si, ou os
-     nossos ajudantes (restauro de janelas, `uncloak.ps1`, painel, foco do WebView2);
-   - o que dizem a documentação e as issues do GlazeWM sobre jogos (`ignore`, `fullscreen`, `shown_on_fullscreen`
-     da barra, pausar o gestor de janelas);
-   - como o Omarchy/Hyprland trata o mesmo caso.
-   Testar com 2 ou 3 jogos (um exclusivo, um sem bordas) e anotar o que acontece em cada um. A solução tem de
-   ser automática ou um atalho simples (ex.: pausar o gestor de janelas e esconder a barra), nunca desinstalar.
+6. **Ecrã do jogo em tela cheia** (relatado a 2026-10-25; em curso, pesquisa em `pesquisa/jogos-ecra-inteiro.md`).
+   A regra `ignore` do Baldur's Gate 3 pô-lo em ecrã inteiro com os atalhos a funcionar, mas ao trocar de
+   workspace o jogo minimiza-se (o DirectX larga o ecrã inteiro exclusivo quando fica tapado). Próximo teste:
+   "janela sem bordas" com a regra `set-fullscreen`. Depois: a lista automática dos jogos da Steam e um painel
+   com atalho (não o `Alt+Shift+I`, que abre o Edge) que mostra o que já foi adicionado e pergunta antes.
 
 7. **Os ~5 s de papel de parede ao entrar (A38).** Diagnóstico com o WPR (como administrador, 1 reinício; passos em
     `pesquisa/arranque-windows.md` §2). Se a causa tiver correção limpa, fase própria.
@@ -44,3 +38,16 @@ Feitos a 2026-10-31: o plano Morg Laws (`morg-laws/plano-01.md`) e o bug do pain
    que esteja fechada (ao ligar o PC, 2026-11-01 05:48: "aprendi Claude = claude; ficou no 1"). Depois de aprendido,
    o processo fica no `layout.json` e uma reinstalação mantém-no. Correção possível: ligar a janela à app pelo
    AppUserModelID da Store (`Claude_pzs8sxrjxfjjc!Claude`), com pesquisa antes.
+
+9. **A reinstalação esconde as janelas abertas** (bug, 2026-11-01): o instalador mata o ajudante `after-exit`
+   que as volta a mostrar depois de o GlazeWM sair (nenhuma das 11 cópias da `~\.glzr` tem o `.uncloak.log`).
+
+10. **Arrastar abas do Chrome desorienta a arrumação** (bug, 2026-11-03; pesquisa em `pesquisa/arrastar-janelas.md`):
+    a issue #1080 do GlazeWM, por resolver na 3.10.1. Animações suaves: o GlazeWM não as tem.
+
+11. **Atualizar o Morg Keys pelo `Alt+Esc, U`** (pedido de 2026-11-03): procura uma versão nova no GitHub e, se
+    houver, atualiza sem mais passos. Pede pesquisa antes (verificar o que se descarrega, manter as
+    personalizações, reinstalar sem esconder as janelas) e plano próprio.
+
+12. **A medição "fundo à vista sem cortina"** do registo do arranque fica errada quando o ambiente arranca sem
+    reiniciar o Explorador (ex.: reinstalar).
