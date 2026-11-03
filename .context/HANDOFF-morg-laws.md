@@ -143,8 +143,8 @@ Técnicas (tomadas durante as fases, com o motivo medido):
    **P6, a reinstalação esconde as janelas: feita a 2026-11-03** (`0288adc` estrutura, `f94679c` correção, plano
    `docs/planos/0005-reinstalar-sem-esconder-janelas.md`, A54). O `FecharAmbienteAntigo` (agora em
    `scripts/instalar-ambiente-antigo.ps1`) fecha os ajudantes menos o `after-exit`, espera até 45 s que ele acabe
-   e, sem ele, corre o `uncloak.ps1`; o `instalacao.log` diz o caminho. **Falta o teste real do dono** (janelas
-   nos workspaces 1 e 2, reinstalar, `.uncloak.log` na cópia antiga). Os estragos do `estragos.py` não cobrem
+   e, sem ele, corre o `uncloak.ps1`; o `instalacao.log` diz o caminho. **Testado pelo dono a 2026-11-03:**
+   "Funcionou. Está perfeito e foi rápido." Os estragos do `estragos.py` não cobrem
    PowerShell: os 4 do `.ps1` foram feitos à mão numa cópia `git worktree` (todos apanhados). As apps com bandeja (Claude, Steam) só
    "sobreviveram" por ficarem em segundo plano; o Chrome fechou.
    **Arrastar abas do Chrome** (pesquisa `docs/pesquisa/arrastar-janelas.md`): issue #1080 do GlazeWM, por resolver

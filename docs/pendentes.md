@@ -41,7 +41,7 @@ Feitos a 2026-10-31: o plano Morg Laws (`morg-laws/plano-01.md`) e o bug do pain
 
 9. **A reinstalação esconde as janelas abertas** (bug, 2026-11-01): **corrigido a 2026-11-03** (`f94679c`, plano
    `planos/0005-reinstalar-sem-esconder-janelas.md`): o instalador espera o ajudante `after-exit` em vez de o
-   fechar e, sem ele, corre o `uncloak.ps1`. Falta o teste real do dono.
+   fechar e, sem ele, corre o `uncloak.ps1`. Testado pelo dono a 2026-11-03: funcionou, e rápido.
 
 10. **Arrastar abas do Chrome desorienta a arrumação** (bug, 2026-11-03; pesquisa em `pesquisa/arrastar-janelas.md`):
     a issue #1080 do GlazeWM, por resolver na 3.10.1. Animações suaves: o GlazeWM não as tem.

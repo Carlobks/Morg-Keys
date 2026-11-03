@@ -18,7 +18,8 @@ Steam) só "sobreviveram" por ficarem em segundo plano; o Chrome fechou.
 **Feito (2026-11-03):** `0288adc` (estrutura) e `f94679c` (correção). Os testes novos foram vistos a falhar antes e
 depois ficaram verdes; `testar.ps1` verde (80 Pester, cobertura a 100 % nos quatro scripts PowerShell). Os 4
 estragos à mão do `instalar-ambiente-antigo.ps1` foram todos apanhados, numa cópia `git worktree`, porque o
-`estragos.py` só estraga `.py` e `.mjs`. **Falta o teu teste real.**
+`estragos.py` só estraga `.py` e `.mjs`. **Testado pelo dono a 2026-11-03:** "Funcionou. Está perfeito e foi
+rápido."
 
 ## Fora do escopo
 
@@ -45,7 +46,7 @@ Com teste vermelho primeiro:
 ## Prova
 
 - [x] cada teste vermelho antes e verde depois; `testar.ps1` verde; nenhum estrago escapou;
-- [ ] **o teu teste real**, com o teu OK:
+- [x] **o teu teste real** (feito pelo dono a 2026-11-03, funcionou):
   1. abrir janelas no workspace 1 e no 2;
   2. reinstalar;
   3. ver que as janelas continuam lá e são arrumadas;
