@@ -46,23 +46,29 @@ WORKSPACE_NAMES = [str(n) for n in range(1, 11)]
 
 def panel_show():
     """Alt+Esc, C: mostra o painel com foco; se já estiver visível, esconde-o."""
-    hwnd = user32.FindWindowW(None, PANEL_TITLE)
+    _show_with_focus(PANEL_TITLE, "apps", PANEL_PREV)
+
+
+def _show_with_focus(title, widget, prev_file):
+    """Mostra o widget `widget` (janela `title`) com foco; se já estiver visível, esconde-o.
+    Usado pelo painel das apps e pelo modal dos limites (morg_limites)."""
+    hwnd = user32.FindWindowW(None, title)
     if hwnd and user32.IsWindowVisible(hwnd):
-        _panel_release(hwnd)  # a página nota a perda de foco e fica "fechada"
+        _panel_release(hwnd, prev_file)  # a página nota a perda de foco e fica "fechada"
         return
-    if not hwnd:  # Zebar arrancado sem o painel: abre-o (só desta vez é lento)
-        if not _start_widget("omarchy-catppuccin", "apps"):
+    if not hwnd:  # Zebar arrancado sem o widget: abre-o (só desta vez é lento)
+        if not _start_widget("omarchy-catppuccin", widget):
             return
         for _ in range(80):  # até 8 s: a página carrega e esconde-se sozinha
             time.sleep(0.1)
-            hwnd = user32.FindWindowW(None, PANEL_TITLE)
+            hwnd = user32.FindWindowW(None, title)
             if hwnd and not user32.IsWindowVisible(hwnd):
                 break
         if not hwnd:
             return
     fg = user32.GetForegroundWindow()
     if fg and fg != hwnd:
-        PANEL_PREV.write_text(str(fg))  # para onde volta o foco ao fechar
+        prev_file.write_text(str(fg))  # para onde volta o foco ao fechar
     _bring_to_front(hwnd)
     _focus_webview(hwnd)
     # Rede de segurança (como o guia): se a página não se esconder ao perder o
@@ -73,18 +79,18 @@ def panel_show():
 def panel_hide():
     hwnd = user32.FindWindowW(None, PANEL_TITLE)
     if hwnd:
-        _panel_release(hwnd)
+        _panel_release(hwnd, PANEL_PREV)
 
 
-def _panel_release(hwnd):
-    """Esconde o painel e devolve o foco à janela de antes. Uma janela escondida
-    que continua ativa fazia a abertura seguinte não ser uma ativação a sério
-    (sem WM_SETFOCUS, a página não recebia o teclado)."""
+def _panel_release(hwnd, prev_file):
+    """Esconde o painel (ou o modal dos limites) e devolve o foco à janela guardada em
+    `prev_file`. Uma janela escondida que continua ativa fazia a abertura seguinte não
+    ser uma ativação a sério (sem WM_SETFOCUS, a página não recebia o teclado)."""
     user32.ShowWindow(hwnd, 0)  # SW_HIDE
     if user32.GetForegroundWindow() != hwnd:
         return
     try:
-        prev = int(PANEL_PREV.read_text())
+        prev = int(prev_file.read_text())
     except (OSError, ValueError):
         prev = 0
     if prev and user32.IsWindow(prev) and user32.IsWindowVisible(prev) and not _is_cloaked(prev):
