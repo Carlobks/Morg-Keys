@@ -163,14 +163,12 @@ Técnicas (tomadas durante as fases, com o motivo medido):
    botão direito, dica do `partilhado/claude.mjs`, reler mais depressa durante 1 min), P7.4 o fecho (estragos,
    changelog `Adicionado`, plano 0006). Teste real do dono: ✻, `40` / `2h15` / `70`, Enter, a barra muda; Esc fecha
    sem gravar; o botão direito abre a página de uso.
-   **A-RETOMAR (2026-11-03, parado com as 5 h da quota em 91 %):** feitas a P7.0 (`6366dc8`), a P7.1 (`83ccd47`
-   estrutura, `70bb2ac` lógica) e a P7.2 (`9da1b0e`); `testar.ps1` verde. Falta a P7.3: no `bar.html`, o clique no
-   ✻ passa a `zebar.shellExec(PYW, ['-I', …/bar_helper.py, 'limites'])` e o `argsRegex` da barra ganha um
-   `pyw.exe` só com `bar_helper\.py limites$`; o botão direito (`contextmenu`) abre o `USAGE_URL`; durante 1 min
-   depois do clique, a barra relê de 3 em 3 s. A dica (`CLIQUE` no `partilhado/claude.mjs`) passa a "Clique: pôr os
-   valores à mão · Botão direito: página de uso", e com `origem: "manual"` diz "Valores postos à mão há …". Para
-   isso, o `claude_usage.py` passa a devolver o `origem`. Os testes vêm primeiro: `tests/claude.test.mjs` e
-   `tests/test_claude_usage.py`. Depois vem a P7.4. Lições: as catracas dos `noqa`/`node:coverage disable` e dos
+   **P7 feita a 2026-11-04** (plano `docs/planos/0006-modal-limites-claude.md`): `6366dc8` pesquisa, `83ccd47`
+   estrutura, `70bb2ac` lógica, `9da1b0e` página e widget, `45c54ba` barra, `3690913` estragos e o fecho. O
+   clique no ✻ abre o modal (`bar_helper.py limites`), o botão direito abre a página de uso e a barra relê de 3
+   em 3 s durante 1 min (`ligarClaude` no `claude.mjs`). O `limites` vem pré-carregado no `settings.json` do
+   Zebar. **Falta o teste real do dono** (reinstalar com o OK; ✻, `40` / `2h15` / `70`, Enter; Esc; botão
+   direito). Por enviar: tudo desde `7b92684`. Lições: as catracas dos `noqa`/`node:coverage disable` e dos
    `<script>` em linha não deixam crescer; escrever os scripts com barras pelo Write, não pelo heredoc.
    **Arrastar abas do Chrome** (pesquisa `docs/pesquisa/arrastar-janelas.md`): issue #1080 do GlazeWM, por resolver
    na 3.10.1; o GlazeWM não tem animações. Falta validar com o dono (com e sem `Alt+Shift+P`).

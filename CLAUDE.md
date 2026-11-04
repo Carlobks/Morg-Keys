@@ -83,7 +83,7 @@ Cada regra abaixo tem a barreira que a obriga em `docs/regras-e-barreiras.md`; o
 
 - `2-configuracao/glzr/` vai para `~\.glzr` pelo instalador (marcadores `{{HOME}}`, `{{HOME_RE}}`, `{{NOME}}`).
   - `glazewm/config.yaml`: atalhos, modos `sistema`/`resize`, bloco de apps gerado por `apps-apply`.
-  - `zebar/omarchy-catppuccin/`: o único pack do Zebar (`zpack.json`, 5 widgets: bar, guia, sistema, apps, splash).
+  - `zebar/omarchy-catppuccin/`: o único pack do Zebar (`zpack.json`, 6 widgets: bar, guia, sistema, apps, limites, splash).
   - `bar_helper.py` é o ajudante (subcomandos na docstring); as páginas só lhe pedem o que o `argsRegex` deixa (A9).
 - `scripts/`: instalar, desinstalar, testar, estragos e `portoes/` (hooks do git) · `tests/` · `docs/`.
 

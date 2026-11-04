@@ -20,6 +20,11 @@
       "pack": "omarchy-catppuccin",
       "widget": "apps",
       "preset": "default"
+    },
+    {
+      "pack": "omarchy-catppuccin",
+      "widget": "limites",
+      "preset": "default"
     }
   ]
 }

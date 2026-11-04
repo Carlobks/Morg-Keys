@@ -12,7 +12,8 @@ Feitos a 2026-10-31: o plano Morg Laws (`morg-laws/plano-01.md`) e o bug do pain
 
 2. **Modal dos limites do Claude** (combinado a 2026-10-31): o clique esquerdo no ✻ da barra deixa de abrir a página
    de uso e abre um modal pequeno para pôr à mão, com o rato ou o teclado, o % das 5 h, o % da semana e a hora
-   do próximo reset das 5 h (para quem não usa o Claude Code no terminal).
+   do próximo reset das 5 h (para quem não usa o Claude Code no terminal). **Feito a 2026-11-04 (P7, plano
+   `planos/0006-modal-limites-claude.md`); falta o teste real do dono.**
 
 3. **Guia do Alt+R** (pedido de 2026-10-31): ao entrar no modo `resize`, aparece por baixo da
    data, no topo, um guia curto de como o usar.
