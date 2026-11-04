@@ -40,7 +40,7 @@ for (const pagina of PAGINAS) {
 
 // Catraca (ML11b): nas páginas fica só a cola com o DOM e o Zebar; a lógica vai para um .mjs testado. O
 // tamanho de cada <script> em linha só desce: ao encolher, baixa-se o número aqui.
-const LINHAS_MAXIMAS = { 'bar.html': 207, 'arranque/splash.html': 188, 'guia/sistema.html': 79 };
+const LINHAS_MAXIMAS = { 'bar.html': 205, 'arranque/splash.html': 188, 'guia/sistema.html': 79 };
 
 test('os <script> em linha não crescem (a lógica nova vai para um .mjs testado)', () => {
   for (const pagina of PAGINAS) {

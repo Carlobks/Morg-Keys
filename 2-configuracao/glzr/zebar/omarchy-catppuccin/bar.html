@@ -49,7 +49,7 @@
       // Gerado com esbuild a partir do pacote npm zebar@3.3.1 (= versão instalada).
       import * as zebar from './vendor/zebar-3.3.1.mjs';
       import { bateria } from './partilhado/bateria.mjs';
-      import { claudeVista } from './partilhado/claude.mjs';
+      import { claudeVista, ligarClaude, USAGE_URL } from './partilhado/claude.mjs';
       import {
         ICON, audioVista, awakeVista, bateriaHTML, clockText, comandosDoBotao, cpuHTML, memoryHTML, minimizadas,
         minimizedHTML, modesHTML, networkHTML, proximoVolume, workspacesHTML,
@@ -60,7 +60,6 @@
       const PY = 'C:\\Windows\\py.exe';
       const PACK = '{{HOME}}/.glzr/zebar/omarchy-catppuccin';
       const correrBarHelper = (...args) => zebar.shellExec(PY, ['-I', `${PACK}/bar_helper.py`, ...args]);
-      const USAGE_EVERY_MS = 30_000; // só lê um ficheiro pequeno
       const AWAKE_EVERY_MS = 5_000;
 
       const providers = zebar.createProviderGroup({
@@ -225,7 +224,6 @@
 
       // --- Claude: % do plano (5h e semanal) e tempo até a janela de 5h repor ---
       // O que mostrar (e a dica) decide-se em partilhado/claude.mjs; aqui só se põe na página.
-      const USAGE_URL = 'https://claude.ai/settings/usage';
 
       function renderClaude(u) {
         const v = claudeVista(u);
@@ -247,9 +245,9 @@
         }
       }
 
-      $('claude').addEventListener('click', () => openWin(USAGE_URL));
-      refreshClaude();
-      setInterval(refreshClaude, USAGE_EVERY_MS);
+      // Clique: o modal dos limites (bar_helper.py limites); botão direito: a página de uso; releitura no claude.mjs.
+      ligarClaude($('claude'), { reler: refreshClaude, abrirUso: () => openWin(USAGE_URL),
+        abrirModal: () => zebar.shellExec(PY, ['-I', `${PACK}/bar_helper.py`, 'limites']) });
     </script>
   </body>
 </html>

@@ -58,7 +58,7 @@ class LimitesParaABarra(unittest.TestCase):
             "five_hour": {"used_percentage": 23.456, "resets_at": AGORA + 3600},
             "seven_day": {"used_percentage": 24, "resets_at": (AGORA + 86400) * 1000}}}
         self.assertEqual(correr(json.dumps(dados)), {
-            "now": AGORA, "mostrar": True, "captured_at": AGORA - 60,
+            "now": AGORA, "mostrar": True, "captured_at": AGORA - 60, "origem": None,
             "five_hour": {"pct": 23.5, "resets_at": AGORA + 3600},
             "seven_day": {"pct": 24.0, "resets_at": AGORA + 86400}})
 
@@ -67,11 +67,18 @@ class LimitesParaABarra(unittest.TestCase):
         self.assertIsNone(correr(json.dumps(dados))["five_hour"])
 
     def test_ficheiro_em_falta_estragado_ou_estranho(self):
-        vazio = {"now": AGORA, "mostrar": True, "captured_at": None, "five_hour": None, "seven_day": None}
+        vazio = {"now": AGORA, "mostrar": True, "captured_at": None, "origem": None, "five_hour": None,
+                 "seven_day": None}
         for conteudo in [None, "{nao e json", "[1, 2]", '{"rate_limits": "x"}',
                          '{"rate_limits": {"five_hour": "x", "seven_day": {"used_percentage": "50"}}}']:
             with self.subTest(conteudo=conteudo):
                 self.assertEqual(correr(conteudo), vazio)
+
+    def test_origem_dos_valores(self):
+        # O modal dos limites (morg_limites.py) grava "origem": "manual"; a statusLine não grava o campo.
+        for origem, esperado in [("manual", "manual"), (None, None), (3, None)]:
+            with self.subTest(origem=origem):
+                self.assertEqual(correr(json.dumps({"origem": origem}))["origem"], esperado)
 
 
 class MostrarOuEsconder(unittest.TestCase):

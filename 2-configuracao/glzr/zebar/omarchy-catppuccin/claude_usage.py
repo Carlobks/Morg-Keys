@@ -4,7 +4,8 @@ Fonte única: ~/.claude/rate_limits.json, escrito pelo ~/.claude/statusline.py
 sempre que uma sessão do Claude Code no terminal recebe `rate_limits` (as
 percentagens oficiais de 5 h e semanal). A aplicação de ambiente de trabalho
 não corre a statusLine, por isso os valores podem estar desatualizados: o
-campo `captured_at` diz de quando são, e a barra mostra essa idade.
+campo `captured_at` diz de quando são, e a barra mostra essa idade. Os valores postos à mão no modal dos
+limites (clique no ✻, morg_limites.py) vêm com "origem": "manual", e a dica da barra diz isso.
 Não se lê o token da conta nem se usa o endpoint não documentado do uso
 (regras da Anthropic: docs/pesquisa/quota-claude.md).
 
@@ -44,7 +45,8 @@ def _epoch(value):
 
 def main():
     now = int(time.time())
-    result = {"now": now, "mostrar": _mostrar(), "captured_at": None, "five_hour": None, "seven_day": None}
+    result = {"now": now, "mostrar": _mostrar(), "captured_at": None, "origem": None, "five_hour": None,
+              "seven_day": None}
     try:
         data = json.loads(RATE_FILE.read_text(encoding="utf-8"))
     except (OSError, ValueError):
@@ -52,6 +54,7 @@ def main():
     if not isinstance(data, dict):
         data = {}
     result["captured_at"] = _epoch(data.get("captured_at"))
+    result["origem"] = data["origem"] if isinstance(data.get("origem"), str) else None
     limits = data.get("rate_limits")
     limits = limits if isinstance(limits, dict) else {}
     for name in ("five_hour", "seven_day"):

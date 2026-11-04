@@ -1,9 +1,14 @@
 // Quota do Claude na barra (bar.html): o que mostrar a partir da saída do claude_usage.py.
 // Sem DOM: testa-se com node --test (tests/claude.test.mjs).
-// Só a via oficial (rate_limits da statusLine, no terminal); sem valores fica só o ✻ e a dica explica
-// porquê. `claude = esconder` no arranque.txt tira o indicador (docs/pesquisa/quota-claude.md).
+// Os valores vêm da statusLine do terminal ou do modal dos limites (clique no ✻, P7: "origem": "manual");
+// sem valores fica só o ✻ e a dica explica porquê. `claude = esconder` no arranque.txt tira o indicador
+// (docs/pesquisa/quota-claude.md, docs/pesquisa/modal-limites.md).
 
 export const STALE_AFTER_S = 15 * 60; // a partir daqui os valores ficam esbatidos
+export const USAGE_URL = 'https://claude.ai/settings/usage';
+export const RELER_MS = 30_000; // só lê um ficheiro pequeno
+export const RAPIDO_MS = 3_000; // depois do clique no ✻: o modal grava e a barra mostra logo
+export const RAPIDO_DURANTE_MS = 60_000;
 
 // Tempo até `epoch` (s): "2d3h", "1h05", "7m".
 export function fmtUntil(epoch, now) {
@@ -16,7 +21,7 @@ export function fmtUntil(epoch, now) {
 // Cor só como alerta (a barra é neutra, só a bateria tem cores): amarela a partir de 50 %, vermelha de 80 %.
 export const level = pct => (pct >= 80 ? 'high' : pct >= 50 ? 'warn' : '');
 
-const CLIQUE = 'Clique: abre a página de uso com os números exatos.';
+const CLIQUE = 'Clique: pôr os valores à mão · Botão direito: página de uso.';
 const ESCONDER = 'Para esconder: claude = esconder no arranque.txt (Documentos\\Guia de Atalhos).';
 
 // Saída do claude_usage.py -> { mostrar, html, stale, dica } para o indicador da barra.
@@ -41,13 +46,34 @@ export function claudeVista(u) {
     tips.push(`Sessão (5h): ${five.pct}% — repõe em ${fmtUntil(five.resets_at, u.now)}`);
   }
   if (week) tips.push(`Semanal: ${week.pct}% — repõe em ${fmtUntil(week.resets_at, u.now)}`);
-  tips.push(age === null
-    ? 'Ainda sem a hora dos valores.'
-    : `Valores de há ${fmtUntil(u.now + age, u.now)} (última sessão no terminal).`);
+  const idade = age === null ? '' : fmtUntil(u.now + age, u.now);
+  if (age === null) tips.push('Ainda sem a hora dos valores.');
+  else tips.push(u.origem === 'manual' ? `Valores postos à mão há ${idade}.` : `Valores de há ${idade} (última sessão no terminal).`);
   return {
     mostrar: true,
     html: parts.join(' <span class="sep">·</span> '),
     stale: age === null || age > STALE_AFTER_S,
     dica: [...tips, CLIQUE, ESCONDER].join('\n'),
   };
+}
+
+// Liga o ✻ da barra: lê já e de RELER_MS em RELER_MS; o clique abre o modal dos limites e relê de RAPIDO_MS em
+// RAPIDO_MS durante RAPIDO_DURANTE_MS (um 2.º clique recomeça o minuto); o botão direito abre a página de uso.
+// `t` traz os temporizadores (os testes passam uns falsos).
+export function ligarClaude(el, { reler, abrirModal, abrirUso }, t = globalThis) {
+  reler();
+  t.setInterval(reler, RELER_MS);
+  let rapido = null;
+  let fim = null;
+  el.addEventListener('click', () => {
+    Promise.resolve().then(abrirModal).catch(console.error);
+    t.clearInterval(rapido);
+    t.clearTimeout(fim);
+    rapido = t.setInterval(reler, RAPIDO_MS);
+    fim = t.setTimeout(() => t.clearInterval(rapido), RAPIDO_DURANTE_MS);
+  });
+  el.addEventListener('contextmenu', e => {
+    e.preventDefault(); // sem o menu do WebView2
+    abrirUso();
+  });
 }

@@ -1,7 +1,9 @@
 // Quota do Claude na barra (partilhado/claude.mjs): valores, sem valores (só o ✻), esbatido e esconder.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { claudeVista, fmtUntil, level, STALE_AFTER_S } from '../2-configuracao/glzr/zebar/omarchy-catppuccin/partilhado/claude.mjs';
+import {
+  claudeVista, fmtUntil, level, ligarClaude, RAPIDO_DURANTE_MS, RAPIDO_MS, RELER_MS, STALE_AFTER_S,
+} from '../2-configuracao/glzr/zebar/omarchy-catppuccin/partilhado/claude.mjs';
 
 const AGORA = 1_800_000_000;
 
@@ -26,7 +28,7 @@ test('sem valores: só o ✻, com a dica a explicar porquê (e há quanto tempo 
   assert.equal(v.mostrar, true);
   assert.equal(v.html, '');
   assert.match(v.dica, /sem valores\.\nSó chegam quando usa o Claude Code num terminal/);
-  assert.match(v.dica, /Clique: abre a página de uso/);
+  assert.match(v.dica, /Clique: pôr os valores à mão · Botão direito: página de uso\./);
   assert.match(v.dica, /claude = esconder/);
   assert.doesNotMatch(v.dica, /expiraram/);
   const antigos = claudeVista({ now: AGORA, captured_at: AGORA - 7200, five_hour: null, seven_day: null });
@@ -53,4 +55,65 @@ test('só uma janela; valores velhos ou sem hora ficam esbatidos', () => {
   assert.match(soSemana.html, /^<span class="muted">5h —<\/span>.*sem 10%<\/span>$/);
   assert.equal(soSemana.stale, true);
   assert.match(soSemana.dica, /Ainda sem a hora dos valores\./);
+});
+
+test('valores postos à mão no modal: a dica diz de onde vêm e há quanto tempo', () => {
+  const v = claudeVista({ now: AGORA, captured_at: AGORA - 300, origem: 'manual',
+    five_hour: { pct: 40, resets_at: AGORA + 8100 }, seven_day: null });
+  assert.match(v.dica, /Valores postos à mão há 5m\./);
+  assert.doesNotMatch(v.dica, /terminal/);
+});
+
+// Elemento e relógio falsos: o ligarClaude só usa addEventListener, setInterval/clearInterval e setTimeout/clearTimeout.
+function falsos() {
+  const ouvintes = {};
+  const el = { addEventListener: (tipo, f) => { ouvintes[tipo] = f; } };
+  const relogio = { proximo: 1, ativos: new Map(), feitos: [],
+    setInterval(f, ms) { const id = this.proximo++; this.ativos.set(id, { f, ms, tipo: 'cada' }); return id; },
+    setTimeout(f, ms) { const id = this.proximo++; this.ativos.set(id, { f, ms, tipo: 'uma' }); return id; },
+    clearInterval(id) { this.ativos.delete(id); },
+    clearTimeout(id) { this.ativos.delete(id); },
+    de(ms, tipo) { return [...this.ativos.values()].filter(a => a.ms === ms && a.tipo === tipo); },
+  };
+  return { ouvintes, el, relogio };
+}
+
+test('ligarClaude: lê já e de 30 em 30 s; o clique abre o modal e relê de 3 em 3 s durante 1 min', async () => {
+  const { ouvintes, el, relogio } = falsos();
+  const pedidos = [];
+  ligarClaude(el, { reler: () => pedidos.push('reler'), abrirModal: async () => pedidos.push('modal'),
+    abrirUso: () => pedidos.push('uso') }, relogio);
+  assert.deepEqual(pedidos, ['reler']);
+  assert.equal(relogio.de(RELER_MS, 'cada').length, 1);
+  ouvintes.click();
+  ouvintes.click(); // um 2.º clique recomeça o minuto, sem duplicar a releitura rápida
+  await Promise.resolve();
+  assert.deepEqual(pedidos, ['reler', 'modal', 'modal']);
+  assert.equal(relogio.de(RAPIDO_MS, 'cada').length, 1);
+  const [fim] = relogio.de(RAPIDO_DURANTE_MS, 'uma');
+  relogio.de(RAPIDO_MS, 'cada')[0].f();
+  assert.equal(pedidos.at(-1), 'reler');
+  fim.f();
+  assert.equal(relogio.de(RAPIDO_MS, 'cada').length, 0);
+  assert.equal(relogio.de(RELER_MS, 'cada').length, 1);
+});
+
+test('ligarClaude: o botão direito abre a página de uso sem o menu do WebView2; um erro do modal não rebenta', async () => {
+  const { ouvintes, el, relogio } = falsos();
+  const pedidos = [];
+  const erros = [];
+  const erroOriginal = console.error;
+  console.error = e => erros.push(String(e));
+  try {
+    ligarClaude(el, { reler: () => {}, abrirUso: () => pedidos.push('uso'),
+      abrirModal: () => Promise.reject(new Error('sem Zebar')) }, relogio);
+    let evitado = false;
+    ouvintes.contextmenu({ preventDefault: () => { evitado = true; } });
+    assert.deepEqual([pedidos, evitado], [['uso'], true]);
+    ouvintes.click();
+    await new Promise(r => setImmediate(r));
+    assert.deepEqual(erros, ['Error: sem Zebar']);
+  } finally {
+    console.error = erroOriginal;
+  }
 });
