@@ -51,7 +51,7 @@ Com teste vermelho primeiro:
 
 - [x] cada teste vermelho antes e verde depois; `testar.ps1` verde; os 14 estragos novos apanhados;
 - [x] a página vista em `limites/limites.html?preview`;
-- [ ] **o teu teste real**, depois de reinstalar com o teu OK:
+- [x] **o teu teste real** (feito pelo dono a 2026-11-04: "Funcionou."):
   1. clicar no ✻;
   2. pôr `40` nas 5 h, `2h15` no reset e `70` na semana, e carregar em Enter;
   3. a barra mostra logo `5h 40% · sem 70% · ↺ 2h15`;
