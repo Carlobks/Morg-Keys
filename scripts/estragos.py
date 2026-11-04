@@ -136,8 +136,25 @@ MUTANTES = [
     ('or numeros(versao) <= numeros(atual):', 'or numeros(versao) < numeros(atual):'),
     ('and not depois.endswith(parte_lancada(antes))', 'and False'),
     ('topo[1] != versao or f"## [{versao}]" in antes:', 'topo[1] != versao:'),
+    # P7: modal dos limites do Claude (morg_limites.py, claude_usage.py, claude.mjs e limites-logica.mjs)
+    ("if not m or int(m.group(1)) > 100:", "if not m:"),
+    ("if minutos and not sufixo and not horas:", "if False:"),
+    ("return int((alvo if alvo > base else alvo + timedelta(days=1)).timestamp())", "return int(alvo.timestamp())"),
+    ("alvo += timedelta(days=(DIAS[dia] - base.weekday()) % 7)", "alvo += timedelta(days=DIAS[dia])"),
+    ("if reset - agora > maximo + FOLGA_S:", "if False:"),
+    ("or not reset or reset <= agora:", "or not reset:"),
+    ('pct = anterior.get("pct") if pct is None else pct', "pct = pct"),
+    ('dados.update({"captured_at": agora, "origem": "manual", "rate_limits": limites})',
+     'dados.update({"captured_at": agora, "rate_limits": limites})'),
+    ('result["origem"] = data["origem"] if isinstance(data.get("origem"), str) else None', 'result["origem"] = None'),
+    ("rapido = t.setInterval(reler, RAPIDO_MS);", "rapido = null;"),
+    ("e.preventDefault(); // sem o menu do WebView2", "// sem o menu do WebView2"),
+    ("u.origem === 'manual' ? `Valores postos", "false ? `Valores postos"),
+    ("estado.origem === 'manual' ? `Postos", "false ? `Postos"),
+    ("r?.errors ? '' :", "r?.errors ? 'x' :"),
 ]
-PASTAS_DO_PACK = ["*.py", "*.mjs", "partilhado/*.mjs", "painel/*.mjs", "guia/*.mjs", "arranque/*.mjs"]
+PASTAS_DO_PACK = ["*.py", "*.mjs", "partilhado/*.mjs", "painel/*.mjs", "guia/*.mjs", "arranque/*.mjs",
+                  "limites/*.mjs"]
 # Fora do pack, com testes Python. Só os ficheiros com estragos: os outros portões repetem o sys.path.insert do
 # bar_helper.py, e um estrago só se aplica se o texto for único.
 FERRAMENTAS = ["scripts/changelog/juntar_changelog.py", "scripts/portoes/versao_lancada.py"]
