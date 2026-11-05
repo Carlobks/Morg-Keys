@@ -58,7 +58,7 @@ MUTANTES = [
     ('drop |= {i for i, k, _ in entries if k == src}', 'pass'),
     ('        _panel_pop_undo()\n        # "linha 12', '        # "linha 12'),
     ('    start = time.monotonic()\n    wait = ', '    start = 0\n    wait = '),
-    ('and reset and reset > now:', 'and reset:'),
+    ("or not reset:", "or False:"),
     ('return int(value / 1000) if value > 1e12 else int(value)', 'return int(value)'),
     ('sys.path.insert(0, str(Path(__file__).resolve().parent))', 'pass'),
     # boot e arranque.txt (fase 2b)
