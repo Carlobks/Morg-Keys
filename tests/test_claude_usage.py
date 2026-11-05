@@ -62,9 +62,25 @@ class LimitesParaABarra(unittest.TestCase):
             "five_hour": {"pct": 23.5, "resets_at": AGORA + 3600},
             "seven_day": {"pct": 24.0, "resets_at": AGORA + 86400}})
 
-    def test_janela_ja_reposta_deixa_de_valer(self):
+    def test_janela_ja_reposta_fica_como_ultimo_valor_expirado(self):
+        # O último valor não some: a barra mostra-o esbatido até alguém o atualizar (clique no ✻).
         dados = {"rate_limits": {"five_hour": {"used_percentage": 90, "resets_at": AGORA - 1}}}
-        self.assertIsNone(correr(json.dumps(dados))["five_hour"])
+        self.assertEqual(correr(json.dumps(dados))["five_hour"],
+                         {"pct": 90.0, "resets_at": AGORA - 1, "expirado": True})
+
+    def test_semanal_expirada_avanca_de_7_em_7_dias_ate_ao_futuro(self):
+        semana = 7 * 86400
+        for atraso, ciclos in [(0, 1), (1, 1), (semana, 2), (semana + 5, 2), (3 * semana + 1, 4)]:
+            with self.subTest(atraso=atraso):
+                dados = {"rate_limits": {"seven_day": {"used_percentage": 70, "resets_at": AGORA - atraso}}}
+                self.assertEqual(correr(json.dumps(dados))["seven_day"], {
+                    "pct": 70.0, "resets_at": AGORA - atraso + ciclos * semana, "expirado": True})
+
+    def test_janela_sem_reset_ou_com_percentagem_estranha_nao_conta(self):
+        for janela in [{"used_percentage": 50}, {"used_percentage": 50, "resets_at": 0},
+                       {"used_percentage": True, "resets_at": AGORA + 5}, {"used_percentage": "5", "resets_at": AGORA}]:
+            with self.subTest(janela=janela):
+                self.assertIsNone(correr(json.dumps({"rate_limits": {"five_hour": janela}}))["five_hour"])
 
     def test_ficheiro_em_falta_estragado_ou_estranho(self):
         vazio = {"now": AGORA, "mostrar": True, "captured_at": None, "origem": None, "five_hour": None,

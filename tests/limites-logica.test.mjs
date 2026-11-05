@@ -25,6 +25,16 @@ test('valoresIniciais: sem valores, campos vazios e exemplos do que se pode escr
   });
 });
 
+test('valoresIniciais: janelas expiradas abrem com o último % e a dica avisa que o reset passou', () => {
+  const estado = { ...SEM_NADA, five_hour: { pct: 90, resets_at: AGORA - 600, expirado: true },
+    seven_day: { pct: 70, resets_at: AGORA + 2 * 86400 + 3600, expirado: true } };
+  assert.deepEqual(valoresIniciais(estado), {
+    five_pct: '90', five_reset: '', week_pct: '70', week_reset: '',
+    five_reset_dica: 'o reset já passou — ex.: 14:30 ou 2h15',
+    week_reset_dica: 'vazio: fica 2d1h (reset já passou)',
+  });
+});
+
 test('origemDosValores: à mão, do terminal ou ainda nenhuns', () => {
   assert.equal(origemDosValores(SEM_NADA), 'Ainda sem valores guardados.');
   assert.equal(origemDosValores({ ...SEM_NADA, captured_at: AGORA - 300, origem: 'manual' }),

@@ -64,6 +64,32 @@ test('valores postos à mão no modal: a dica diz de onde vêm e há quanto temp
   assert.doesNotMatch(v.dica, /terminal/);
 });
 
+test('janelas expiradas: o último % fica esbatido, a 5 h sem "↺" e a dica diz que o reset passou', () => {
+  const v = claudeVista({ now: AGORA, captured_at: AGORA - 30_000, origem: 'manual',
+    five_hour: { pct: 90, resets_at: AGORA - 600, expirado: true },
+    seven_day: { pct: 70, resets_at: AGORA + 3 * 86400, expirado: true } });
+  assert.equal(v.html, '<span class="muted">5h 90%</span> <span class="sep">·</span> <span class="muted">sem 70%</span>');
+  assert.equal(v.stale, true);
+  assert.match(v.dica, /Sessão \(5h\): 90% — o reset já passou\./);
+  assert.match(v.dica, /Semanal: 70% — o reset já passou \(próximo em 3d0h\)\./);
+  assert.match(v.dica, /Reset já passou: um clique no ✻ atualiza\./);
+  assert.doesNotMatch(v.dica, /repõe em/);
+});
+
+test('uma janela expirada e a outra viva: só a expirada fica esbatida e mantém o "↺" da viva', () => {
+  const v = claudeVista({ now: AGORA, captured_at: AGORA - 60,
+    five_hour: { pct: 20, resets_at: AGORA + 3600 }, seven_day: { pct: 85, resets_at: AGORA + 86400, expirado: true } });
+  assert.match(v.html, /<span class="">5h 20%<\/span>.*<span class="muted">sem 85%<\/span>.*↺ 1h00/);
+  assert.match(v.dica, /Sessão \(5h\): 20% — repõe em 1h00/);
+  assert.match(v.dica, /Reset já passou: um clique/);
+});
+
+test('sem janelas expiradas, a dica não fala em reset passado', () => {
+  const v = claudeVista({ now: AGORA, captured_at: AGORA - 60,
+    five_hour: { pct: 20, resets_at: AGORA + 3600 }, seven_day: null });
+  assert.doesNotMatch(v.dica, /já passou/);
+});
+
 // Elemento e relógio falsos: o ligarClaude só usa addEventListener, setInterval/clearInterval e setTimeout/clearTimeout.
 function falsos() {
   const ouvintes = {};

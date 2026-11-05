@@ -132,12 +132,20 @@ class Modal(unittest.TestCase):
             "now": self.agora, "captured_at": None, "origem": None, "five_hour": None, "seven_day": None}})
 
     def test_estado_com_valores_e_janela_ja_reposta(self):
+        # A 5 h expirada continua no estado (o modal abre com o último %); a semanal tem o ciclo avançado.
         self.gravar_ficheiro({"captured_at": self.agora - 60, "origem": "manual", "rate_limits": {
             "five_hour": {"used_percentage": 23.5, "resets_at": self.agora - 1},
             "seven_day": {"used_percentage": 40, "resets_at": (self.agora + 99) * 1000}}})
         self.assertEqual(self.pedir("state")["state"], {
-            "now": self.agora, "captured_at": self.agora - 60, "origem": "manual", "five_hour": None,
+            "now": self.agora, "captured_at": self.agora - 60, "origem": "manual",
+            "five_hour": {"pct": 23.5, "resets_at": self.agora - 1, "expirado": True},
             "seven_day": {"pct": 40, "resets_at": self.agora + 99}})
+
+    def test_estado_com_semanal_expirada_avanca_o_ciclo(self):
+        passado = self.agora - 86400
+        self.gravar_ficheiro({"rate_limits": {"seven_day": {"used_percentage": 40, "resets_at": passado}}})
+        self.assertEqual(self.pedir("state")["state"]["seven_day"],
+                         {"pct": 40, "resets_at": passado + 7 * 86400, "expirado": True})
 
     def test_estado_com_ficheiro_estragado(self):
         for conteudo in ["{", "[]", json.dumps({"rate_limits": []}), json.dumps({"rate_limits": {"five_hour": 3}})]:
@@ -182,6 +190,22 @@ class Modal(unittest.TestCase):
         self.gravar_ficheiro({"rate_limits": {"five_hour": {"used_percentage": 10, "resets_at": self.agora - 5}}})
         resposta = self.gravar(five_pct="40", five_reset="")
         self.assertEqual(resposta["errors"], {"five_reset": "Falta a hora do reset."})
+
+    def test_5h_expirada_aproveita_o_pct_mas_pede_reset_novo(self):
+        # Nunca se grava uma hora no passado: o reset da 5 h expirada tem de ser dito de novo.
+        self.gravar_ficheiro({"rate_limits": {"five_hour": {"used_percentage": 10, "resets_at": self.agora - 5}}})
+        resposta = self.gravar(five_pct="", five_reset="")
+        self.assertEqual(resposta["errors"], {"five_reset": "Falta a hora do reset."})
+        self.assertTrue(self.gravar(five_pct="", five_reset="45m")["ok"])
+        self.assertEqual(self.ficheiro_json()["rate_limits"]["five_hour"],
+                         {"used_percentage": 10, "resets_at": self.agora + 45 * 60})
+
+    def test_semanal_expirada_grava_com_o_reset_avancado(self):
+        passado = self.agora - 86400
+        self.gravar_ficheiro({"rate_limits": {"seven_day": {"used_percentage": 40, "resets_at": passado}}})
+        self.assertTrue(self.gravar(week_pct="55", week_reset="")["ok"])
+        self.assertEqual(self.ficheiro_json()["rate_limits"]["seven_day"],
+                         {"used_percentage": 55, "resets_at": passado + 7 * 86400})
 
     def test_erros_de_formato_por_campo(self):
         resposta = self.gravar(five_pct="140", five_reset="6h", week_pct="x", week_reset="zz")

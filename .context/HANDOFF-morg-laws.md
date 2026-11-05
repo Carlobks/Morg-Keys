@@ -170,6 +170,10 @@ Técnicas (tomadas durante as fases, com o motivo medido):
    Zebar. **Testado pelo dono a 2026-11-04:** "Funcionou." Enviado com o OK a 2026-11-04: `exp/a` até `0b1fb14`, CI verde (corrida 41785743861). A seguir: um fix
    pequeno que o dono vai descrever na sessão nova. Lições: as catracas dos `noqa`/`node:coverage disable` e dos
    `<script>` em linha não deixam crescer; escrever os scripts com barras pelo Write, não pelo heredoc.
+   **Fix dos limites expirados (2026-11-05, "Último valor esbatido", decisão do dono):** os números do modal
+   sumiam quando o `resets_at` passava (o ficheiro sobrevive). Agora `claude_usage.janela_com_reposicao` mantém a
+   janela com `"expirado": true` (semanal com o reset avançado de 7 em 7 dias; 5 h sem reset futuro); a barra
+   mostra-a esbatida, o modal abre com o %, e a 5 h expirada pede reset novo. Por testar pelo dono (reset `2m`).
    **Arrastar abas do Chrome** (pesquisa `docs/pesquisa/arrastar-janelas.md`): issue #1080 do GlazeWM, por resolver
    na 3.10.1; o GlazeWM não tem animações. Falta validar com o dono (com e sem `Alt+Shift+P`).
    **Pedido novo:** atualizar o Morg Keys pelo `Alt+Esc, U` (procura versão nova no GitHub e atualiza); pede

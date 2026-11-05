@@ -18,6 +18,7 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from claude_usage import CICLO_S, janela_com_reposicao
 from morg_painel import _panel_release, _show_with_focus
 from morg_processos import HERE
 from morg_win32 import user32
@@ -110,23 +111,19 @@ def _ler_ficheiro():
     return dados if isinstance(dados, dict) else {}
 
 
-def _janela_valida(dados, nome, agora):
-    """{"pct", "resets_at"} da janela, só se ainda não repôs; senão None."""
+def _janela_guardada(dados, nome, agora):
+    """{"pct", "resets_at"} da janela como o claude_usage.py a lê (a barra e o modal mostram o mesmo); já
+    reposta vem com "expirado": True (semanal: reset avançado; 5 h: reset no passado); sem valores None."""
     limites = dados.get("rate_limits")
     janela = limites.get(nome) if isinstance(limites, dict) else None
-    if not isinstance(janela, dict):
-        return None
-    pct, reset = janela.get("used_percentage"), _epoch(janela.get("resets_at"))
-    if isinstance(pct, bool) or not isinstance(pct, (int, float)) or not reset or reset <= agora:
-        return None
-    return {"pct": pct, "resets_at": reset}
+    return janela_com_reposicao(janela, agora, CICLO_S.get(nome))
 
 
 def _limites_state(agora):
     dados = _ler_ficheiro()
     estado = {"now": agora, "captured_at": _epoch(dados.get("captured_at")), "origem": dados.get("origem")}
     for nome, _ in JANELAS.values():
-        estado[nome] = _janela_valida(dados, nome, agora)
+        estado[nome] = _janela_guardada(dados, nome, agora)
     return estado
 
 
@@ -140,15 +137,22 @@ def _ler_campo(campos, chave, ler, erros):
         return None
 
 
+def _reset_anterior(anterior, agora):
+    """O reset guardado, se ainda for futuro; senão None (a janela pede um reset novo)."""
+    reset = anterior.get("resets_at")
+    return reset if reset and reset > agora else None
+
+
 def _novas_janelas(campos, agora):
-    """(janelas a gravar {nome: {...}}, erros por campo). Um campo vazio mantém o valor anterior válido."""
+    """(janelas a gravar {nome: {...}}, erros por campo). Um campo vazio mantém o valor anterior: o % mesmo
+    expirado; o reset só se ainda for futuro (nunca se grava uma hora no passado: a 5 h expirada pede um novo)."""
     dados, novas, erros = _ler_ficheiro(), {}, {}
     for prefixo, (nome, maximo) in JANELAS.items():
         pct = _ler_campo(campos, prefixo + "_pct", ler_percentagem, erros)
         reset = _ler_campo(campos, prefixo + "_reset", lambda t, m=maximo: ler_reset(t, agora, m), erros)
-        anterior = _janela_valida(dados, nome, agora) or {}
+        anterior = _janela_guardada(dados, nome, agora) or {}
         pct = anterior.get("pct") if pct is None else pct
-        reset = anterior.get("resets_at") if reset is None else reset
+        reset = _reset_anterior(anterior, agora) if reset is None else reset
         if pct is None and reset is None:
             continue  # janela toda vazia e sem valor anterior: fica como estava
         if pct is None:

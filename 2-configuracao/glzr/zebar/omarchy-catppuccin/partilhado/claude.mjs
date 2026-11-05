@@ -24,6 +24,27 @@ export const level = pct => (pct >= 80 ? 'high' : pct >= 50 ? 'warn' : '');
 const CLIQUE = 'Clique: pôr os valores à mão · Botão direito: página de uso.';
 const ESCONDER = 'Para esconder: claude = esconder no arranque.txt (Documentos\\Guia de Atalhos).';
 
+const RESET_PASSOU = 'Reset já passou: um clique no ✻ atualiza.';
+
+// "5h 40%" com a cor do nível; esbatido (muted) se o reset já passou; "5h —" sem janela.
+function spanDaJanela(rotulo, janela) {
+  if (!janela) return `<span class="muted">${rotulo} —</span>`;
+  return `<span class="${janela.expirado ? 'muted' : level(janela.pct)}">${rotulo} ${Math.round(janela.pct)}%</span>`;
+}
+
+function dicasDasJanelas(five, week, now) {
+  const tips = [];
+  if (five) {
+    tips.push(five.expirado ? `Sessão (5h): ${five.pct}% — o reset já passou.`
+      : `Sessão (5h): ${five.pct}% — repõe em ${fmtUntil(five.resets_at, now)}`);
+  }
+  if (week) {
+    tips.push(week.expirado ? `Semanal: ${week.pct}% — o reset já passou (próximo em ${fmtUntil(week.resets_at, now)}).`
+      : `Semanal: ${week.pct}% — repõe em ${fmtUntil(week.resets_at, now)}`);
+  }
+  return tips;
+}
+
 // Saída do claude_usage.py -> { mostrar, html, stale, dica } para o indicador da barra.
 export function claudeVista(u) {
   if (u.mostrar === false) return { mostrar: false, html: '', stale: false, dica: '' };
@@ -36,16 +57,11 @@ export function claudeVista(u) {
     if (age !== null) tips.push(`Os últimos (de há ${fmtUntil(u.now + age, u.now)}) já expiraram.`);
     return { mostrar: true, html: '', stale: false, dica: [...tips, CLIQUE, ESCONDER].join('\n') };
   }
-  const parts = [
-    five ? `<span class="${level(five.pct)}">5h ${Math.round(five.pct)}%</span>` : '<span class="muted">5h —</span>',
-    week ? `<span class="${level(week.pct)}">sem ${Math.round(week.pct)}%</span>` : '<span class="muted">sem —</span>',
-  ];
-  const tips = [];
-  if (five) {
-    parts.push(`<span class="muted">↺ ${fmtUntil(five.resets_at, u.now)}</span>`);
-    tips.push(`Sessão (5h): ${five.pct}% — repõe em ${fmtUntil(five.resets_at, u.now)}`);
-  }
-  if (week) tips.push(`Semanal: ${week.pct}% — repõe em ${fmtUntil(week.resets_at, u.now)}`);
+  const parts = [spanDaJanela('5h', five), spanDaJanela('sem', week)];
+  // Reset já passou: o último valor fica esbatido e sem "↺" (não há reset futuro conhecido para a 5 h).
+  if (five && !five.expirado) parts.push(`<span class="muted">↺ ${fmtUntil(five.resets_at, u.now)}</span>`);
+  const tips = dicasDasJanelas(five, week, u.now);
+  if (five?.expirado || week?.expirado) tips.push(RESET_PASSOU);
   const idade = age === null ? '' : fmtUntil(u.now + age, u.now);
   if (age === null) tips.push('Ainda sem a hora dos valores.');
   else tips.push(u.origem === 'manual' ? `Valores postos à mão há ${idade}.` : `Valores de há ${idade} (última sessão no terminal).`);

@@ -7,7 +7,13 @@ import { b64 } from '../painel/apps-logica.mjs';
 export const CAMPOS = ['five_pct', 'five_reset', 'week_pct', 'week_reset'];
 
 const pctDoCampo = janela => (janela ? String(Math.round(janela.pct)) : '');
-const dicaDoReset = (janela, now, exemplo) => (janela ? `vazio: fica ${fmtUntil(janela.resets_at, now)}` : exemplo);
+// Reset no passado (5 h expirada): vazio não serve, tem de escrever um novo. Semanal expirada: o claude_usage.py
+// já avançou o ciclo de 7 dias, e a dica avisa que o reset original passou.
+function dicaDoReset(janela, now, exemplo) {
+  if (!janela) return exemplo;
+  if (janela.resets_at <= now) return `o reset já passou — ${exemplo}`;
+  return `vazio: fica ${fmtUntil(janela.resets_at, now)}${janela.expirado ? ' (reset já passou)' : ''}`;
+}
 
 // Estado do `limites state` -> valores iniciais dos campos. O reset fica vazio (vazio mantém o atual) e o
 // atual aparece na dica: escrever por cima de um "2h15" já velho gravaria uma hora errada.
