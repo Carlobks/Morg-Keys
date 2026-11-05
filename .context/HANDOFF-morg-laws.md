@@ -167,7 +167,8 @@ Técnicas (tomadas durante as fases, com o motivo medido):
    estrutura, `70bb2ac` lógica, `9da1b0e` página e widget, `45c54ba` barra, `3690913` estragos e o fecho. O
    clique no ✻ abre o modal (`bar_helper.py limites`), o botão direito abre a página de uso e a barra relê de 3
    em 3 s durante 1 min (`ligarClaude` no `claude.mjs`). O `limites` vem pré-carregado no `settings.json` do
-   Zebar. **Testado pelo dono a 2026-11-04:** "Funcionou." Por enviar: tudo desde `7b92684`. Lições: as catracas dos `noqa`/`node:coverage disable` e dos
+   Zebar. **Testado pelo dono a 2026-11-04:** "Funcionou." Enviado com o OK a 2026-11-04: `exp/a` até `0b1fb14`, CI verde (corrida 41785743861). A seguir: um fix
+   pequeno que o dono vai descrever na sessão nova. Lições: as catracas dos `noqa`/`node:coverage disable` e dos
    `<script>` em linha não deixam crescer; escrever os scripts com barras pelo Write, não pelo heredoc.
    **Arrastar abas do Chrome** (pesquisa `docs/pesquisa/arrastar-janelas.md`): issue #1080 do GlazeWM, por resolver
    na 3.10.1; o GlazeWM não tem animações. Falta validar com o dono (com e sem `Alt+Shift+P`).
