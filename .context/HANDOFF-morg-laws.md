@@ -175,9 +175,8 @@ Técnicas (tomadas durante as fases, com o motivo medido):
    janela com `"expirado": true` (semanal com o reset avançado de 7 em 7 dias; 5 h sem reset futuro); a barra
    mostra-a esbatida, o modal abre com o %, e a 5 h expirada pede reset novo. `258b65d` fix e `091d0bc` estrago, feitos
    numa sessão Sonnet e revistos: `testar.ps1` verde (525 Python, 80 Pester, cobertura 100 %), estragos 122/122.
-   **A-RETOMAR:** o dono está a fazer o teste real (reinstalar; modal com `40` e reset `2m`; esperar; a barra
-   fica esbatida sem "↺", o modal reabre com o `40`, gravar sem reset diz "Falta a hora do reset."; também
-   depois de reiniciar). Se passar, pedir o "sim" ao push de `b98cb57`, `258b65d`, `091d0bc` e deste commit.
+   **Testado pelo dono a 2026-11-07:** "o fix funcionou". Enviado com o OK a 2026-11-07 (`exp/a`). A seguir,
+   cada um com o "sim": P5 (jogo sem bordas + `set-fullscreen`), pedido `Alt+Esc, U`, etiqueta "erro", workflow no `main`.
    **Arrastar abas do Chrome** (pesquisa `docs/pesquisa/arrastar-janelas.md`): issue #1080 do GlazeWM, por resolver
    na 3.10.1; o GlazeWM não tem animações. Falta validar com o dono (com e sem `Alt+Shift+P`).
    **Pedido novo:** atualizar o Morg Keys pelo `Alt+Esc, U` (procura versão nova no GitHub e atualiza); pede
