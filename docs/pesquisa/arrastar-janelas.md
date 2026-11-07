@@ -4,7 +4,7 @@
 salta de um lado para o outro, às vezes vai para o lado certo e às vezes fica uma linha fina que não se abre? E
 como se tem uma animação suave na arrumação, como no Omarchy? Relato do dono, 2026-11-03.
 
-**Estado:** pesquisa feita; **nada validado neste PC ainda**.
+**Estado:** causa confirmada com o dono a 2026-11-07 (secção "Teste com o dono"); correção decidida (A, mosaico ao largar) e por implementar.
 
 ## Fontes (lidas a 2026-11-03)
 
@@ -61,3 +61,46 @@ como se tem uma animação suave na arrumação, como no Omarchy? Relato do dono
 1. Arrastar uma aba do Chrome para fora com o Morg Keys como está, e anotar o que acontece (salta? linha fina?).
 2. O mesmo com o GlazeWM pausado (`Alt+Shift+P`): se o problema desaparecer, é o GlazeWM (a #1080).
 3. Se a correção 1 avançar: provar com o Chrome e com outra app que arrasta abas (ex.: o Terminal do Windows).
+
+## Teste com o dono (2026-11-07)
+
+Gravação das janelas do GlazeWM 5 vezes por segundo (consulta `query windows`, só leitura) enquanto o dono
+arrastava abas do Chrome, sem pausa:
+- cada aba arrastada para fora é uma janela nova do `chrome`; aparece `floating` e, **0,24 s depois**, o GlazeWM
+  já a meteu no mosaico (`tiling`), com o botão do rato ainda carregado;
+- durante o arrasto o Chrome cria e destrói janelas várias vezes (mais de 15 em 37 s); cada vez o GlazeWM
+  rearruma tudo (metades horizontais, verticais, três colunas e de volta);
+- a "linha fina": uma janela com **244 px** de altura (`1896x244`), espremida entre duas.
+
+Com o GlazeWM pausado (`Alt+Shift+P`), nas palavras do dono: "ficou muito melhor", e o encaixe do Windows nos
+cantos funciona. **Confirma a hipótese 1 (a #1080).** A gravação com pausa não vê nada, porque o GlazeWM pausado
+não arruma janelas novas.
+
+Nota: `glazewm sub` com a saída redirecionada para um ficheiro não escreveu nada em 10 minutos (o processo estava
+vivo). Para um ajudante, usar a ligação do GlazeWM em vez da linha de comandos.
+
+**Decisão do dono (2026-11-07, "siga a recomendação"): A. mosaico ao largar.** Enquanto se arrasta, a janela nova
+fica solta e nada se mexe; ao largar, entra no mosaico de uma vez.
+
+## Como fazer a correção 1 (lido a 2026-11-07)
+
+- **Ligação ao GlazeWM:** o `packages/wm/src/ipc_server.rs` (v3.10.1) abre um WebSocket só em
+  `127.0.0.1:6123` e lê cada mensagem como os argumentos da linha de comandos (`message.split_whitespace()`).
+  Responde em JSON (`ClientResponse` com `data`, `error`, `success`; `EventSubscription` com `subscription_id`).
+  Um ajudante liga-se uma vez, pede `sub -e window_managed` e fica parado à espera (sem gastar CPU). O Python
+  só com a biblioteca padrão não tem cliente WebSocket: são umas dezenas de linhas (aperto de mão HTTP e
+  tramas com máscara, RFC 6455), testáveis sem rede.
+- **Apontar a uma janela:** `command --id <uuid> <comando>` (`subject_container_id` em
+  `packages/wm-common/src/app_command.rs`). `set-floating` aceita `--centered=false` (sem isso usa o
+  `centered: true` do `config.yaml`) e `set-tiling` não tem opções.
+- **O botão do rato:** `GetAsyncKeyState(VK_LBUTTON)` (documentação da Microsoft, lida a 2026-11-07) dá o estado
+  **físico** do botão, seja qual for a janela em foco; com os botões trocados (`GetSystemMetrics(SM_SWAPBUTTON)`)
+  o botão principal é o `VK_RBUTTON`. Devolve 0 quando falha (por exemplo, com uma janela de administrador em
+  primeiro plano): aí o ajudante não faz nada e fica como hoje.
+- **O fluxo:** chega `window_managed` → se o botão está carregado, `command --id X set-floating --centered=false`
+  → vê o botão a cada 50 ms (só enquanto há um arrasto) → ao largar, `command --id X set-tiling`. Uma janela que
+  o Chrome já destruiu dá erro no `set-tiling`, que se ignora.
+- **Arranque e fim:** uma linha nova nos `startup_commands` do `config.yaml` (`pyw.exe -I bar_helper.py …`, como
+  as outras); quando o GlazeWM fecha, a ligação cai e o ajudante sai.
+- **Risco por medir:** o `window_managed` chega depois de o GlazeWM já ter arrumado a janela, por isso pode ficar
+  **um** salto curto (arrumar e soltar) em vez de muitos. Mede-se no teste do dono.
