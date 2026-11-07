@@ -41,7 +41,7 @@ class ListaDeComandos(unittest.TestCase):
         ("awake-hold",): "awake_hold", ("quick",): "quick_settings", ("guide",): "guide",
         ("guide-hide",): "guide_hide", ("guide-ensure-hidden",): "guide_ensure_hidden", ("bar", "toggle"): "bar_toggle",
         ("restore-min",): "restore_minimized", ("layout-restore",): "layout_restore",
-        ("boot",): "boot", ("splash-ready",): "splash_ready", ("apps-apply",): "apps_apply",
+        ("arrastar",): "arrastar", ("boot",): "boot", ("splash-ready",): "splash_ready", ("apps-apply",): "apps_apply",
         ("apps-edit",): "apps_edit", ("panel",): "panel_show", ("panel-hide",): "panel_hide",
         ("layer-show",): "layer_show", ("layer-hide",): "layer_hide", ("on-exit",): "on_exit",
         ("after-exit",): "after_exit", ("lock",): "lock", ("erro-de-teste",): "erro_de_teste",

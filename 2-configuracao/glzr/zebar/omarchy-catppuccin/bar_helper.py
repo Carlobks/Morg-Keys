@@ -11,6 +11,7 @@
   bar toggle      -> Alt+Shift+Espaço: esconde/mostra a barra do Zebar
   restore-min     -> Alt+Shift+M: restaura a janela minimizada mais recente
   layout-restore  -> no arranque do GlazeWM: abre as apps e repõe o arranjo
+  arrastar        -> (interno) no arranque do GlazeWM: solta a janela nova enquanto o rato arrasta
   boot            -> arranque do PC: ecrã de arranque + barra + GlazeWM + apps + programas
                      .bat de arranque.txt (tarefa agendada)
   splash-ready    -> (interno) a página do ecrã de arranque avisa que já está desenhada
@@ -57,6 +58,7 @@ from morg_acordado import awake_hold, awake_off, awake_status, awake_toggle
 from morg_animacao import animacao_preview, animacao_set, animacao_tap
 from morg_arranjo import layout_restore
 from morg_arranque import boot
+from morg_arrastar import arrastar
 from morg_atalhos import apps_apply, apps_edit
 from morg_ecra_arranque import splash_ready
 from morg_glaze import restore_minimized
@@ -85,6 +87,7 @@ COMANDOS = {
     ("bar", "toggle"): bar_toggle,
     ("restore-min",): restore_minimized,
     ("layout-restore",): layout_restore,
+    ("arrastar",): arrastar,
     ("boot",): boot,
     ("splash-ready",): splash_ready,
     ("apps-apply",): apps_apply,
