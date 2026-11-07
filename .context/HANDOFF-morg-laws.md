@@ -168,12 +168,16 @@ Técnicas (tomadas durante as fases, com o motivo medido):
    clique no ✻ abre o modal (`bar_helper.py limites`), o botão direito abre a página de uso e a barra relê de 3
    em 3 s durante 1 min (`ligarClaude` no `claude.mjs`). O `limites` vem pré-carregado no `settings.json` do
    Zebar. **Testado pelo dono a 2026-11-04:** "Funcionou." Enviado com o OK a 2026-11-04: `exp/a` até `0b1fb14`, CI verde (corrida 41785743861). A seguir: um fix
-   pequeno que o dono vai descrever na sessão nova. Lições: as catracas dos `noqa`/`node:coverage disable` e dos
+   pequeno (feito, abaixo). Lições: as catracas dos `noqa`/`node:coverage disable` e dos
    `<script>` em linha não deixam crescer; escrever os scripts com barras pelo Write, não pelo heredoc.
    **Fix dos limites expirados (2026-11-05, "Último valor esbatido", decisão do dono):** os números do modal
    sumiam quando o `resets_at` passava (o ficheiro sobrevive). Agora `claude_usage.janela_com_reposicao` mantém a
    janela com `"expirado": true` (semanal com o reset avançado de 7 em 7 dias; 5 h sem reset futuro); a barra
-   mostra-a esbatida, o modal abre com o %, e a 5 h expirada pede reset novo. Por testar pelo dono (reset `2m`).
+   mostra-a esbatida, o modal abre com o %, e a 5 h expirada pede reset novo. `258b65d` fix e `091d0bc` estrago, feitos
+   numa sessão Sonnet e revistos: `testar.ps1` verde (525 Python, 80 Pester, cobertura 100 %), estragos 122/122.
+   **A-RETOMAR:** o dono está a fazer o teste real (reinstalar; modal com `40` e reset `2m`; esperar; a barra
+   fica esbatida sem "↺", o modal reabre com o `40`, gravar sem reset diz "Falta a hora do reset."; também
+   depois de reiniciar). Se passar, pedir o "sim" ao push de `b98cb57`, `258b65d`, `091d0bc` e deste commit.
    **Arrastar abas do Chrome** (pesquisa `docs/pesquisa/arrastar-janelas.md`): issue #1080 do GlazeWM, por resolver
    na 3.10.1; o GlazeWM não tem animações. Falta validar com o dono (com e sem `Alt+Shift+P`).
    **Pedido novo:** atualizar o Morg Keys pelo `Alt+Esc, U` (procura versão nova no GitHub e atualiza); pede
