@@ -18,6 +18,13 @@ O que os testes automáticos não cobrem e como se verifica à mão (com o passo
 8. Com Claude Code: depois de uma resposta, a barra mostra `5h …% · sem …%`.
 9. Relatório de erros: no PowerShell, correr `& C:\Windows\pyw.exe -I "$env:USERPROFILE\.glzr\zebar\omarchy-catppuccin\bar_helper.py" erro-de-teste` (é `$env:USERPROFILE`: um `$USERPROFILE` vem vazio e o `pyw.exe` sai calado, sem consola). Aparece o aviso "Morg Keys: erro" com o resumo; "Sim" abre o "Guardar como" em Documentos; o ficheiro guardado não tem o nome da conta nem o caminho pessoal. Fica também uma cópia em `.glzr\erros`. Com `erros = esconder` no `arranque.txt`, não há aviso, mas a cópia aparece. `Alt+Esc`, `V`: a linha "Aviso de erros" do painel passa a "desligado" (e volta a "ligado" com outro `V`), e o `arranque.txt` muda com ela.
 
+## 11. Jogo em ecrã inteiro (P5.2, Baldur's Gate 3)
+
+1. No BG3, Definições → Vídeo → modo de ecrã: "janela sem bordas".
+2. Abrir o jogo: fica em ecrã inteiro e os atalhos do gestor de janelas funcionam.
+3. Mudar para outro workspace e voltar: o jogo volta logo em ecrã inteiro, sem minimizar.
+4. Na consulta das janelas do gestor de janelas (`query windows`), o estado do `bg3_dx11` é `fullscreen`.
+
 Registos: `~\.glzr\instalacao.log`, `glazewm\errors.log`, `zebar\errors.log`, `zebar\omarchy-catppuccin\.layout-restore.log`, `.uncloak.log` e `arranque\<nome>.log` (um por `.bat`).
 
 ## Excluído da cobertura

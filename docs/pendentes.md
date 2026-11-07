@@ -25,8 +25,9 @@ Feitos a 2026-10-31: o plano Morg Laws (`morg-laws/plano-01.md`) e o bug do pain
 
 6. **Ecrã do jogo em tela cheia** (relatado a 2026-10-25; em curso, pesquisa em `pesquisa/jogos-ecra-inteiro.md`).
    A regra `ignore` do Baldur's Gate 3 pô-lo em ecrã inteiro com os atalhos a funcionar, mas ao trocar de
-   workspace o jogo minimiza-se (o DirectX larga o ecrã inteiro exclusivo quando fica tapado). Próximo teste:
-   "janela sem bordas" com a regra `set-fullscreen`. Depois: a lista automática dos jogos da Steam e um painel
+   workspace o jogo minimiza-se (o DirectX larga o ecrã inteiro exclusivo quando fica tapado). **2.º teste (P5.2,
+   feita a 2026-11-07, à espera do teste real do dono):** a regra passou a `set-fullscreen` e o jogo tem de estar
+   em "janela sem bordas" (passos em `validacao-manual.md` §11). Depois: a lista automática dos jogos da Steam e um painel
    com atalho (não o `Alt+Shift+I`, que abre o Edge) que mostra o que já foi adicionado e pergunta antes.
 
 7. **Os ~5 s de papel de parede ao entrar (A38).** Diagnóstico com o WPR (como administrador, 1 reinício; passos em

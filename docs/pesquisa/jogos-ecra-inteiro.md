@@ -131,6 +131,17 @@ adicionar** antes de o fazer, para não adicionar sem querer.
 - **Conflito:** o `Alt+Shift+I` já abre o Microsoft Edge no `apps.txt` do dono; o atalho do painel dos jogos tem de
   ser outro.
 
+## 2.º teste: janela sem bordas com `set-fullscreen` (2026-11-07)
+
+- **O que mudou:** o `bg3_dx11` saiu do bloco `ignore` do `config.yaml` e tem uma regra própria
+  `commands: ['set-fullscreen']`, pelo processo e nunca pela classe (`SDL_app` é também do `steamwebhelper`). Sem
+  opções, valem os `state_defaults.fullscreen` (`maximized: false`, `shown_on_top: false`). O comando existe no
+  GlazeWM 3.10.1 (`packages/wm-common/src/app_command.rs`). O teste `test_regras_de_janela.py` passou a exigir isto.
+- **Pré-requisito:** o jogo em "janela sem bordas" (Definições → Vídeo → modo de ecrã); em ecrã inteiro exclusivo o
+  DirectX continua a largar o ecrã quando o jogo fica tapado.
+- **À espera do teste real do dono:** passos em `docs/validacao-manual.md` §11. Ainda não foi verificado em
+  máquina que o jogo volta em ecrã inteiro ao regressar ao workspace.
+
 ## Conclusão (provisória)
 
 Nada decidido antes da validação. Se o `ignore` resolver, a solução tem de ser automática: uma lista de jogos (como

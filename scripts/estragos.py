@@ -166,12 +166,15 @@ MUTANTES = [
     ("u.origem === 'manual' ? `Valores postos", "false ? `Valores postos"),
     ("estado.origem === 'manual' ? `Postos", "false ? `Postos"),
     ("r?.errors ? '' :", "r?.errors ? 'x' :"),
+    # P5.2: o jogo em ecrã inteiro tem de ser arrumado pelo set-fullscreen (o ignore deixava-o minimizar)
+    ("  - commands: ['set-fullscreen']\n", "  - commands: ['ignore']\n"),
 ]
 PASTAS_DO_PACK = ["*.py", "*.mjs", "partilhado/*.mjs", "painel/*.mjs", "guia/*.mjs", "arranque/*.mjs",
                   "limites/*.mjs"]
 # Fora do pack, com testes Python. Só os ficheiros com estragos: os outros portões repetem o sys.path.insert do
 # bar_helper.py, e um estrago só se aplica se o texto for único.
-FERRAMENTAS = ["scripts/changelog/juntar_changelog.py", "scripts/portoes/versao_lancada.py"]
+FERRAMENTAS = ["scripts/changelog/juntar_changelog.py", "scripts/portoes/versao_lancada.py",
+               "2-configuracao/glzr/glazewm/config.yaml"]
 # MORG_PY: outro Python (o CI do GitHub não garante o py), o mesmo nome do testar.ps1 e dos .githooks.
 TESTES_PY = [os.environ.get("MORG_PY", "py"), "-I", "-m", "unittest", "discover", "-s", "tests"]
 

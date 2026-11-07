@@ -138,6 +138,7 @@ Técnicas (tomadas durante as fases, com o motivo medido):
      Teste do dono: ecrã inteiro e atalhos OK; **ao trocar de workspace minimiza-se** (DXGI larga o exclusivo quando
      tapado, validado na doc da Microsoft) e não volta sozinho;
    - próximo teste: o jogo em "janela sem bordas" com `set-fullscreen` em vez de `ignore`;
+     **P5.2 feita (2026-11-07), à espera do teste real do dono** (`docs/validacao-manual.md` §11);
    - depois: lista automática dos `.exe` da Steam e um painel com atalho que mostra o que já foi adicionado e
      pergunta antes de adicionar (decisão do dono). **O `Alt+Shift+I` está ocupado** (Edge no `apps.txt` do dono).
    **P6, a reinstalação esconde as janelas: feita a 2026-11-03** (`0288adc` estrutura, `f94679c` correção, plano
