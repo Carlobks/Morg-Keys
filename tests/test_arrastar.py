@@ -92,6 +92,11 @@ class QualJanelaNasceu(unittest.TestCase):
         outro = {"eventType": "focus_changed", "focusedContainer": {"type": "window", "id": ID_A}}
         self.assertIsNone(ARRASTAR.janela_nova(evento(ID_A, data=outro)))
 
+    def test_outro_evento_com_janela_gerida_valida_nao_conta(self):
+        # Só o tipo do evento o distingue: o mesmo corpo com outro eventType tem de ser ignorado.
+        outro = {"eventType": "window_unmanaged", "managedWindow": {"type": "window", "id": ID_A}}
+        self.assertIsNone(ARRASTAR.janela_nova(evento(ID_A, data=outro)))
+
     def test_data_sem_forma_de_objeto(self):
         self.assertIsNone(ARRASTAR.janela_nova(evento(ID_A, data=None)))
 
