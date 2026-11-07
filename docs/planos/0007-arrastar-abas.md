@@ -2,18 +2,18 @@
 
 ## Contexto
 
-ao arrastar uma aba do Chrome para fora, o GlazeWM mete a janela nova no mosaico 0,24 s depois de
+Ao arrastar uma aba do Chrome para fora, o GlazeWM mete a janela nova no mosaico 0,24 s depois de
 ela aparecer, com o botão do rato ainda carregado, e tudo se rearruma várias vezes. É a issue #1080, confirmada
 com o dono a 2026-11-07. A pesquisa está em `docs/pesquisa/arrastar-janelas.md`.
 
 ## Decisão do dono (A, mosaico ao largar)
 
-enquanto se arrasta, a janela nova fica solta e nada se mexe; ao
+Enquanto se arrasta, a janela nova fica solta e nada se mexe; ao
 largar, entra no mosaico de uma vez.
 
 ## Como
 
-um ajudante sempre ligado, `bar_helper.py arrastar`, arrancado pelos `startup_commands` do GlazeWM.
+Um ajudante sempre ligado, `bar_helper.py arrastar`, arrancado pelos `startup_commands` do GlazeWM.
 1. Liga-se ao WebSocket do GlazeWM (`127.0.0.1:6123`) e pede `sub -e window_managed`. Fica à espera sem gastar
    CPU.
 2. A cada janela nova, se o botão principal do rato estiver carregado (`GetAsyncKeyState`, com os botões trocados
@@ -34,7 +34,7 @@ um ajudante sempre ligado, `bar_helper.py arrastar`, arrancado pelos `startup_co
 
 ## Fora do escopo
 
-as animações; mudar o GlazeWM; regras por app (vale para qualquer janela nova criada com o
+As animações; mudar o GlazeWM; regras por app (vale para qualquer janela nova criada com o
 botão carregado).
 
 ## Passos (cada um com teste vermelho antes)
@@ -46,6 +46,6 @@ botão carregado).
 
 ## Prova
 
-testes vermelhos e depois verdes, cobertura a 100 %, estragos todos apanhados e o teste do dono. O teste
+Testes vermelhos e depois verdes, cobertura a 100 %, estragos todos apanhados e o teste do dono. O teste
 mede também o risco que fica: o `window_managed` chega depois de o GlazeWM já ter arrumado a janela, por isso pode
 ficar **um** salto curto em vez de muitos.
