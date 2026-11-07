@@ -168,6 +168,18 @@ MUTANTES = [
     ("r?.errors ? '' :", "r?.errors ? 'x' :"),
     # P5.2: o jogo em ecrã inteiro tem de ser arrumado pelo set-fullscreen (o ignore deixava-o minimizar)
     ("  - commands: ['set-fullscreen']\n", "  - commands: ['ignore']\n"),
+    # 0007: arrastar abas — a janela nova só se solta com o botão carregado e volta ao mosaico ao largar
+    ('if id_da_janela is None or not botao_carregado:', 'if id_da_janela is None:'),
+    ('if id_da_janela and botao_carregado():', 'if id_da_janela:'),
+    ('if soltas and not botao_carregado():', 'if soltas and botao_carregado():'),
+    ('            soltas.clear()', '            pass'),
+    ('INTERVALO_DO_BOTAO if soltas else None', 'None'),
+    ('janela.get("type") != "window"', 'False'),
+    ('dados.get("eventType") != "window_managed"', 'False'),
+    ('isinstance(id_da_janela, str) and UUID.match(id_da_janela)', 'isinstance(id_da_janela, str)'),
+    ('tecla = VK_RBUTTON if user32_.GetSystemMetrics(SM_SWAPBUTTON) else VK_LBUTTON', 'tecla = VK_LBUTTON'),
+    ('if tentativa < TENTATIVAS_DE_LIGACAO - 1:', 'if True:'),
+    ('        if not dono:\n            return', '        if False:\n            return'),
 ]
 PASTAS_DO_PACK = ["*.py", "*.mjs", "partilhado/*.mjs", "painel/*.mjs", "guia/*.mjs", "arranque/*.mjs",
                   "limites/*.mjs"]

@@ -4,7 +4,7 @@
 salta de um lado para o outro, às vezes vai para o lado certo e às vezes fica uma linha fina que não se abre? E
 como se tem uma animação suave na arrumação, como no Omarchy? Relato do dono, 2026-11-03.
 
-**Estado:** causa confirmada com o dono a 2026-11-07 (secção "Teste com o dono"); correção decidida (A, mosaico ao largar) e por implementar.
+**Estado:** causa confirmada com o dono a 2026-11-07 (secção "Teste com o dono"); correção decidida (A, mosaico ao largar) e implementada (plano 0007, passos 7.1–7.3); falta o teste real do dono (7.4).
 
 ## Fontes (lidas a 2026-11-03)
 

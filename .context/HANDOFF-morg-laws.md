@@ -180,6 +180,8 @@ Técnicas (tomadas durante as fases, com o motivo medido):
    cada um com o "sim": P5 (jogo sem bordas + `set-fullscreen`), pedido `Alt+Esc, U`, etiqueta "erro", workflow no `main`.
    **Arrastar abas do Chrome** (pesquisa `docs/pesquisa/arrastar-janelas.md`): issue #1080 do GlazeWM, por resolver
    na 3.10.1; o GlazeWM não tem animações. Falta validar com o dono (com e sem `Alt+Shift+P`).
+   **Implementado (plano 0007, 7.1–7.3, só commits locais):** ajudante `arrastar` ligado ao IPC; falta o 7.4
+   (reinstalar e o dono arrastar abas do Chrome; pode restar um salto curto).
    **Pedido novo:** atualizar o Morg Keys pelo `Alt+Esc, U` (procura versão nova no GitHub e atualiza); pede
    pesquisa e plano próprio, depois do P6 (a atualização reinstala).
    Nota: o teste das 35 linhas só vê ficheiros que o git conhece; um ficheiro novo só é medido depois do `git add`.

@@ -14,10 +14,13 @@ general:
   #      ecrã de arranque) e este cede-lhe a vez; serve para reinícios manuais do GlazeWM.
   # 3.º: rede de segurança — se o guia (Alt+K) não se esconder sozinho ao
   #      carregar, esconde-o.
+  # 4.º: arrastar abas — enquanto o rato arrasta, a janela nova fica solta e só entra
+  #      no mosaico ao largar (senão o mosaico rearruma tudo a cada passo; issue #1080).
   startup_commands:
     - 'shell-exec %ProgramFiles%/glzr.io/Zebar/zebar.exe startup'
     - 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" layout-restore'
     - 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" guide-ensure-hidden'
+    - 'shell-exec C:/Windows/pyw.exe -I "{{HOME}}/.glzr/zebar/omarchy-catppuccin/bar_helper.py" arrastar'
   # Ao sair: fecha o Zebar e lança "on-exit". Os processos lançados aqui
   # morrem quando o GlazeWM termina (estão no mesmo job do Windows), por isso
   # o on-exit só arranca um processo independente que, depois de o GlazeWM

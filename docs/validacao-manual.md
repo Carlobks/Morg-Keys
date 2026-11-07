@@ -25,6 +25,16 @@ O que os testes automáticos não cobrem e como se verifica à mão (com o passo
 3. Mudar para outro workspace e voltar: o jogo volta logo em ecrã inteiro, sem minimizar.
 4. Na consulta das janelas do gestor de janelas (`query windows`), o estado do `bg3_dx11` é `fullscreen`.
 
+## 12. Arrastar abas do Chrome (plano 0007)
+
+1. Depois de reinstalar e reiniciar o gestor de janelas, abrir o Chrome com duas abas.
+2. Arrastar uma aba para fora, devagar, sem largar: as outras janelas não se mexem enquanto o botão está carregado.
+3. Largar: a janela nova entra na arrumação (no máximo um salto curto).
+4. Repetir com os botões do rato trocados (Definições → Rato → botão principal: direito).
+
+Não coberto por testes: `botao_principal_carregado` (o `GetAsyncKeyState` verdadeiro) e a ligação real ao IPC
+do gestor de janelas. Os testes provam a decisão e o ciclo com rato, rede e tempo falsos.
+
 Registos: `~\.glzr\instalacao.log`, `glazewm\errors.log`, `zebar\errors.log`, `zebar\omarchy-catppuccin\.layout-restore.log`, `.uncloak.log` e `arranque\<nome>.log` (um por `.bat`).
 
 ## Excluído da cobertura
