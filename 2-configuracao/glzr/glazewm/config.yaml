@@ -141,9 +141,13 @@ window_rules:
       # Outras janelas de sistema/utilitários que não devem entrar no mosaico.
       - window_process: { equals: 'PowerToys.QuickAccess' }
       - window_process: { equals: 'TextInputHost' }
-      # Jogos em ecrã inteiro: no mosaico ficavam no tamanho da área do mosaico e minimizados. Fora da
-      # arrumação, os atalhos continuam a funcionar (docs/pesquisa/jogos-ecra-inteiro.md). Pelo processo e nunca
-      # pela classe: o cliente da Steam tem a mesma (SDL_app). Prova com um só jogo antes da lista automática.
+
+  # Jogos em ecrã inteiro (P5.2, docs/pesquisa/jogos-ecra-inteiro.md): com o jogo em "janela sem bordas", o
+  # GlazeWM arruma-o em ecrã inteiro, esconde-o ao sair do workspace e mostra-o ao voltar (o `ignore` deixava-o
+  # minimizado). Pelo processo e nunca pela classe: o cliente da Steam tem a mesma (SDL_app). Prova com um só
+  # jogo antes da lista automática.
+  - commands: ['set-fullscreen']
+    match:
       - window_process: { equals: 'bg3_dx11' }
 
   - commands: ['set-floating --centered']
