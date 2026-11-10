@@ -52,7 +52,7 @@
       import { claudeVista, ligarClaude, USAGE_URL } from './partilhado/claude.mjs';
       import {
         ICON, audioVista, awakeVista, bateriaHTML, clockText, comandosDoBotao, cpuHTML, memoryHTML, minimizadas,
-        minimizedHTML, modesHTML, networkHTML, proximoVolume, workspacesHTML,
+        minimizedHTML, modesHTML, networkHTML, proximoVolume, vigiaSistema, workspacesHTML,
       } from './bar-logica.mjs';
 
       // Scripts Python locais (permitidos no zpack.json). py.exe = lançador
@@ -60,7 +60,7 @@
       const PY = 'C:\\Windows\\py.exe';
       const PACK = '{{HOME}}/.glzr/zebar/omarchy-catppuccin';
       const correrBarHelper = (...args) => zebar.shellExec(PY, ['-I', `${PACK}/bar_helper.py`, ...args]);
-      const AWAKE_EVERY_MS = 5_000;
+      const AWAKE_EVERY_MS = 60_000; // rede de segurança (plano 0008): o resto é ao carregar, ao clicar e ao fechar o modo sistema
 
       const providers = zebar.createProviderGroup({
         glazewm: { type: 'glazewm' },
@@ -197,14 +197,14 @@
         el.classList.toggle('off', !v.on);
         el.title = v.title;
       }
-      const refreshAwake = () => correrBarHelper('awake', 'status').then(r => renderAwake(r.stdout)).catch(console.error);
+      const refreshAwake = () => zebar.shellExec(PY, ['-I', `${PACK}/morg_acordado_estado.py`]).then(r => renderAwake(r.stdout)).catch(console.error);
       $('awake').addEventListener('click', () =>
         correrBarHelper('awake', 'toggle').then(r => renderAwake(r.stdout)).catch(console.error));
       renderAwake('off');
       refreshAwake();
       setInterval(refreshAwake, AWAKE_EVERY_MS);
 
-      providers.onOutput(render);
+      providers.onOutput(vigiaSistema(() => providers.outputMap.glazewm?.bindingModes, refreshAwake, render));
       render();
 
       // Cliques nos botões gerados: workspaces, modos, pausa, minimizadas.

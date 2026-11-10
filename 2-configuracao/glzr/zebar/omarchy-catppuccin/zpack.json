@@ -24,7 +24,7 @@
         "shellCommands": [
           {
             "program": "C:\\Windows\\py.exe",
-            "argsRegex": "^-I {{HOME_RE}}/\\.glzr/zebar/omarchy-catppuccin/(claude_usage\\.py|bar_helper\\.py (awake (status|toggle)|quick|limites))$"
+            "argsRegex": "^-I {{HOME_RE}}/\\.glzr/zebar/omarchy-catppuccin/(claude_usage\\.py|morg_acordado_estado\\.py|bar_helper\\.py (awake (status|toggle)|quick|limites))$"
           }
         ]
       },

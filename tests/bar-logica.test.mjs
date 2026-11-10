@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import {
   APPS, audioVista, awakeVista, bateriaHTML, clockText, comandosDoBotao, cpuHTML, esc, ICON, isoWeek, memoryHTML,
-  minimizadas, minimizedHTML, modesHTML, networkHTML, networkIcon, proximoVolume, SCRATCH, volumeIcon, workspacesHTML,
+  minimizadas, minimizedHTML, modesHTML, networkHTML, networkIcon, proximoVolume, SCRATCH, sistemaFechou, vigiaSistema, volumeIcon,
+  workspacesHTML,
 } from '../2-configuracao/glzr/zebar/omarchy-catppuccin/bar-logica.mjs';
 
 const ws = (name, extra = {}) => ({ name, hasFocus: false, isDisplayed: false, children: [{}], ...extra });
@@ -128,4 +129,30 @@ test('comandosDoBotao: workspace, sair do modo, pausa; restauro e outros botões
   assert.deepEqual(comandosDoBotao({ mode: 'resize' }), ['wm-disable-binding-mode --name resize']);
   assert.deepEqual(comandosDoBotao({ pause: '1' }), ['wm-toggle-pause']);
   assert.deepEqual(comandosDoBotao({ restore: 'id1' }), []);
+});
+
+test('sistemaFechou: só quando o modo sistema estava ativo e deixou de estar (o atalho da chávena vive nele)', () => {
+  const modo = name => ({ name });
+  assert.equal(sistemaFechou([modo('sistema')], []), true);
+  assert.equal(sistemaFechou([modo('sistema')], [modo('resize')]), true);
+  assert.equal(sistemaFechou([modo('sistema'), modo('resize')], [modo('sistema')]), false);
+  assert.equal(sistemaFechou([], []), false);
+  assert.equal(sistemaFechou([], [modo('sistema')]), false);
+  assert.equal(sistemaFechou([modo('resize')], []), false);
+  // a 1.ª leitura não tem "antes"; e o provider pode ainda não ter a lista
+  assert.equal(sistemaFechou(undefined, [modo('sistema')]), false);
+  assert.equal(sistemaFechou([modo('sistema')], undefined), true);
+});
+
+test('vigiaSistema: desenha sempre e reverifica a chávena só quando o modo sistema fecha', () => {
+  const eventos = [];
+  let modos;
+  const ouvir = vigiaSistema(() => modos, () => eventos.push('chavena'), () => eventos.push('desenho'));
+  modos = [{ name: 'sistema' }];
+  ouvir();
+  modos = [];
+  ouvir();
+  modos = undefined; // o provider ainda sem lista: não conta como fecho
+  ouvir();
+  assert.deepEqual(eventos, ['desenho', 'chavena', 'desenho', 'desenho']);
 });

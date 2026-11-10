@@ -137,7 +137,26 @@ export function proximoVolume(pendente, volumeReal, deltaY) {
 export const bateriaHTML = bat => `<span class="ico" data-icon="${bat.icone}" style="--c: ${bat.cor}"></span>` +
   `<span style="color: ${bat.cor}">${bat.texto}</span>`;
 
-// --- Chávena: não suspender (resposta de "bar_helper.py awake status|toggle": "on" ou "off") ---
+// A chávena só se reverifica quando o modo `sistema` fecha (o atalho Alt+Esc, I alterna-a sem passar pela barra):
+// verdadeiro se `antes` tinha o modo `sistema` e `agora` já não tem. Plano 0008.
+export function sistemaFechou(antes, agora) {
+  const ativo = modos => (modos ?? []).some(m => m.name === 'sistema');
+  return ativo(antes) && !ativo(agora);
+}
+
+// Ouvinte do provider: desenha sempre e, quando o modo `sistema` fecha, reverifica a chávena (`aoFechar`).
+// `modosAtuais` devolve a lista do provider glazewm (ou undefined se ainda não chegou).
+export function vigiaSistema(modosAtuais, aoFechar, desenhar) {
+  let antes = [];
+  return () => {
+    const agora = modosAtuais();
+    if (sistemaFechou(antes, agora)) aoFechar();
+    antes = agora ?? [];
+    desenhar();
+  };
+}
+
+// --- Chávena: não suspender (resposta de "morg_acordado_estado.py" ou "bar_helper.py awake toggle": "on" ou "off") ---
 export function awakeVista(estado) {
   const on = estado.trim() === 'on';
   return {
