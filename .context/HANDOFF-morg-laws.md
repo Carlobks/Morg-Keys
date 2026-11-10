@@ -3,6 +3,9 @@
 Para retomar numa sessão nova. Confirme o estado no repositório (`git log --oneline`) antes de confiar neste
 ficheiro. Atualizado no commit que fecha cada fase. Modelo: skill `orquestrando-sessoes` §3.
 
+**A retomar (2026-11-10):** o trabalho em curso está em `.context/HANDOFF-morg-mais-leve.md` (plano 0008, falta o
+teste do dono e o push).
+
 ## Objetivo
 
 Pôr o Morg Keys a cumprir as regras do Morg Laws: cada regra do `CLAUDE.md` com uma barreira de máquina, ou com o
