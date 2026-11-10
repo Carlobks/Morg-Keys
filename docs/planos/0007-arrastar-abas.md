@@ -42,7 +42,7 @@ botão carregado).
 - [x] 7.1 `morg_websocket.py` e testes.
 - [x] 7.2 `morg_arrastar.py` (decisão e ciclo) e testes.
 - [x] 7.3 Subcomando, `startup_commands`, estragos, docs; `testar.ps1` verde.
-- [ ] 7.4 Teste do dono: arrastar abas do Chrome sem pausa, depois de reinstalar.
+- [x] 7.4 Teste do dono: arrastar abas do Chrome sem pausa, depois de reinstalar (2026-11-10: "funcionou perfeitamente").
 
 ## Prova
 
