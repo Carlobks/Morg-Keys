@@ -17,7 +17,7 @@ O guia de quem usa o PC é o `Tutorial.html`; as regras de trabalho dos agentes 
 | [morg-laws/](morg-laws/) | Verificações contra as regras gerais do Morg Laws (`verificacao-01-2026-10-30.md`, `verificacao-02-2026-10-31.md`) e o plano que as cumpre (`plano-01.md`) |
 | [pendentes.md](pendentes.md) | Trabalho combinado e ainda não feito, por ordem |
 | [regras-e-barreiras.md](regras-e-barreiras.md) | Cada regra do `CLAUDE.md` e a barreira que a obriga (hook, git, teste, permissão, CI ou texto) |
-| [planos/](planos/) | Planos aprovados depois do plano Morg Laws (cópia da aba Plano, com fora do escopo e prova): `0001-bug-painel-apps.md`, `0002-relatorio-de-erros.md`, `0003-tecla-do-aviso-de-erros.md`, `0004-versao-e-sistema-no-relatorio.md`, `0005-reinstalar-sem-esconder-janelas.md`, `0006-modal-limites-claude.md`, `0007-arrastar-abas.md` |
+| [planos/](planos/) | Planos aprovados depois do plano Morg Laws (cópia da aba Plano, com fora do escopo e prova): `0001-bug-painel-apps.md`, `0002-relatorio-de-erros.md`, `0003-tecla-do-aviso-de-erros.md`, `0004-versao-e-sistema-no-relatorio.md`, `0005-reinstalar-sem-esconder-janelas.md`, `0006-modal-limites-claude.md`, `0007-arrastar-abas.md`, `0008-morg-mais-leve.md` |
 | [arquivo/](arquivo/) | Documentos cumpridos, guardados para consulta: `proposta-CLAUDE.md` (aplicada na ML6 do plano Morg Laws) |
 | [painel-apps.md](painel-apps.md) | Plano do painel "Apps e arranque" (Alt+Esc, C) |
 

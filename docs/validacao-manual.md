@@ -35,6 +35,14 @@ O que os testes automáticos não cobrem e como se verifica à mão (com o passo
 Não coberto por testes: `botao_principal_carregado` (o `GetAsyncKeyState` verdadeiro) e a ligação real ao IPC
 do gestor de janelas. Os testes provam a decisão e o ciclo com rato, rede e tempo falsos.
 
+## 13. Morg mais leve (plano 0008)
+
+1. Depois de reinstalar, reiniciar o PC (ou a tarefa agendada "GlazeWM (arranque)").
+2. Contar as janelas do Zebar (Gestor de Tarefas ou os widgets abertos): cada página (bar, guia, sistema, apps,
+   limites) aparece **uma** vez; antes apps e limites apareciam duas.
+3. Clicar na chávena: liga/desliga logo. Depois `Alt+Esc`, `I`: a chávena muda no máximo 1 s depois de sair do modo.
+4. Não coberto por testes: a barra real no Zebar (provam-se o verificador, a regex do zpack e a lógica do `.mjs`).
+
 Registos: `~\.glzr\instalacao.log`, `glazewm\errors.log`, `zebar\errors.log`, `zebar\omarchy-catppuccin\.layout-restore.log`, `.uncloak.log` e `arranque\<nome>.log` (um por `.bat`).
 
 ## Excluído da cobertura

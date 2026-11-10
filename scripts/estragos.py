@@ -62,7 +62,6 @@ MUTANTES = [
     ('return int(value / 1000) if value > 1e12 else int(value)', 'return int(value)'),
     ('sys.path.insert(0, str(Path(__file__).resolve().parent))', 'pass'),
     # boot e arranque.txt (fase 2b)
-    ('_popen_detached([str(ZEBAR), "startup"])', 'pass'),
     ('        a.cover.close()\n        a.log(f"animação visível', '        a.log(f"animação visível'),
     ('        if not Path(bat["path"]).exists():', '        if False:'),
     ('>= BOOT_QUIET_S and not waiting_ports:', '>= BOOT_QUIET_S:'),
@@ -128,7 +127,7 @@ MUTANTES = [
     ('if (visivelHaMs < MIN_ITEM_MS) return [];', 'if (false) return [];'),
     ('desdeOInicioMs > MIN_NO_ECRA_MS', 'desdeOInicioMs >= MIN_NO_ECRA_MS'),
     ("toLowerCase().replace('é', 'e')", 'toLowerCase()'),
-    ("some(m => m.name === 'sistema')", "some(m => m.name === 'resize')"),
+    ("(bindingModes ?? []).some(m => m.name === 'sistema')", "(bindingModes ?? []).some(m => m.name === 'resize')"),
     # P3c: o nome do Windows no relatório e a versão SemVer (juntar_changelog.py e o portão versao_lancada.py)
     ('numero = 11 if build >= PRIMEIRO_BUILD_DO_WINDOWS_11 else 10', 'numero = 11 if build > PRIMEIRO_BUILD_DO_WINDOWS_11 else 10'),
     ('return f"{maior + 1}.0.0" if maior else f"0.{menor + 1}.0"', 'return f"{maior + 1}.0.0"'),
@@ -180,6 +179,27 @@ MUTANTES = [
     ('tecla = VK_RBUTTON if user32_.GetSystemMetrics(SM_SWAPBUTTON) else VK_LBUTTON', 'tecla = VK_LBUTTON'),
     ('if tentativa < TENTATIVAS_DE_LIGACAO - 1:', 'if True:'),
     ('        if not dono:\n            return', '        if False:\n            return'),
+    # 0008: um só pedido de abrir as páginas (o boot voltava a pedir, o config voltava a repetir) ...
+    ('    a.progress.step("barra", "Barra")\n\n\ndef _esperar_splash',
+     '    _popen_detached([str(ZEBAR), "startup"])\n    a.progress.step("barra", "Barra")\n\n\ndef _esperar_splash'),
+    ("  startup_commands:\n    - 'shell-exec %ProgramFiles%/glzr.io/Zebar/zebar.exe startup'\n",
+     "  startup_commands:\n    - 'shell-exec %ProgramFiles%/glzr.io/Zebar/zebar.exe startup'\n    - 'shell-exec %ProgramFiles%/glzr.io/Zebar/zebar.exe startup'\n"),
+    # ... e a chávena sem o bar_helper: o ajudante só-ctypes e o aviso de que o modo sistema fechou
+    ('def estado(kernel32):\n    handle = kernel32.OpenMutexW(SYNCHRONIZE, False, AWAKE_ALIVE)',
+     'def estado(kernel32):\n    handle = kernel32.OpenMutexW(SYNCHRONIZE, True, AWAKE_ALIVE)'),
+    ('def estado(kernel32):\n    handle = kernel32.OpenMutexW(SYNCHRONIZE, False, AWAKE_ALIVE)\n    if handle:\n        kernel32.CloseHandle(handle)\n        return "on"\n    return "off"',
+     'def estado(kernel32):\n    handle = kernel32.OpenMutexW(SYNCHRONIZE, False, AWAKE_ALIVE)\n    if not handle:\n        kernel32.CloseHandle(handle)\n        return "on"\n    return "off"'),
+    ('def estado(kernel32):\n    handle = kernel32.OpenMutexW(SYNCHRONIZE, False, AWAKE_ALIVE)\n    if handle:\n        kernel32.CloseHandle(handle)\n        return "on"\n    return "off"',
+     'def estado(kernel32):\n    handle = kernel32.OpenMutexW(SYNCHRONIZE, False, AWAKE_ALIVE)\n    if handle:\n        return "on"\n    return "off"'),
+    ('    return "off"\n\n\nif __name__', '    return "on"\n\n\nif __name__'),
+    ('SYNCHRONIZE = 0x00100000', 'SYNCHRONIZE = 0x001F0003'),
+    ('  return ativo(antes) && !ativo(agora);', '  return ativo(antes);'),
+    ("const ativo = modos => (modos ?? []).some(m => m.name === 'sistema')",
+     "const ativo = modos => (modos ?? []).some(m => m.name !== 'sistema')"),
+    ('(modos ?? [])', '(modos || [{ name: "sistema" }])'),
+    ('    if (sistemaFechou(antes, agora)) aoFechar();', '    if (sistemaFechou(antes, agora) || agora === undefined) aoFechar();'),
+    ('    antes = agora ?? [];', '    antes = [];'),
+    ('    desenhar();\n  };', '  };'),
 ]
 PASTAS_DO_PACK = ["*.py", "*.mjs", "partilhado/*.mjs", "painel/*.mjs", "guia/*.mjs", "arranque/*.mjs",
                   "limites/*.mjs"]
