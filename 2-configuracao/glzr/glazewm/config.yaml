@@ -8,7 +8,9 @@ general:
   # muda quando o Python é atualizado.
   # 1.º: "startup" abre barra/guia/painel mesmo que o Zebar já esteja a correr
   #      (no arranque do PC o orquestrador lança-o primeiro só com o ecrã de arranque).
-  #      Widgets já abertos não se duplicam.
+  #      É o ÚNICO pedido no arranque do PC: o orquestrador já não faz o seu (dois pedidos
+  #      em corrida duplicavam o apps e o limites; plano 0008). Num reinício manual do
+  #      GlazeWM, com os widgets já abertos, não se duplicam.
   # 2.º: repõe o arranjo dos workspaces (~/.glzr/layout.json, Alt+Esc e depois G).
   #      No arranque do PC quem o faz é o orquestrador (bar_helper.py boot, com o
   #      ecrã de arranque) e este cede-lhe a vez; serve para reinícios manuais do GlazeWM.

@@ -36,7 +36,8 @@ from morg_win32 import WAIT_OBJECT_0, dwmapi, kernel32, user32
 # barra, o GlazeWM, as apps e os programas .bat; cada etapa é escrita em
 # progress.json, que o ecrã lê. Ordem e cuidados vindos da revisão do plano:
 #  - o splash é lançado primeiro com start-widget-preset, o que arranca o Zebar
-#    SÓ com esse widget → logo a seguir "zebar startup" abre barra/guia/painel;
+#    SÓ com esse widget → o GlazeWM, ao arrancar, faz "zebar startup" e abre barra/guia/painel
+#    (o boot não o pede: dois pedidos em corrida duplicavam o apps e o limites);
 #  - o GlazeWM tem uiAccess=true: só arranca por ShellExecute (os.startfile);
 #  - prioridade normal (as tarefas agendadas correm abaixo do normal e os
 #    filhos herdam isso → animação aos solavancos);
@@ -192,9 +193,10 @@ def _boot_ecra_e_barra(a, ready):
         a.log(f"animação visível: {a.decorrido():.1f} s")
     else:
         a.log("a animação não avisou em 20 s; continua com a cortina preta")
-    # 2. Barra, guia e painel (startupConfigs) — "startup" funciona com o Zebar já a correr.
+    # 2. Barra, guia e painel (startupConfigs): quem os abre é o 1.º startup_commands do GlazeWM
+    #    ("zebar startup", logo a seguir). Pedi-los aqui também fazia dois pedidos em corrida e o
+    #    apps e o limites abriam a dobrar (plano 0008). Fica só o passo de progresso.
     a.progress.step("barra", "Barra")
-    _popen_detached([str(ZEBAR), "startup"])
 
 
 def _esperar_splash(ready, fatias=200):

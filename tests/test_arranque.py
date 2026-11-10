@@ -124,10 +124,10 @@ class Arranque(unittest.TestCase):
             zebar = str(s.zebar)
             self.assertEqual(s.lancados[0], [zebar, "start-widget-preset", "--pack", "omarchy-catppuccin",
                                              "--widget-name", "splash", "--preset", "default"])
-            self.assertEqual(s.lancados[1], [zebar, "startup"])
-            self.assertEqual(s.lancados[2], [str(s.bh.PYTHONW), "-I", str(s.bh.BAT_TRAY), str(s.bat),
+            # O "zebar startup" já não é lançado aqui: é o do GlazeWM (plano 0008, test_arranque_sem_duplicados).
+            self.assertEqual(s.lancados[1], [str(s.bh.PYTHONW), "-I", str(s.bh.BAT_TRAY), str(s.bat),
                                              "http://localhost:3000", "Servidor"])
-            self.assertEqual(len(s.lancados), 3)
+            self.assertEqual(len(s.lancados), 2)
             self.assertIn((str(s.bh.GLAZEWM_EXE), None), s.abridor.abertos)
             cortina = CortinaFalsa.criadas[0]
             self.assertEqual((cortina.animacao, cortina.fechada), ("cafe", True))
@@ -136,8 +136,8 @@ class Arranque(unittest.TestCase):
             self.assertEqual(s.mensagens, [])  # o splash fechou-se sozinho
             # A cortina sai quando a animação avisa (logo a seguir ao splash), antes da barra: antes disso a
             # animação vai para cima da cortina e o DWM compõe 2 vezes com ela à vista (sem piscar).
-            self.assertEqual(s.eventos[:7], ["lançou start-widget-preset --pack", "splash ao topo", "splash ao topo",
-                                             "DwmFlush", "DwmFlush", "cortina fechada", "lançou startup"])
+            self.assertEqual(s.eventos[:6], ["lançou start-widget-preset --pack", "splash ao topo", "splash ao topo",
+                                             "DwmFlush", "DwmFlush", "cortina fechada"])
             # A saudação do ecrã de boas-vindas: o nome do arranque.txt e a frase do dia do frases.txt.
             self.assertEqual(progresso["nome"], "Ana")
             dia_impar = s.relogio.localtime().tm_mday % 2 == 1
