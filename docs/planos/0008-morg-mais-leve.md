@@ -14,7 +14,9 @@ A medição está em `docs/pesquisa/` (peso do Morg Keys). Aprovado pelo dono a 
 - [x] 8.3 `morg_acordado_estado.py` (só `ctypes`, abre o mutex `Local\OmarchyAwakeAlive`); a barra pergunta ao
   carregar, ao clicar, quando o modo `sistema` fecha (`vigiaSistema`) e a cada 60 s.
 - [x] 8.4 Estragos novos todos apanhados, `testar.ps1` verde, changelog, plano, passo manual.
-- [ ] 8.5 Teste do dono: reiniciar, contar as janelas do Zebar e ver a chávena (clique e atalho).
+- [x] 8.5 Teste do dono: reiniciar, contar as janelas do Zebar e ver a chávena (clique e atalho). 2026-11-10,
+  depois de reinstalar (sem reiniciar o PC): cada página 1×, 0 processos Python novos em 60 s, chávena certa pelo
+  clique e pelo `Alt+Esc, I`. O caminho do arranque do PC fica por ver no próximo reinício.
 
 ## Fora do escopo
 

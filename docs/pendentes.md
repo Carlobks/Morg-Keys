@@ -32,8 +32,8 @@ Desistido pelo dono a 2026-11-07: as frases do arranque por dia do ano (não se 
    o processo fica no `layout.json` e uma reinstalação mantém-no. Correção possível: ligar a janela à app pelo
    AppUserModelID da Store (`Claude_pzs8sxrjxfjjc!Claude`), com pesquisa antes.
 
-7. **Arrastar abas do Chrome desorienta a arrumação** (bug, 2026-11-03; em curso desde 2026-11-07, a validar com o dono; pesquisa em `pesquisa/arrastar-janelas.md`):
-    a issue #1080 do GlazeWM, por resolver na 3.10.1. Animações suaves: o GlazeWM não as tem.
+7. **O `Alt+Esc, I` (chávena) não aparece no painel do `Alt+Esc`** (visto pelo dono a 2026-11-10): o atalho
+    funciona, mas quem não o conhece nunca o descobre. Pôr a linha na página `sistema` (`guia/sistema.html`).
 
 8. **Atualizar o Morg Keys pelo `Alt+Esc, U`** (pedido de 2026-11-03): procura uma versão nova no GitHub e, se
     houver, atualiza sem mais passos. Pede pesquisa antes (verificar o que se descarrega, manter as

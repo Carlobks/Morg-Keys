@@ -48,7 +48,10 @@ Python a cada 5 s. Plano: `docs/planos/0008-morg-mais-leve.md` (o original está
 
 ## Próximos passos
 
-1. **8.5, o teste do dono:** reinstalar e reiniciar o PC. A sessão conta as janelas do Zebar por página (cada uma
+0. **Feito a 2026-11-10:** 8.5 depois de reinstalar (cada página 1×, 0 Python novos em 60 s, chávena certa) e
+   push do `exp/a`. Falta só ver as janelas depois de um **reinício do PC** (o caminho do `boot`). Pendente novo:
+   o `Alt+Esc, I` não aparece no painel do `Alt+Esc` (`docs/pendentes.md` item 7).
+1. **8.5, o teste do dono (original):** reinstalar e reiniciar o PC. A sessão conta as janelas do Zebar por página (cada uma
    1×; antes, `apps` e `limites` ×2) com um script só de leitura no scratchpad. Conta também os processos
    Python num minuto (antes ~24, agora ~2). O dono vê a chávena mudar pelo clique e pelo `Alt+Esc, I`. Passo
    em `docs/validacao-manual.md` §13.
