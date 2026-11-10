@@ -20,6 +20,7 @@ Procure por palavra-chave neste índice ou com `grep -ri "<palavra>" docs/pesqui
 | [versoes.md](versoes.md) | Número de versão: SemVer, quando sobe, tags e histórico (CalVer descartado) | SemVer, VERSION, 0.y.z, build metadata, tag anotada, CalVer | 2026-10-31 |
 | [jogos-ecra-inteiro.md](jogos-ecra-inteiro.md) | Jogos em ecrã inteiro com o GlazeWM: issues, código, Omarchy/Hyprland e como validar (hipóteses por validar) | ignore, wm-toggle-pause, fullscreen, corner_style, #699, #833 | 2026-11-01 |
 | [arrastar-janelas.md](arrastar-janelas.md) | Arrastar janelas e abas com o GlazeWM (Chrome), animações; causa confirmada, correção decidida | #1080, active_drag, Chrome, animação, IPC 6123, GetAsyncKeyState | 2026-11-07 |
+| [peso-do-morg-keys.md](peso-do-morg-keys.md) | Quanto o Morg Keys gasta (CPU, memória, processos) e o que vale otimizar | WebView2, renderer, MemoryUsageTargetLevel, shellExec, widgets duplicados, timer throttling | 2026-11-10 |
 | [modal-limites.md](modal-limites.md) | Modal dos limites do Claude: posição do widget, foco, gravação e desenho (P7) | anchor, top_right, offsetX, to_px_scaled, rate_limits, origem manual, qui 16:00 | 2026-11-03 |
 | [licencas-publicacao.md](licencas-publicacao.md) | Licenças para publicar o repositório | GPL-3.0, OFL, VC++, binários | 2026-10-22 |
 
